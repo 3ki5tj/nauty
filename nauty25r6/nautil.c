@@ -690,7 +690,8 @@ nautil_check(int wordsize, int m, int n, int version)
 {
     if (wordsize != WORDSIZE)
     {
-        fprintf(ERRFILE,"Error: WORDSIZE mismatch in nautil.c\n");
+        fprintf(ERRFILE,"Error: WORDSIZE mismatch %d vs %d in nautil.c\n",
+            wordsize, WORDSIZE);
         exit(1);
     }
 

@@ -1,0 +1,8 @@
+Aim: make a minimal and self-contained version of nauty
+
+The symbolic links constitute a minimal subset of files.
+
+The standalone file nau0.h or nau0s.h can be included by external programs to use the function nauty()
+
+nau0.h    standalone file
+nau0s.h   simplified standalone file

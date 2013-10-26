@@ -1,13 +1,21 @@
-CC = icc -O2 -Wall
+CC = icc -g -Wall
 LM =
+
+iprogs = ex1
+
+$(iprogs) : % : %.c nau0s.h
+	$(CC) -o $@ $< $(LM)
+
+
 
 comh = nauty.h naurng.h schreier.h sorttemplates.c
 comc = nauty.c naurng.c schreier.c nautil.c naugraph.c
+deps = $(comh) $(comc) Makefile
 
-progs = nautyex1
+progs = mynautyex1
 
 $(progs) : % : %.c $(deps)
-	$(CC) -o $@ $< $(comc) $(LM)
+	$(CC) -DWORDSIZE=32 -o $@ $< $(comc) $(LM)
 
 clean:
-	$(RM) $(progs) *~
+	$(RM) -rf $(progs) $(iprogs) *~ a.out bin obj
