@@ -1,0 +1,257 @@
+This is nauty version 1.9.
+
+Author:
+    Brendan D. McKay
+    Computer Science Department
+    Australian National University
+    GPO Box 4, Canberra, ACT 2601
+    Australia.
+
+    phone:  +61 6 249 3845
+    fax:    +61 6 249 0010
+    email:  bdm@cs.anu.edu.au
+
+Description:
+    nauty is a set of procedures for determining the automorphism
+       group of a graph, and optionally for canonically labelling it.
+    dreadnaut is a simple interactive interface to nauty.
+    Instructions for using nauty and dreadnaut can be found in
+       B. D. McKay, Nauty Users Guide (Version 1.5),
+       Technical Report TR-CS-90-02, 1990,
+       Computer Science Department,
+       Australian National University.
+    It is not expected that this software can be correctly used
+    without the manual.  Changes made between versions 1.5 and 1.9
+    are summarized below.
+
+Files:
+    nauty.h
+    nauty.c
+    nautil.c
+        These are the files you need for programs which call the nauty()
+        procedure directly.  If you want to use any of the supplied
+        vertex-invariants, you need the next two files as well.
+    naututil.h
+    nautinv.c
+    naututil.c
+    dreadnaut.c
+        These are the additional files you need for the dreadnaut
+        program.  See below for how to make dreadnaut.
+
+    nautaux.h
+    nautaux.c
+        These contain a few procedures not currently used for anything.
+
+    makefile
+        A basic makefile for UNIX.  The principal targets are
+        dreadnaut, dreadnaut1 and dreadnautx.  These are versions
+        of dreadnaut with different limits on the number of vertices.
+    makefile_lattice
+        A makefile for Lattice C.
+
+    nug.alw
+        A Postscript version of the manual for version 1.5, targetted
+        at an Apple Laserwriter (300 bpi).  It may not print correctly
+        on other Postscript printers.
+
+    makeg.c
+        A program for generating non-isomorphic graphs.  See below.
+
+
+Compiling nauty and dreadnaut:
+   The first step is to edit the file nauty.h.  Exactly one of the
+   symbols of the form SYS_* must have the value 1, and the others
+   must have the value 0.  You can also select the value of MAXN
+   (maximum order of graph accepted) by inserting a #define for it.
+   (Alternatively, define it on the compile command if you can.)
+   Then just compile the files  dreadnaut.c,nauty.c,nautil.c,
+   naututil.c and nautinv.c and link the objects together.  That's it.
+   The maximum legal value of MAXN is 32675, but some compilers or
+   linkers will not permit a value that large.
+
+Changes for version 1.6:
+
+   This is a complete list of all but the most trivial changes between
+   version 1.5 and version 1.6.  No change was made to the functional
+   behaviour of nauty or dreadnaut as described in the version 1.5 Guide.
+
+*  Part of dreadnaut.c was recoded to avoid a bug in the Pyramid C
+   compiler.
+
+*  A new variant SYS_APOLLO was created for the Apollo Domain C compiler,
+   in order to avoid a bug in Apollo's provision of header files.
+
+*  A bug in nauty.h which caused 64-bit versions to give nonsense
+   answers was fixed.  This bug had no effect on the 16-bit and
+   32-bit versions.
+
+*  The computation of cpu time by dreadnaut was changed to make it
+   correct on Crays (it wasn't before) and to avoid a conflicting
+   type declaration in some versions of gcc.
+
+*  The name of the local variable in the EMPTYSET macro was changed to
+   avoid a bug in the A/UX compiler on Mac II.
+
+*  The test for ANSI conformance now requires __STDC__ == 1, not just
+   that this variable be defined.
+
+*  The line-breaking algorithm for writing automorphisms was changed to
+   make it less eager to break cycles like this:               (1
+   2 3).
+
+*  The time for the first execution of nauty() by dreadnaut was
+   improved for machines (like some Mac systems) that do
+   demand-loading of code segments.
+
+Changes for version 1.7:
+
+*  A new version SYS_IBMC for the IBM C Set/2 compiler under OS/2
+   was added according to directions from Ivo Duentsch.
+
+*  Added support for Quick C, and for the Sun compiler acc.
+
+*  The output routines now accept a value of linelength <= 0
+   (in dreadnaut:  l=0) as a request for no linebreaks to appear
+   in each permutation, partition, graph row, set, etc. written.
+
+*  Fixed bug in dreadnaut complement (_) command.
+
+Changes for version 1.7+:
+
+*  The CRAY version was updated to look in different header files.
+
+Changes for version 1.8:
+
+*  The code for the 64-bit version of FIRSTBIT was found to be incorrect.
+   Fortunately this code was not used by any standard version until now,
+   as the CRAY version uses special code for FIRSTBIT.
+
+*  Added support for Digital Equipment Corporation Alpha workstations.
+
+Changes for version 1.9:
+
+*  Added invariant adjacencies() to help with difficult directed graphs.
+   To use it in dreadnaut:   *=13 k=1 10   (where "10" could be larger).
+   To use it from a program:  options.invarproc = adjacencies;
+                              options.mininvarlevel = 1;
+                              options.maxinvarlevel = 10;
+
+Changes for version 1.9+:
+
+*  Added support for AZTEC C on Commmodore Amiga computers.
+
+
+Further information on specific versions:
+
+* UNIX and VAXVMS (except Cray and Alpha).
+   There are no known problems with these versions.
+   The version BSDUNIX has been tested under SUNOS using the
+   compilers cc, gcc and acc.
+   Version SYS_BSDUNIX works on SGI computers (IRIX), and SYS_UNIX
+   works on HP computers (HP-UX).
+
+* Cray.
+   I don't have access to a Cray.  However, during a recent visit to
+   Bell Labs, Aaron Grosky and Neil Sloane helped me to test version 1.5
+   using both version 4.1.5 of the Portable C compiler and release 1.0.4
+   of the Cray Standard C compiler  (XMP/YMP versions in each case).
+   A bug in nauty.h was uncovered, and was fixed in version 1.6.
+   Version 1.7+ appears to work with cc version 3.027, whatever that is.
+   Thanks to Miro Kraetzl.
+
+* Apple Macintosh.
+   Five compilers have been successfully tested.  Silly compiler foibles,
+   such as limits on the amount of static data, may restrict MAXN.
+
+   Macintosh Programmer's Workshop (MPW) C:
+     Select SYS_MACMPW in nauty.h before compiling.
+     I only have a very old version of this compiler.  If someone can
+     check out a newer version, please let me know.
+
+   LightSpeed C (version 1):
+     Select SYS_MACLSC in nauty.h before compiling.  The library modules
+     you need are MacTraps, stdio, storage and unix.   The lack of cooked
+     input makes the resulting application unpleasant to use.  Also, the
+     quality of the generated code is not great.
+     Not tested since nauty 1.4.
+
+   THINK C:
+     Select SYS_MACTHINK in nauty.h before compiling.  You need to load
+     the library ANSI, and to turn off the requirement for prototypes.
+     Tested with compiler version 4.0.
+
+   Aztec C:
+     Select SYS_MACAZT in nauty.h before compiling.  Some earlier
+     versions of this compiler didn't know how to write floating-point
+     numbers.  Last tested for nauty 1.4 with compiler version 3.6c.
+
+   A/UX C compiler:
+     Select SYS_UNIX in nauty.h before compiling.
+
+* IBM PC or compatibles.
+   There are two Microsoft C versions, a Turbo C version, and
+   a Set/2 version (for OS/2).
+
+   The Microsoft C 4.0 version was prepared by Mark Henderson for
+   nauty 1.2 and hasn't been tested since.  Select SYS_PCMS4 for this
+   version and compile with the compact memory model.
+
+   The Microsoft C 5.1 version was prepared by me for nauty 1.5.  I know
+   very little about the PC and less about Microsoft C, but it compiles
+   at least.  The compiler complains about a non-existent pointer type
+   mismatch at line 199 of nauty.c, but it works anyway.  The only other
+   problem I know of is that I couldn't compile for the 80286 instruction
+   set (/G2 option) because the compiler ran out of heap space.  I think
+   this due to the large switch() statement in main() but I haven't got
+   time to track it down.  Select SYS_PCMS5 for this version and compile
+   with the compact memory model.
+
+   The Microsoft C 5.1 version also works with Quick C version 2.5.
+   Use the large memory model.
+
+   The Turbo C version was prepared by me for nauty 1.4.  Ivo Duentsch
+   has compiled it for version 1.6 successfully with "cfree" replaced
+   by "free".  Rob Beezer reports that this version also works for the
+   Borland C/C++ compiler under OS/2.  Select SYS_PCTURBO.
+
+   The Set/2 version was prepared by Ivo Duentsch and tested for
+   version 1.7.
+
+
+* Commodore Amiga.
+   Select SYS_AMIGALC for the Lattice C compiler.  This was recently
+   tested for version 1.6+ by David Guichard on an Amiga 3000 with
+   the Lattice/SAS 5.10 compiler.  The file makefile_lattice is
+   specifically for this version.
+   Select SYS_AMIGAAZT for the Aztec C compiler.  Developed and
+   tested by Carsten Saager for version 1.9+.
+
+
+* DEC Alpha.
+   Select SYS_ALPHA before compiling.  This version was designed and
+   tested by Gordon Royle.
+
+
+The makeg and makebg programs:
+   makeg is an application of nauty for generating lists of graphs
+   without isomorphs or intermediate disk files.  The parameters
+   available are
+    (1) the number of vertices,
+    (2) a range for the number of edges,
+    (3) a bound on the maximum degree,
+    (4) optional restriction to triangle-free or bipartite graphs,
+    (5) optional restriction to connected graphs.
+   Full details, and some sample execution times, can be found at
+   the beginning of the source code.
+   I believe that makeg was the first program to generate all the
+   11-vertex graphs without isomorphs.  I also made the 12-vertex
+   graphs, just so I could write this sentence.
+
+   makebg is a similar program, for making bicloured graphs.
+   The parameters available are
+    (1) the numver of vertices in each class,
+    (2) a range for the number of edges,
+    (3) a bound for the maximum degree in each class,
+    (4) optional restriction to connected graphs.
+
+Brendan McKay.  June 29, 1995.

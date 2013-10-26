@@ -1,0 +1,67 @@
+# makefile for dreadnaut and makeg, SAS/C (Lattice) 5.10
+# Constructed by David Guichard
+# Compiler flags:
+#   b0   use 32 bit addressing; needed for the "x" version of nauty and nautil.
+#   m    code for 68000
+#   m3   code for 68030
+#   O    optimizer ( dreadnaut.c gives the optimizer a workout, about 10
+#                    minutes on my 25Mhz 3000 )
+#
+# Set the stack larger than the default for graphs on more than a few
+# vertices, e.g., "stack 20000" at the CLI prompt.
+#
+CFLAGS = -m3 -O
+LIBS = LIB lib:lcm.lib lib:lc.lib lib:amiga.lib
+
+dreadnaut: dreadnaut.o naututil.o nauty.o nautil.o nautinv.o
+        blink lib:c.o dreadnaut.o naututil.o nauty.o nautil.o nautinv.o \
+              to dreadnaut $(LIBS)
+dreadnaut.o: nauty.h naututil.h dreadnaut.c
+        lc $(CFLAGS) -DMAXN=1024 dreadnaut.c
+naututil.o: nauty.h naututil.h naututil.c
+        lc $(CFLAGS) -DMAXN=1024 naututil.c
+nautil.o: nauty.h nautil.c
+        lc $(CFLAGS) -DMAXN=1024 nautil.c
+nauty.o: nauty.h nauty.c
+        lc $(CFLAGS) -DMAXN=1024 nauty.c
+nautinv.o: nauty.h naututil.h nautinv.c
+        lc $(CFLAGS) -DMAXN=1024 nautinv.c
+nautaux.o: nautaux.h nauty.h naututil.h nautaux.c
+        lc $(CFLAGS) -DMAXN=1024 nautaux.c
+
+dreadnaut1: dreadnaut1.o naututil1.o nauty1.o nautil1.o nautinv1.o
+        blink lib:c.o dreadnaut1.o naututil1.o nauty1.o nautil1.o nautinv1.o \
+              to dreadnaut1 $(LIBS)
+dreadnaut1.o: nauty.h naututil.h dreadnaut.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -odreadnaut1.o dreadnaut.c
+naututil1.o: nauty.h naututil.h naututil.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -onaututil1.o naututil.c
+nautil1.o: nauty.h nautil.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -onautil1.o nautil.c
+nauty1.o: nauty.h nauty.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -onauty1.o nauty.c
+nautinv1.o: nauty.h naututil.h nautinv.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -onautinv1.o nautinv.c
+nautaux1.o: nautaux.h nauty.h naututil.h nautaux.c
+        lc $(CFLAGS) -DMAXN=WORDSIZE -onautaux1.o nautaux.c
+
+dreadnautx: dreadnautx.o naututilx.o nautyx.o nautilx.o nautinvx.o
+        blink lib:c.o dreadnautx.o naututilx.o nautyx.o nautilx.o nautinvx.o \
+              to dreadnautx $(LIBS)
+dreadnautx.o: nauty.h naututil.h dreadnaut.c
+        lc $(CFLAGS) -DMAXN=8192 -odreadnautx.o dreadnaut.c
+naututilx.o: nauty.h naututil.h naututil.c
+        lc $(CFLAGS) -DMAXN=8192 -onaututilx.o naututil.c
+nautilx.o: nauty.h nautil.c
+        lc $(CFLAGS) -b0 -DMAXN=8192 -onautilx.o nautil.c
+nautyx.o: nauty.h nauty.c
+        lc $(CFLAGS) -b0 -DMAXN=8192 -onautyx.o nauty.c
+nautinvx.o: nauty.h naututil.h nautinv.c
+        lc $(CFLAGS) -DMAXN=8192 -onautinvx.o nautinv.c
+nautauxx.o: nautaux.h nauty.h naututil.h nautaux.c
+        lc $(CFLAGS) -DMAXN=8192 -onautauxx.o nautaux.c
+
+makeg: makeg.o nauty1.o nautil1.o
+        blink lib:c.o makeg.o nauty1.o nautil1.o to makeg $(LIBS)
+makeg.o: nauty.h naututil.h makeg.c
+        lc $(CFLAGS) makeg.c
