@@ -6,6 +6,45 @@
  *  o remove user functions
  *  o remove writemarker, writeperm
  * This file was edited manually */
+#ifndef NAU0S_H__
+#define NAU0S_H__
+
+
+
+#ifdef __INTEL_COMPILER
+  #pragma warning push
+  /* 1418: external function
+   * 981: evaluated unspecified order
+   * 161: unrecognized pragma
+   * 869: unused variables */
+  #pragma warning disable 1418 981 869 161
+#elif defined(__GNUC__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+  #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+#ifndef INLINE
+#define INLINE __inline
+#endif
+
+#ifndef RESTRICT
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+#define RESTRICT
+#else
+#define RESTRICT __restrict
+#endif
+#endif
+
+#ifndef LONGLONG
+#if defined(_MSC_VER)
+#define LONGLONG __int64
+#else
+#define LONGLONG long long
+#endif
+#endif
+
+
 
 #ifndef NAUTY_H__
 #define NAUTY_H__
@@ -35,34 +74,7 @@
 #define HAVE_CLZL 0
 #define HAVE_CLZLL 0
 
-#ifndef INLINE
-#define INLINE __inline
-#endif
-
-#ifndef RESTRICT
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
-#define RESTRICT
-#else
-#define RESTRICT __restrict
-#endif
-#endif
-
-#ifndef LONGLONG
-#if defined(_MSC_VER)
-#define LONGLONG __int64
-#else
-#define LONGLONG long long
-#endif
-#endif
-
-
 /*==================================================================*/
-
-#ifdef __INTEL_COMPILER
-/* 1418: external function; 981 evaluated unspecified order */
-#pragma warning disable 1418 981
-#endif
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -221,38 +233,25 @@ typedef unsigned LONGLONG setword;
 #endif
 
 
-#if SIZEOF_LONG_LONG >= 8 && SIZEOF_LONG == 4
-typedef unsigned LONGLONG nauty_counter;
-#define LONG_LONG_COUNTERS 1
-#define COUNTER_FMT "%llu"
-#else
-typedef unsigned long nauty_counter;
-#define LONG_LONG_COUNTERS 0
-#define COUNTER_FMT "%lu"
-#endif
-#define PRINT_COUNTER(f,x) fprintf(f,COUNTER_FMT,x)
-
 #define NAUTYVERSIONID (25480)  /* 10000*version */
 #define NAUTYREQUIRED NAUTYVERSIONID  /* Minimum compatible version */
 
 #if WORDSIZE == 16
 #define NAUTYVERSION "2.5 (16 bits)"
-#endif
-#if WORDSIZE == 32
+#elif WORDSIZE == 32
 #define NAUTYVERSION "2.5 (32 bits)"
-#endif
-#if WORDSIZE == 64
+#elif WORDSIZE == 64
 #define NAUTYVERSION "2.5 (64 bits)"
 #endif
 
-#ifndef  MAXN  /* maximum allowed n value; use 0 for dynamic sizing. */
+#ifndef MAXN  /* maximum allowed n value; use 0 for dynamic sizing. */
 #define MAXN WORDSIZE
 #define MAXM 1
 #else
 #define MAXM ((MAXN + WORDSIZE - 1) / WORDSIZE)  /* max setwords in a set */
 #endif  /* MAXN */
 
-#if  MAXM == 1
+#if MAXM == 1
 #define M 1
 #else
 #define M m
@@ -638,75 +637,10 @@ typedef struct optionstruct {
 #define DEFAULTOPTIONS DEFAULTOPTIONS_GRAPH
 #endif
 
-#define PUTC(c,f) putc(c,f)
-
-/* ALLOCS(x,y) should return a pointer (any pointer type) to x*y units of new
-   storage, not necessarily initialised.  A "unit" of storage is defined by
-   the sizeof operator.   x and y are integer values of type int or larger,
-   but x*y may well be too large for an int.  The macro should cast to the
-   correct type for the call.  On failure, ALLOCS(x,y) should return a NULL
-   pointer.  FREES(p) should free storage previously allocated by ALLOCS,
-   where p is the value that ALLOCS returned. */
-
-#define ALLOCS(x,y) malloc((size_t)(x) * (size_t)(y))
-#define REALLOCS(p,x) realloc(p,(size_t)(x))
-#define FREES(p) free(p)
-
-/* The following macros are used by nauty if MAXN=0.  They dynamically
-   allocate arrays of size dependent on m or n.  For each array there
-   should be two static variables:
-     type *name;
-     size_t name_sz;
-   "name" will hold a pointer to an allocated array.  "name_sz" will hold
-   the size of the allocated array in units of sizeof(type).  DYNALLSTAT
-   declares both variables and initialises name_sz=0.  DYNALLOC1 and
-   DYNALLOC2 test if there is enough space allocated, and if not free
-   the existing space and allocate a bigger space.  The allocated space
-   is not initialised.
-
-   In the case of DYNALLOC1, the space is allocated using
-       ALLOCS(sz,sizeof(type)).
-   In the case of DYNALLOC2, the space is allocated using
-       ALLOCS(sz1,sz2*sizeof(type)).
-
-   DYNREALLOC is like DYNALLOC1 except that the old contents are copied
-   into the new space.  realloc() is assumed.  This is not currently
-   used by nauty or dreadnaut.
-
-   DYNFREE frees any allocated array and sets name_sz back to 0.
-   CONDYNFREE does the same, but only if name_sz exceeds some limit.
- */
-
-/* File to write error messages to (used as first argument to fprintf()). */
-#define ERRFILE stderr
-
-/* Don't use OLDEXTDEFS, it is only still here for Magma. */
-#ifdef OLDEXTDEFS
-#define EXTDEF_CLASS
-#ifdef EXTDEFS
-#define EXTDEF_TYPE 1
-#else
-#define EXTDEF_TYPE 2
-#endif
-#else
-#define EXTDEF_CLASS static
-#define EXTDEF_TYPE 2
-#endif
-
-extern int labelorg;   /* Declared in nautil.c */
-
-/* Things equivalent to bit, bytecount, leftbit are defined
-   in bs.h for Magma. */
-#if  EXTDEF_TYPE == 1
-extern setword bit[];
-extern int bytecount[];
-extern int leftbit[];
-
-#else
 /* array giving setwords with single 1-bit */
 #if  WORDSIZE == 64
 #ifdef SETWORD_LONGLONG
-EXTDEF_CLASS const
+static const
 setword bit[] = { 01000000000000000000000LL,0400000000000000000000LL,
                   0200000000000000000000LL,0100000000000000000000LL,
                   040000000000000000000LL,020000000000000000000LL,
@@ -728,7 +662,7 @@ setword bit[] = { 01000000000000000000000LL,0400000000000000000000LL,
                   02000LL,01000LL,0400LL,0200LL,0100LL,040LL,020LL,010LL,
                   04LL,02LL,01LL };
 #else
-EXTDEF_CLASS const
+static const
 setword bit[] = { 01000000000000000000000,0400000000000000000000,
                   0200000000000000000000,0100000000000000000000,
                   040000000000000000000,020000000000000000000,
@@ -750,7 +684,7 @@ setword bit[] = { 01000000000000000000000,0400000000000000000000,
 #endif
 
 #if  WORDSIZE == 32
-EXTDEF_CLASS const
+static const
 setword bit[] = { 020000000000,010000000000,04000000000,02000000000,
                   01000000000,0400000000,0200000000,0100000000,040000000,
                   020000000,010000000,04000000,02000000,01000000,0400000,
@@ -759,13 +693,13 @@ setword bit[] = { 020000000000,010000000000,04000000000,02000000000,
 #endif
 
 #if WORDSIZE == 16
-EXTDEF_CLASS const
+static const
 setword bit[] = { 0100000,040000,020000,010000,04000,02000,01000,0400,0200,
                   0100,040,020,010,04,02,01 };
 #endif
 
 /*  array giving number of 1-bits in bytes valued 0..255: */
-EXTDEF_CLASS const
+static const
 int bytecount[] = { 0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,
                     1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
                     1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
@@ -784,7 +718,7 @@ int bytecount[] = { 0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,
                     4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8 };
 
 /* array giving position (1..7) of high-order 1-bit in byte: */
-EXTDEF_CLASS const
+static const
 int leftbit[] = { 8,7,6,6,5,5,5,5,4,4,4,4,4,4,4,4,
                   3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
                   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -801,14 +735,6 @@ int leftbit[] = { 8,7,6,6,5,5,5,5,4,4,4,4,4,4,4,4,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#endif  /* EXTDEFS */
-
-#define ANSIPROT 1
-#define EXTPROC(func,args) extern func args;     /* obsolete */
-
-/* The following is for C++ programs that read nauty.h.  Compile nauty
-   itself using C, not C++.  */
-
 
 extern boolean cheapautom(int*,int,boolean,int);
 extern void doref(graph *,int*,int*,int,int*,int*,int*,set *,int*,
@@ -817,9 +743,7 @@ extern void doref(graph *,int*,int*,int,int*,int*,int*,set *,int*,
                   int,int,int,boolean,int,int);
 extern boolean isautom(graph *,int*,boolean,int,int);
 extern dispatchvec dispatch_graph;
-extern int nextelement(set*,int,int);
 extern void permset(set*,set*,int,int*);
-extern void shortprune(set*,set*,int);
 extern int testcanlab(graph*,graph*,int*,int*,int,int);
 extern void updatecan(graph*,graph*,int*,int,int,int);
 
@@ -843,15 +767,8 @@ extern void updatecan(graph*,graph*,int*,int,int,int);
 /* : expression whose value depends on long l and is less than 077777
      when converted to int then short.  Anything goes. */
 
-#if  MAXM == 1
-#define M 1
-#else
-#define M m
-#endif
-
 static int workperm0[MAXN];
-
-int labelorg = 0;   /* no TLS_ATTR on purpose */
+#pragma omp threadprivate(workperm0)
 
 /* aproto: header new_nauty_protos.h */
 
@@ -866,7 +783,7 @@ int labelorg = 0;   /* no TLS_ATTR on purpose */
 *                                                                            *
 *****************************************************************************/
 
-int nextelement(set *set1, int m, int pos)
+INLINE int nextelement(set *set1, int m, int pos)
 {
   setword setwd;
 
@@ -893,7 +810,6 @@ int nextelement(set *set1, int m, int pos)
     setwd = set1[w];
   }
 #endif
-
 }
 
 
@@ -1089,8 +1005,7 @@ INLINE void fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int 
 
 /*******************************************************************/
 
-static void
-sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
+INLINE void sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
 {
   int i,j;
   int a,d,ba,dc,s,nn;
@@ -1390,10 +1305,10 @@ INLINE void longprune(set *tcell, set *fix, set *bottom, set *top, int m)
 *                                                                            *
 *****************************************************************************/
 
-void writegroupsize(FILE *f, double gpsize1, int gpsize2)
+INLINE void writegroupsize(FILE *f, double gpsize1, int gpsize2)
 {
   if (gpsize2 == 0)
-    fprintf(f,"%.0f",gpsize1 + 0.1);
+    fprintf(f, "%.0f", gpsize1 + 0.1);
   else {
     while (gpsize1 >= 10.0) {
       gpsize1 /= 10.0;
@@ -1416,33 +1331,30 @@ typedef struct tcnode_struct {
   set *tcellptr;
 } tcnode;
 
-/* aproto: header new_nauty_protos.h */
-
 static int firstpathnode(int*, int*, int, int);
 static int othernode(int*, int*, int, int);
 static int processnode(int*, int*, int, int);
 
-#if  MAXM == 1
-#define M 1
-#else
-#define M m
-#endif
-
 /* copies of some of the options: */
-static boolean getcanon,digraph;
-static int tc_level,mininvarlevel,maxinvarlevel,invararg;
+static boolean getcanon, digraph;
+static int tc_level, mininvarlevel, maxinvarlevel, invararg;
 static void (*invarproc)
 (graph *,int*,int*,int,int,int,int*,int,boolean,int,int);
 static dispatchvec dispatch;
+#pragma omp threadprivate(getcanon, digraph, tc_level)
+#pragma omp threadprivate(mininvarlevel, maxinvarlevel, invararg)
+#pragma omp threadprivate(invarproc, dispatch)
 
 /* local versions of some of the arguments: */
-static int m,n;
-static graph *g,*canong;
+static int m, n;
+static graph *g, *canong;
 static int *orbits;
 static statsblk *stats;
 /* temporary versions of some stats: */
 static unsigned long invapplics,invsuccesses;
 static int invarsuclevel;
+#pragma omp threadprivate(m, n, g, canong, orbits, stats)
+#pragma omp threadprivate(invapplics, invsuccess, invarsuclevel)
 
 /* working variables: <the "bsf leaf" is the leaf which is best guess so
                            far at the canonical leaf>  */
@@ -1464,8 +1376,12 @@ static int gca_first, /* level of greatest common ancestor of
                         the bsf leaf  BDM:correct description? */
            canonlevel, /* level of bsf leaf */
            cosetindex; /* the point being fixed at level gca_first */
+#pragma omp threadprivate(gca_first, gca_canon, noncheaplevel, allsamelevel)
+#pragma omp threadprivate(eqlev_first, eqlev_canon, comp_canon)
+#pragma omp threadprivate(samerows, canonlevel, cosetindex)
 
 static boolean needshortprune;  /* used to flag calls to shortprune */
+#pragma omp threadprivate(needshortprune)
 
 static set defltwork[2 * MAXM];   /* workspace in case none provided */
 /* cz: this variable must be renamed to avoid the conflict
@@ -1480,11 +1396,13 @@ static short firstcode[MAXN + 2],      /* codes for first leaf */
 static int firsttc[MAXN + 2];  /* index of target cell for left path */
 static set active[MAXM];     /* used to contain index to cells now
                                     active for refinement purposes */
+#pragma omp threadprivate(defltwork, workperm1, fixedpts, firstlab, canonlab)
+#pragma omp threadprivate(firstcode, canoncode, firsttc, active)
 
 static set *workspace,*worktop;  /* first and just-after-last
                                     addresses of work area to hold automorphism data */
 static set *fmptr;                   /* pointer into workspace */
-
+#pragma omp threadprivate(workspace, worktop, fmptr)
 
 
 /*****************************************************************************
@@ -1497,22 +1415,22 @@ static set *fmptr;                   /* pointer into workspace */
 INLINE void nauty_check(int wordsize, int m, int n, int version)
 {
   if (wordsize != WORDSIZE) {
-    fprintf(ERRFILE,"Error: WORDSIZE mismatch in nauty.c\n");
+    fprintf(stderr,"Error: WORDSIZE mismatch in nauty.c\n");
     exit(1);
   }
 
   if (m > MAXM) {
-    fprintf(ERRFILE,"Error: MAXM inadequate in nauty.c\n");
+    fprintf(stderr,"Error: MAXM inadequate in nauty.c\n");
     exit(1);
   }
 
   if (n > MAXN) {
-    fprintf(ERRFILE,"Error: MAXN inadequate in nauty.c\n");
+    fprintf(stderr,"Error: MAXN inadequate in nauty.c\n");
     exit(1);
   }
 
   if (version < NAUTYREQUIRED) {
-    fprintf(ERRFILE,"Error: nauty.c version mismatch\n");
+    fprintf(stderr,"Error: nauty.c version mismatch\n");
     exit(1);
   }
 }
@@ -1577,8 +1495,8 @@ void nauty(graph * RESTRICT g_arg,
   /* determine dispatch vector */
 
   if (options->dispatch == NULL) {
-    fprintf(ERRFILE,">E nauty: null dispatch vector\n");
-    fprintf(ERRFILE,"Maybe you need to recompile\n");
+    fprintf(stderr,">E nauty: null dispatch vector\n");
+    fprintf(stderr,"Maybe you need to recompile\n");
     exit(1);
   } else
     dispatch = *(options->dispatch);
@@ -1588,19 +1506,19 @@ void nauty(graph * RESTRICT g_arg,
 
   if (dispatch.refine == NULL || dispatch.updatecan == NULL
       || dispatch.targetcell == NULL || dispatch.cheapautom == NULL) {
-    fprintf(ERRFILE,">E bad dispatch vector\n");
+    fprintf(stderr,">E bad dispatch vector\n");
     exit(1);
   }
 
   /* check for excessive sizes: */
   if (m_arg > MAXM) {
     stats_arg->errstatus = MTOOBIG;
-    fprintf(ERRFILE,"nauty: need m <= %d\n\n",MAXM);
+    fprintf(stderr,"nauty: need m <= %d\n\n",MAXM);
     return;
   }
   if (n_arg > MAXN || n_arg > WORDSIZE * m_arg) {
     stats_arg->errstatus = NTOOBIG;
-    fprintf(ERRFILE,
+    fprintf(stderr,
             "nauty: need n <= min(%d,%d*m)\n\n",MAXM,WORDSIZE);
     return;
   }
@@ -1650,7 +1568,7 @@ void nauty(graph * RESTRICT g_arg,
   if (getcanon)
     if (canong_arg == NULL) {
       stats_arg->errstatus = CANONGNIL;
-      fprintf(ERRFILE,
+      fprintf(stderr,
               "nauty: canong=NULL but options.getcanon=TRUE\n\n");
       return;
     }
@@ -2168,7 +2086,7 @@ static set workset[MAXM];   /* used for scratch work */
 static int workperm2[MAXN];
 static int bucket[MAXN + 2];
 static set dnwork[40 * MAXM];
-
+#pragma omp threadprivate(workset, workperm2, bucket, dnwork)
 
 
 /*****************************************************************************
@@ -2684,7 +2602,7 @@ dispatchvec dispatch_graph =
 
 #define densenauty(g, lab, ptn, orbits, options, stats, m, n, h) { \
   if ((options)->dispatch != &dispatch_graph) { \
-    fprintf(ERRFILE, "Error: densenauty() needs standard options block\n"); \
+    fprintf(stderr, "Error: densenauty() needs standard options block\n"); \
     exit(1); \
   } \
   nauty(g, lab, ptn, NULL, orbits, options, stats, dnwork, 40 * m, m, n, h); }
@@ -2692,4 +2610,15 @@ dispatchvec dispatch_graph =
 
 
 #endif /* NAUGRAPH_C__ */
+
+
+
+#ifdef __INTEL_COMPILER
+  #pragma warning pop
+#elif defined(__GNUC__)
+  #pragma GCC diagnostic pop
+#endif
+
+
+#endif /* NAU0S_H__ */
 

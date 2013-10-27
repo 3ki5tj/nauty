@@ -3,6 +3,43 @@
  * define NAU_SCHREIER to enable shreier code, disabled by default
  * source code for schreier is not included here
  * This file was edited manually */
+#ifndef NAU0_H__
+#define NAU0_H__
+
+
+#ifdef __INTEL_COMPILER
+  #pragma warning push
+  /* 1418: external function
+   * 981: evaluated unspecified order
+   * 869: unused variables */
+  #pragma warning disable 1418 981 869
+#elif defined(__GNUC__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+  #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+#ifndef INLINE
+#define INLINE __inline
+#endif
+
+#ifndef RESTRICT
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+#define RESTRICT
+#else
+#define RESTRICT __restrict
+#endif
+#endif
+
+#ifndef LONGLONG
+#if defined(_MSC_VER)
+#define LONGLONG __int64
+#else
+#define LONGLONG long long
+#endif
+#endif
+
+
 
 #ifndef NAUTY_H__
 #define NAUTY_H__
@@ -32,29 +69,8 @@
 #define HAVE_CLZL 0
 #define HAVE_CLZLL 0
 
-#ifndef RESTRICT
-#if defined(_MSC_VER) && (_MSC_VER < 1400)
-#define RESTRICT
-#else
-#define RESTRICT __restrict
-#endif
-#endif
-
-#ifndef LONGLONG
-#if defined(_MSC_VER)
-#define LONGLONG __int64
-#else
-#define LONGLONG long long
-#endif
-#endif
-
-
 /*==================================================================*/
 
-#ifdef __INTEL_COMPILER
-/* 1418: external function; 981 evaluated unspecified order */
-#pragma warning disable 1418 981
-#endif
 
 
 #include <stdio.h>
@@ -894,14 +910,6 @@ typedef struct optionstruct {
 
 extern int labelorg;   /* Declared in nautil.c */
 
-/* Things equivalent to bit, bytecount, leftbit are defined
-   in bs.h for Magma. */
-#if  EXTDEF_TYPE == 1
-extern setword bit[];
-extern int bytecount[];
-extern int leftbit[];
-
-#else
 /* array giving setwords with single 1-bit */
 #if  WORDSIZE == 64
 #ifdef SETWORD_LONGLONG
@@ -1000,10 +1008,7 @@ int leftbit[] = { 8,7,6,6,5,5,5,5,4,4,4,4,4,4,4,4,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#endif  /* EXTDEFS */
 
-#define ANSIPROT 1
-#define EXTPROC(func,args) extern func args;     /* obsolete */
 
 /* The following is for C++ programs that read nauty.h.  Compile nauty
    itself using C, not C++.  */
@@ -1396,8 +1401,7 @@ void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
 *                                                                            *
 *****************************************************************************/
 
-void
-fmperm(int *perm, set *fix, set *mcr, int m, int n)
+void fmperm(int *perm, set *fix, set *mcr, int m, int n)
 {
   int i,k,l;
 
@@ -1439,8 +1443,7 @@ fmperm(int *perm, set *fix, set *mcr, int m, int n)
 *                                                                            *
 *****************************************************************************/
 
-void
-fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int n)
+void fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int n)
 {
   int i,lmin;
 
@@ -1654,14 +1657,13 @@ sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
 *                                                                            *
 *****************************************************************************/
 
-void
-doref(graph *g, int *lab, int *ptn, int level, int *numcells,
-      int *qinvar, int *invar, set *active, int *code,
-      void (*refproc)(graph*,int*,int*,int,int*,int*,set*,int*,int,int),
-      void (*invarproc)(graph*,int*,int*,int,int,int,int*,
-                        int,boolean,int,int),
-      int mininvarlev, int maxinvarlev, int invararg,
-      boolean digraph, int m, int n)
+void doref(graph *g, int *lab, int *ptn, int level, int *numcells,
+    int *qinvar, int *invar, set *active, int *code,
+    void (*refproc)(graph*,int*,int*,int,int*,int*,set*,int*,int,int),
+    void (*invarproc)(graph*,int*,int*,int,int,int,int*,
+                      int,boolean,int,int),
+    int mininvarlev, int maxinvarlev, int invararg,
+    boolean digraph, int m, int n)
 {
   int pw;
   int i,cell1,cell2,nc,tvpos,minlev,maxlev;
@@ -1764,8 +1766,7 @@ void maketargetcell(graph *g, int *lab, int *ptn, int level, set *tcell,
 *                                                                            *
 *****************************************************************************/
 
-void
-shortprune(set *set1, set *set2, int m)
+void shortprune(set *set1, set *set2, int m)
 {
   int i;
 
@@ -1820,8 +1821,7 @@ breakout(int *lab, int *ptn, int level, int tc, int tv,
 *                                                                            *
 *****************************************************************************/
 
-void
-longprune(set *tcell, set *fix, set *bottom, set *top, int m)
+void longprune(set *tcell, set *fix, set *bottom, set *top, int m)
 {
   int i;
 
@@ -1868,8 +1868,7 @@ void writegroupsize(FILE *f, double gpsize1, int gpsize2)
 *                                                                            *
 *****************************************************************************/
 
-void
-alloc_error(char *s)
+void alloc_error(char *s)
 {
   fprintf(ERRFILE,"Dynamic allocation failed: %s\n",s);
   exit(2);
@@ -1883,8 +1882,7 @@ alloc_error(char *s)
 *                                                                            *
 *****************************************************************************/
 
-void
-nautil_freedyn(void)
+void nautil_freedyn(void)
 {
 #if !MAXN
   DYNFREE(workperm0,workperm0_sz);
@@ -1985,12 +1983,6 @@ static void firstterminal(int*, int);
 static int processnode(int*, int*, int, int);
 static void recover(int*, int);
 static void writemarker(int, int, int, int, int, int);
-
-#if  MAXM == 1
-#define M 1
-#else
-#define M m
-#endif
 
 #define OPTCALL(proc) if (proc != NULL) (*proc)
 
@@ -3046,13 +3038,6 @@ void nauty_freedyn(void)
 /* : expression whose value depends on long l and is less than 077777
    when converted to int then short.  Anything goes. */
 
-#if  MAXM == 1
-#define M 1
-#else
-#define M m
-#endif
-
-
 #if !MAXN
 DYNALLSTAT(set,workset,workset_sz);
 DYNALLSTAT(int,workperm2,workperm2_sz);
@@ -3642,4 +3627,14 @@ void densenauty(graph * RESTRICT g,
 
 
 #endif /* NAUGRAPH_C__ */
+
+
+
+#ifdef __INTEL_COMPILER
+  #pragma warning pop
+#elif defined(__GNUC__)
+  #pragma GCC diagnostic pop
+#endif
+
+#endif /* NAU0_H__ */
 
