@@ -6,8 +6,8 @@
 
 int main(void)
 {
-  graph g[MAXN*MAXM];
-  int lab[MAXN],ptn[MAXN],orbits[MAXN];
+  graph g[MAXN * MAXM];
+  int lab[MAXN], ptn[MAXN], orbits[MAXN];
   static DEFAULTOPTIONS_GRAPH(options);
   statsblk stats;
 
@@ -22,41 +22,44 @@ int main(void)
   options.writeautoms = TRUE;
 
   if (n > MAXN) {
-    printf("n must be in the range 1..%d\n",MAXN);
+    printf("n must be in the range 1..%d\n", MAXN);
     exit(1);
   }
 
-   /* The nauty parameter m is a value such that an array of
-      m setwords is sufficient to hold n bits.  The type setword
-      is defined in nauty.h.  The number of bits in a setword is
-      WORDSIZE, which is 16, 32 or 64.  Here we calculate
-      m = ceiling(n/WORDSIZE).                                  */
+  /* The nauty parameter m is a value such that an array of
+     m setwords is sufficient to hold n bits.  The type setword
+     is defined in nauty.h.  The number of bits in a setword is
+     WORDSIZE, which is 16, 32 or 64.  Here we calculate
+     m = ceiling(n/WORDSIZE).                                  */
 
   m = SETWORDSNEEDED(n);
 
   /* The following optional call verifies that we are linking
      to compatible versions of the nauty routines.            */
 
-  nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
+  nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
 
   /* Now we create the cycle.  First we zero the graph, than for
      each v, we add the edge (v,v+1), where values are mod n. */
 
-  EMPTYGRAPH(g,m,n);
-  for (v = 0; v < n; ++v)  ADDONEEDGE(g,v,(v+1)%n,m);
+  EMPTYGRAPH(g, m, n);
+  for (v = 0; v < n; ++v) ADDONEEDGE(g, v, (v + 1) % n, m);
 
-  printf("Generators for Aut(C[%d]):\n",n);
+  printf("Generators for Aut(C[%d]):\n", n);
 
   /* Since we are not requiring a canonical labelling, the last
      parameter to densenauty() is not required and can be NULL. */
 
-  densenauty(g,lab,ptn,orbits,&options,&stats,m,n,NULL);
+  densenauty(g, lab, ptn, orbits, &options, &stats, m, n, NULL);
 
   /* The size of the group is returned in stats.grpsize1 and
      stats.grpsize2. */
 
   printf("Automorphism group size = ");
-  writegroupsize(stdout,stats.grpsize1,stats.grpsize2);
+  writegroupsize(stdout, stats.grpsize1, stats.grpsize2);
   printf("\n");
   return 0;
 }
+
+
+

@@ -9,12 +9,16 @@
 
 #ifdef __INTEL_COMPILER
   #pragma warning push
-  /* 1418: external function
-   * 981: evaluated unspecified order
-   * 869: unused variables */
-  #pragma warning disable 1418 981 869
-#elif defined(__GNUC__)
-  #pragma GCC diagnostic push
+/* 1418: external function
+ * 981: evaluated unspecified order
+ * 161:  unrecognized pragma
+ * 869: unused variables */
+  #pragma warning disable 1418 981 161 869
+#elif defined(__GNUC__) && defined(__GNUC_MINOR__)
+  #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+    /* diagnostic push and pop are added in GCC 4.6 */
+    #pragma GCC diagnostic push
+  #endif
   #pragma GCC diagnostic ignored "-Wunused-parameter"
   #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
@@ -402,7 +406,7 @@ typedef unsigned long nauty_counter;
 #define LONG_LONG_COUNTERS 0
 #define COUNTER_FMT "%lu"
 #endif
-#define PRINT_COUNTER(f,x) fprintf(f,COUNTER_FMT,x)
+#define PRINT_COUNTER(f, x) fprintf(f, COUNTER_FMT, x)
 
 #define NAUTYVERSIONID (25480)  /* 10000*version */
 #define NAUTYREQUIRED NAUTYVERSIONID  /* Minimum compatible version */
@@ -454,27 +458,27 @@ typedef unsigned long nauty_counter;
 
 #define BITT bit
 
-#define ADDELEMENT1(setadd,pos)  (*(setadd) |= BITT[pos])
-#define DELELEMENT1(setadd,pos)  (*(setadd) &= ~BITT[pos])
-#define FLIPELEMENT1(setadd,pos) (*(setadd) ^= BITT[pos])
-#define ISELEMENT1(setadd,pos)   ((*(setadd) & BITT[pos]) != 0)
-#define EMPTYSET1(setadd,m)   *(setadd) = 0;
-#define GRAPHROW1(g,v,m) ((set*)(g) + (v))
-#define ADDONEARC1(g,v,w,m) (g)[v] |= BITT[w]
-#define ADDONEEDGE1(g,v,w,m) { ADDONEARC1(g,v,w,m); ADDONEARC1(g,w,v,m); }
-#define EMPTYGRAPH1(g,m,n) EMPTYSET0(g,n)  /* really EMPTYSET0 */
+#define ADDELEMENT1(setadd, pos)  (*(setadd) |= BITT[pos])
+#define DELELEMENT1(setadd, pos)  (*(setadd) &= ~BITT[pos])
+#define FLIPELEMENT1(setadd, pos) (*(setadd) ^= BITT[pos])
+#define ISELEMENT1(setadd, pos)   ((*(setadd) & BITT[pos]) != 0)
+#define EMPTYSET1(setadd, m)   *(setadd) = 0;
+#define GRAPHROW1(g, v, m) ((set*)(g) + (v))
+#define ADDONEARC1(g, v, w, m) (g)[v] |= BITT[w]
+#define ADDONEEDGE1(g, v, w, m) { ADDONEARC1(g, v, w, m); ADDONEARC1(g, w, v, m); }
+#define EMPTYGRAPH1(g, m, n) EMPTYSET0(g, n)  /* really EMPTYSET0 */
 
-#define ADDELEMENT0(setadd,pos)  ((setadd)[SETWD(pos)] |= BITT[SETBT(pos)])
-#define DELELEMENT0(setadd,pos)  ((setadd)[SETWD(pos)] &= ~BITT[SETBT(pos)])
-#define FLIPELEMENT0(setadd,pos) ((setadd)[SETWD(pos)] ^= BITT[SETBT(pos)])
-#define ISELEMENT0(setadd,pos) (((setadd)[SETWD(pos)] & BITT[SETBT(pos)]) != 0)
-#define EMPTYSET0(setadd,m) \
+#define ADDELEMENT0(setadd, pos)  ((setadd)[SETWD(pos)] |= BITT[SETBT(pos)])
+#define DELELEMENT0(setadd, pos)  ((setadd)[SETWD(pos)] &= ~BITT[SETBT(pos)])
+#define FLIPELEMENT0(setadd, pos) ((setadd)[SETWD(pos)] ^= BITT[SETBT(pos)])
+#define ISELEMENT0(setadd, pos) (((setadd)[SETWD(pos)] & BITT[SETBT(pos)]) != 0)
+#define EMPTYSET0(setadd, m) \
   { setword *es; \
     for (es = (setword*)(setadd) + (m); --es >= (setword*)(setadd); ) *es = 0; }
-#define GRAPHROW0(g,v,m) ((set*)(g) + (m) * (size_t)(v))
-#define ADDONEARC0(g,v,w,m) ADDELEMENT0(GRAPHROW0(g,v,m),w)
-#define ADDONEEDGE0(g,v,w,m) { ADDONEARC0(g,v,w,m); ADDONEARC0(g,w,v,m); }
-#define EMPTYGRAPH0(g,m,n) EMPTYSET0(g,(m) * (size_t)(n))
+#define GRAPHROW0(g, v, m) ((set*)(g) + (m) * (size_t)(v))
+#define ADDONEARC0(g, v, w, m) ADDELEMENT0(GRAPHROW0(g, v, m), w)
+#define ADDONEEDGE0(g, v, w, m) { ADDONEARC0(g, v, w, m); ADDONEARC0(g, w, v, m); }
+#define EMPTYGRAPH0(g, m, n) EMPTYSET0(g, (m) * (size_t)(n))
 
 #if  (MAXM == 1) && defined(ONE_WORD_SETS)
 #define ADDELEMENT ADDELEMENT1
@@ -499,14 +503,14 @@ typedef unsigned long nauty_counter;
 #endif
 
 
-#define NOTSUBSET(word1,word2) ((word1) & ~(word2))  /* test if the 1-bits
-                                                        in setword word1 do not form a subset of those in word2  */
-#define INTERSECT(word1,word2) ((word1) &= (word2))  /* AND word2 into word1 */
-#define UNION(word1,word2)     ((word1) |= (word2))  /* OR word2 into word1 */
-#define SETDIFF(word1,word2)   ((word1) &= ~(word2)) /* - word2 into word1 */
-#define XOR(word1,word2)       ((word1) ^= (word2))  /* XOR word2 into word1 */
-#define ZAPBIT(word,x) ((word) &= ~BITT[x])  /* delete bit x in setword */
-#define TAKEBIT(iw,w) { (iw) = FIRSTBITNZ(w); (w) ^= BITT[iw]; }
+#define NOTSUBSET(word1, word2) ((word1) & ~(word2))  /* test if the 1-bits
+                                                         in setword word1 do not form a subset of those in word2  */
+#define INTERSECT(word1, word2) ((word1) &= (word2))  /* AND word2 into word1 */
+#define UNION(word1, word2)     ((word1) |= (word2))  /* OR word2 into word1 */
+#define SETDIFF(word1, word2)   ((word1) &= ~(word2)) /* - word2 into word1 */
+#define XOR(word1, word2)       ((word1) ^= (word2))  /* XOR word2 into word1 */
+#define ZAPBIT(word, x) ((word) &= ~BITT[x])  /* delete bit x in setword */
+#define TAKEBIT(iw, w) { (iw) = FIRSTBITNZ(w); (w) ^= BITT[iw]; }
 
 #ifdef SETWORD_LONGLONG
 #define MSK3232 0xFFFFFFFF00000000ULL
@@ -716,7 +720,7 @@ typedef unsigned long nauty_counter;
 /* The following four types are obsolete, use int in new code. */
 typedef int shortish;
 typedef shortish permutation;
-typedef int nvector,np2vector;
+typedef int nvector, np2vector;
 
 #if MAXN > NAUTY_INFINITY - 2
  #error MAXN must be at most NAUTY_INFINITY-2
@@ -728,7 +732,7 @@ typedef int boolean;    /* boolean MUST be the same as int */
 
 #define UPROC void      /* obsolete */
 
-typedef setword set,graph;
+typedef setword set, graph;
 
 typedef struct {
   double grpsize1;          /* size of group is */
@@ -755,32 +759,32 @@ typedef struct {
 #define CANONGNIL    3      /* canong = NULL, but getcanon = TRUE */
 
 /* manipulation of real approximation to group size */
-#define MULTIPLY(s1,s2,i) if ((s1 *= i) >= 1e10) { s1 /= 1e10; s2 += 10; }
+#define MULTIPLY(s1, s2, i) if ((s1 *= i) >= 1e10) { s1 /= 1e10; s2 += 10; }
 
 struct optionstruct;  /* incomplete definition */
 
 typedef struct {
   boolean (*isautom)          /* test for automorphism */
-    (graph*,int*,boolean,int,int);
+    (graph*, int*, boolean, int, int);
   int (*testcanlab)           /* test for better labelling */
-  (graph *,graph *,int*,int*,int,int);
+  (graph *, graph *, int*, int*, int, int);
   void (*updatecan)           /* update canonical object */
-  (graph *,graph *,int*,int,int,int);
+  (graph *, graph *, int*, int, int, int);
   void (*refine)              /* refine partition */
-  (graph *,int*,int*,int,int*,int*,set *,int*,int,int);
+  (graph *, int*, int*, int, int*, int*, set *, int*, int, int);
   void (*refine1)             /* refine partition, MAXM==1 */
-  (graph *,int*,int*,int,int*,int*,set *,int*,int,int);
+  (graph *, int*, int*, int, int*, int*, set *, int*, int, int);
   boolean (*cheapautom)       /* test for easy automorphism */
-    (int*,int,boolean,int);
+    (int*, int, boolean, int);
   int (*targetcell)           /* decide which cell to split */
-  (graph *,int*,int*,int,int,int,int);
+  (graph *, int*, int*, int, int, int, int);
   void (*freedyn)(void);      /* free dynamic memory */
   void (*check)               /* check compilation parameters */
-  (int,int,int,int);
-  void (*init)(graph*,graph**,graph*,graph**,int*,int*,set*,
-               struct optionstruct*,int*,int,int);
-  void (*cleanup)(graph*,graph**,graph*,graph**,int*,int*,
-                  struct optionstruct*,statsblk*,int,int);
+  (int, int, int, int);
+  void (*init)(graph*, graph**, graph*, graph**, int*, int*, set*,
+               struct optionstruct*, int*, int, int);
+  void (*cleanup)(graph*, graph**, graph*, graph**, int*, int*,
+                  struct optionstruct*, statsblk*, int, int);
 } dispatchvec;
 
 typedef struct optionstruct {
@@ -794,15 +798,15 @@ typedef struct optionstruct {
   int linelength;             /* max chars/line (excl. '\n') for output */
   FILE *outfile;              /* file for output, if any */
   void (*userrefproc)         /* replacement for usual refine procedure */
-  (graph *,int*,int*,int,int*,int*,set *,int*,int,int);
+  (graph *, int*, int*, int, int*, int*, set *, int*, int, int);
   void (*userautomproc)       /* procedure called for each automorphism */
-  (int,int*,int*,int,int,int);
+  (int, int*, int*, int, int, int);
   void (*userlevelproc)       /* procedure called for each level */
-  (int*,int*,int,int*,statsblk *,int,int,int,int,int,int);
+  (int*, int*, int, int*, statsblk *, int, int, int, int, int, int);
   void (*usernodeproc)        /* procedure called for each node */
-  (graph *,int*,int*,int,int,int,int,int,int);
+  (graph *, int*, int*, int, int, int, int, int, int);
   void (*invarproc)           /* procedure to compute vertex-invariant */
-  (graph *,int*,int*,int,int,int,int*,int,boolean,int,int);
+  (graph *, int*, int*, int, int, int, int*, int, boolean, int, int);
   int tc_level;               /* max level for smart target cell choosing */
   int mininvarlevel;          /* min level for invariant computation */
   int maxinvarlevel;          /* max level for invariant computation */
@@ -819,14 +823,14 @@ typedef struct optionstruct {
 
 
 #define DEFAULTOPTIONS_GRAPH(options) optionblk options = \
-{ 0,FALSE,FALSE,FALSE,TRUE,FALSE,CONSOLWIDTH, \
-  NULL,NULL,NULL,NULL,NULL,NULL,100,0,1,0,&dispatch_graph,FALSE,NULL }
+{ 0, FALSE, FALSE, FALSE, TRUE, FALSE, CONSOLWIDTH, \
+  NULL, NULL, NULL, NULL, NULL, NULL, 100, 0, 1, 0, &dispatch_graph, FALSE, NULL }
 
 
 
 #define DEFAULTOPTIONS_DIGRAPH(options) optionblk options = \
-{ 0,TRUE,FALSE,FALSE,TRUE,FALSE,CONSOLWIDTH, \
-  NULL,NULL,NULL,NULL,NULL,adjacencies,100,0,999,0,&dispatch_graph,FALSE,NULL }
+{ 0, TRUE, FALSE, FALSE, TRUE, FALSE, CONSOLWIDTH, \
+  NULL, NULL, NULL, NULL, NULL, adjacencies, 100, 0, 999, 0, &dispatch_graph, FALSE, NULL }
 
 
 
@@ -834,7 +838,7 @@ typedef struct optionstruct {
 #define DEFAULTOPTIONS DEFAULTOPTIONS_GRAPH
 #endif
 
-#define PUTC(c,f) putc(c,f)
+#define PUTC(c, f) putc(c, f)
 
 /* ALLOCS(x,y) should return a pointer (any pointer type) to x*y units of new
    storage, not necessarily initialised.  A "unit" of storage is defined by
@@ -844,8 +848,8 @@ typedef struct optionstruct {
    pointer.  FREES(p) should free storage previously allocated by ALLOCS,
    where p is the value that ALLOCS returned. */
 
-#define ALLOCS(x,y) malloc((size_t)(x) * (size_t)(y))
-#define REALLOCS(p,x) realloc(p,(size_t)(x))
+#define ALLOCS(x, y) malloc((size_t)(x) * (size_t)(y))
+#define REALLOCS(p, x) realloc(p, (size_t)(x))
 #define FREES(p) free(p)
 
 /* The following macros are used by nauty if MAXN=0.  They dynamically
@@ -873,23 +877,23 @@ typedef struct optionstruct {
    CONDYNFREE does the same, but only if name_sz exceeds some limit.
  */
 
-#define DYNALLSTAT(type,name,name_sz) \
+#define DYNALLSTAT(type, name, name_sz) \
   static type * name; static size_t name_sz = 0
-#define DYNALLOC1(type,name,name_sz,sz,msg) \
+#define DYNALLOC1(type, name, name_sz, sz, msg) \
   if ((size_t)(sz) > name_sz) \
   { if (name_sz) FREES(name); name_sz = (sz); \
-    if ((name = (type*)ALLOCS(sz,sizeof(type))) == NULL) { alloc_error(msg); } }
-#define DYNALLOC2(type,name,name_sz,sz1,sz2,msg) \
+    if ((name = (type*)ALLOCS(sz, sizeof(type))) == NULL) { alloc_error(msg); } }
+#define DYNALLOC2(type, name, name_sz, sz1, sz2, msg) \
   if ((size_t)(sz1) * (size_t)(sz2) > name_sz) \
   { if (name_sz) FREES(name); name_sz = (size_t)(sz1) * (size_t)(sz2); \
-    if ((name = (type*)ALLOCS((sz1),(sz2) * sizeof(type))) == NULL) \
+    if ((name = (type*)ALLOCS((sz1), (sz2) * sizeof(type))) == NULL) \
     { alloc_error(msg); } }
-#define DYNREALLOC(type,name,name_sz,sz,msg) \
+#define DYNREALLOC(type, name, name_sz, sz, msg) \
   { if ((size_t)(sz) > name_sz) \
-    { if ((name = (type*)REALLOCS(name,(sz) * sizeof(type))) == NULL) \
-     { alloc_error(msg); } else name_sz = (sz); } }
-#define DYNFREE(name,name_sz) if (name_sz) { FREES(name); name_sz = 0; }
-#define CONDYNFREE(name,name_sz,minsz) \
+    { if ((name = (type*)REALLOCS(name, (sz) * sizeof(type))) == NULL) \
+      { alloc_error(msg); } else name_sz = (sz); } }
+#define DYNFREE(name, name_sz) if (name_sz) { FREES(name); name_sz = 0; }
+#define CONDYNFREE(name, name_sz, minsz) \
   if (name_sz > (size_t)(minsz)) { FREES(name); name_sz = 0; }
 
 /* File to write error messages to (used as first argument to fprintf()). */
@@ -914,100 +918,100 @@ extern int labelorg;   /* Declared in nautil.c */
 #if  WORDSIZE == 64
 #ifdef SETWORD_LONGLONG
 EXTDEF_CLASS const
-setword bit[] = { 01000000000000000000000LL,0400000000000000000000LL,
-                  0200000000000000000000LL,0100000000000000000000LL,
-                  040000000000000000000LL,020000000000000000000LL,
-                  010000000000000000000LL,04000000000000000000LL,
-                  02000000000000000000LL,01000000000000000000LL,
-                  0400000000000000000LL,0200000000000000000LL,
-                  0100000000000000000LL,040000000000000000LL,
-                  020000000000000000LL,010000000000000000LL,
-                  04000000000000000LL,02000000000000000LL,
-                  01000000000000000LL,0400000000000000LL,0200000000000000LL,
-                  0100000000000000LL,040000000000000LL,020000000000000LL,
-                  010000000000000LL,04000000000000LL,02000000000000LL,
-                  01000000000000LL,0400000000000LL,0200000000000LL,
-                  0100000000000LL,040000000000LL,020000000000LL,010000000000LL,
-                  04000000000LL,02000000000LL,01000000000LL,0400000000LL,
-                  0200000000LL,0100000000LL,040000000LL,020000000LL,
-                  010000000LL,04000000LL,02000000LL,01000000LL,0400000LL,
-                  0200000LL,0100000LL,040000LL,020000LL,010000LL,04000LL,
-                  02000LL,01000LL,0400LL,0200LL,0100LL,040LL,020LL,010LL,
-                  04LL,02LL,01LL };
+setword bit[] = { 01000000000000000000000LL, 0400000000000000000000LL,
+                  0200000000000000000000LL, 0100000000000000000000LL,
+                  040000000000000000000LL, 020000000000000000000LL,
+                  010000000000000000000LL, 04000000000000000000LL,
+                  02000000000000000000LL, 01000000000000000000LL,
+                  0400000000000000000LL, 0200000000000000000LL,
+                  0100000000000000000LL, 040000000000000000LL,
+                  020000000000000000LL, 010000000000000000LL,
+                  04000000000000000LL, 02000000000000000LL,
+                  01000000000000000LL, 0400000000000000LL, 0200000000000000LL,
+                  0100000000000000LL, 040000000000000LL, 020000000000000LL,
+                  010000000000000LL, 04000000000000LL, 02000000000000LL,
+                  01000000000000LL, 0400000000000LL, 0200000000000LL,
+                  0100000000000LL, 040000000000LL, 020000000000LL, 010000000000LL,
+                  04000000000LL, 02000000000LL, 01000000000LL, 0400000000LL,
+                  0200000000LL, 0100000000LL, 040000000LL, 020000000LL,
+                  010000000LL, 04000000LL, 02000000LL, 01000000LL, 0400000LL,
+                  0200000LL, 0100000LL, 040000LL, 020000LL, 010000LL, 04000LL,
+                  02000LL, 01000LL, 0400LL, 0200LL, 0100LL, 040LL, 020LL, 010LL,
+                  04LL, 02LL, 01LL };
 #else
 EXTDEF_CLASS const
-setword bit[] = { 01000000000000000000000,0400000000000000000000,
-                  0200000000000000000000,0100000000000000000000,
-                  040000000000000000000,020000000000000000000,
-                  010000000000000000000,04000000000000000000,
-                  02000000000000000000,01000000000000000000,
-                  0400000000000000000,0200000000000000000,
-                  0100000000000000000,040000000000000000,020000000000000000,
-                  010000000000000000,04000000000000000,02000000000000000,
-                  01000000000000000,0400000000000000,0200000000000000,
-                  0100000000000000,040000000000000,020000000000000,
-                  010000000000000,04000000000000,02000000000000,
-                  01000000000000,0400000000000,0200000000000,0100000000000,
-                  040000000000,020000000000,010000000000,04000000000,
-                  02000000000,01000000000,0400000000,0200000000,0100000000,
-                  040000000,020000000,010000000,04000000,02000000,01000000,
-                  0400000,0200000,0100000,040000,020000,010000,04000,
-                  02000,01000,0400,0200,0100,040,020,010,04,02,01 };
+setword bit[] = { 01000000000000000000000, 0400000000000000000000,
+                  0200000000000000000000, 0100000000000000000000,
+                  040000000000000000000, 020000000000000000000,
+                  010000000000000000000, 04000000000000000000,
+                  02000000000000000000, 01000000000000000000,
+                  0400000000000000000, 0200000000000000000,
+                  0100000000000000000, 040000000000000000, 020000000000000000,
+                  010000000000000000, 04000000000000000, 02000000000000000,
+                  01000000000000000, 0400000000000000, 0200000000000000,
+                  0100000000000000, 040000000000000, 020000000000000,
+                  010000000000000, 04000000000000, 02000000000000,
+                  01000000000000, 0400000000000, 0200000000000, 0100000000000,
+                  040000000000, 020000000000, 010000000000, 04000000000,
+                  02000000000, 01000000000, 0400000000, 0200000000, 0100000000,
+                  040000000, 020000000, 010000000, 04000000, 02000000, 01000000,
+                  0400000, 0200000, 0100000, 040000, 020000, 010000, 04000,
+                  02000, 01000, 0400, 0200, 0100, 040, 020, 010, 04, 02, 01 };
 #endif
 #endif
 
 #if  WORDSIZE == 32
 EXTDEF_CLASS const
-setword bit[] = { 020000000000,010000000000,04000000000,02000000000,
-                  01000000000,0400000000,0200000000,0100000000,040000000,
-                  020000000,010000000,04000000,02000000,01000000,0400000,
-                  0200000,0100000,040000,020000,010000,04000,02000,01000,
-                  0400,0200,0100,040,020,010,04,02,01 };
+setword bit[] = { 020000000000, 010000000000, 04000000000, 02000000000,
+                  01000000000, 0400000000, 0200000000, 0100000000, 040000000,
+                  020000000, 010000000, 04000000, 02000000, 01000000, 0400000,
+                  0200000, 0100000, 040000, 020000, 010000, 04000, 02000, 01000,
+                  0400, 0200, 0100, 040, 020, 010, 04, 02, 01 };
 #endif
 
 #if WORDSIZE == 16
 EXTDEF_CLASS const
-setword bit[] = { 0100000,040000,020000,010000,04000,02000,01000,0400,0200,
-                  0100,040,020,010,04,02,01 };
+setword bit[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
+                  0100, 040, 020, 010, 04, 02, 01 };
 #endif
 
 /*  array giving number of 1-bits in bytes valued 0..255: */
 EXTDEF_CLASS const
-int bytecount[] = { 0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,
-                    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-                    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-                    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-                    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-                    3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-                    3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-                    4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8 };
+int bytecount[] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+                    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+                    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+                    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+                    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+                    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+                    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+                    4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
 
 /* array giving position (1..7) of high-order 1-bit in byte: */
 EXTDEF_CLASS const
-int leftbit[] = { 8,7,6,6,5,5,5,5,4,4,4,4,4,4,4,4,
-                  3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-                  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-                  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+int leftbit[] = { 8, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
+                  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+                  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 /* The following is for C++ programs that read nauty.h.  Compile nauty
@@ -1015,32 +1019,32 @@ int leftbit[] = { 8,7,6,6,5,5,5,5,4,4,4,4,4,4,4,4,
 
 
 extern void alloc_error(char *s);
-extern void breakout(int*,int*,int,int,int,set*,int);
-extern boolean cheapautom(int*,int,boolean,int);
-extern void doref(graph *,int*,int*,int,int*,int*,int*,set *,int*,
-                  void (*)(graph*,int*,int*,int,int*,int*,set*,int*,int,int),
-                  void (*)(graph*,int*,int*,int,int,int,int*,int,boolean,int,int),
-                  int,int,int,boolean,int,int);
-extern void extra_autom(int*,int);
-extern void extra_level(int,int*,int*,int,int,int,int,int,int);
-extern boolean isautom(graph *,int*,boolean,int,int);
+extern void breakout(int*, int*, int, int, int, set*, int);
+extern boolean cheapautom(int*, int, boolean, int);
+extern void doref(graph *, int*, int*, int, int*, int*, int*, set *, int*,
+                  void (*)(graph*, int*, int*, int, int*, int*, set*, int*, int, int),
+                  void (*)(graph*, int*, int*, int, int, int, int*, int, boolean, int, int),
+                  int, int, int, boolean, int, int);
+extern void extra_autom(int*, int);
+extern void extra_level(int, int*, int*, int, int, int, int, int, int);
+extern boolean isautom(graph *, int*, boolean, int, int);
 extern dispatchvec dispatch_graph;
-extern int itos(int,char*);
-extern void fmperm(int*,set*,set*,int,int);
-extern void fmptn(int*,int*,int,set*,set*,int,int);
-extern void longprune(set*,set*,set*,set*,int);
-extern int nextelement(set*,int,int);
-extern int orbjoin(int*,int*,int);
-extern void permset(set*,set*,int,int*);
-extern void putstring(FILE*,char*);
-extern void refine(graph*,int*,int*,int,int*,int*,set*,int*,int,int);
-extern void refine1(graph*,int*,int*,int,int*,int*,set*,int*,int,int);
-extern void shortprune(set*,set*,int);
-extern int testcanlab(graph*,graph*,int*,int*,int,int);
-extern void updatecan(graph*,graph*,int*,int,int,int);
-extern void writeperm(FILE *,int*,boolean,int,int);
+extern int itos(int, char*);
+extern void fmperm(int*, set*, set*, int, int);
+extern void fmptn(int*, int*, int, set*, set*, int, int);
+extern void longprune(set*, set*, set*, set*, int);
+extern int nextelement(set*, int, int);
+extern int orbjoin(int*, int*, int);
+extern void permset(set*, set*, int, int*);
+extern void putstring(FILE*, char*);
+extern void refine(graph*, int*, int*, int, int*, int*, set*, int*, int, int);
+extern void refine1(graph*, int*, int*, int, int*, int*, set*, int*, int, int);
+extern void shortprune(set*, set*, int);
+extern int testcanlab(graph*, graph*, int*, int*, int, int);
+extern void updatecan(graph*, graph*, int*, int, int, int);
+extern void writeperm(FILE *, int*, boolean, int, int);
 extern void nauty_freedyn(void);
-extern void nauty_check(int,int,int,int);
+extern void nauty_check(int, int, int, int);
 extern void nautil_freedyn(void);
 extern void naugraph_freedyn(void);
 
@@ -1116,7 +1120,7 @@ extern void naugraph_freedyn(void);
 /* macros for hash-codes: */
 /* Don't use NAUTY_INFINITY here as that would make the canonical
  * labelling depend on whether BIGNAUTY is in operation */
-#define MASH(l,i) ((((l) ^ 065435) + (i)) & 077777)
+#define MASH(l, i) ((((l) ^ 065435) + (i)) & 077777)
 /* : expression whose long value depends only on long l and int/long i.
      Anything goes, preferably non-commutative. */
 
@@ -1178,7 +1182,6 @@ int nextelement(set *set1, int m, int pos)
     setwd = set1[w];
   }
 #endif
-
 }
 
 
@@ -1198,23 +1201,23 @@ void permset(set *set1, set *set2, int m, int *perm)
   int pos, b;
 
 #if  MAXM == 1
-  EMPTYSET(set2,m);
+  EMPTYSET(set2, m);
   setw = set1[0];
   while (setw != 0) {
-    TAKEBIT(b,setw);
+    TAKEBIT(b, setw);
     pos = perm[b];
-    ADDELEMENT(set2,pos);
+    ADDELEMENT(set2, pos);
   }
 #else
   int w;
 
-  EMPTYSET(set2,m);
+  EMPTYSET(set2, m);
   for (w = 0; w < m; ++w) {
     setw = set1[w];
     while (setw != 0) {
-      TAKEBIT(b,setw);
+      TAKEBIT(b, setw);
       pos = perm[TIMESWORDSIZE(w) + b];
-      ADDELEMENT(set2,pos);
+      ADDELEMENT(set2, pos);
     }
   }
 #endif
@@ -1232,7 +1235,7 @@ void
 putstring(FILE *f, char *s)
 {
   while (*s != '\0') {
-    PUTC(*s,f);
+    PUTC(*s, f);
     ++s;
   }
 }
@@ -1252,7 +1255,7 @@ putstring(FILE *f, char *s)
 int
 itos(int i, char *s)
 {
-  int digit,j,k;
+  int digit, j, k;
   char c;
   int ans;
 
@@ -1301,7 +1304,7 @@ itos(int i, char *s)
 int
 orbjoin(int *orbits, int *map, int n)
 {
-  int i,j1,j2;
+  int i, j1, j2;
 
   for (i = 0; i < n; ++i)
     if (map[i] != i) {
@@ -1337,7 +1340,7 @@ orbjoin(int *orbits, int *map, int n)
 
 void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
 {
-  int i,k,l,curlen,intlen;
+  int i, k, l, curlen, intlen;
   char s[30];
 
   /* CONDNL(x) writes end-of-line and 3 spaces if x characters
@@ -1355,7 +1358,7 @@ void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
       fputs(s, f);
       curlen += intlen + 1;
     }
-    PUTC('\n',f);
+    PUTC('\n', f);
   } else {
     for (i = n; --i >= 0; ) workperm0[i] = 0;
 
@@ -1365,7 +1368,7 @@ void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
         sprintf(s, "%d", l + labelorg);
         intlen = strlen(s);
         if (curlen > 3) CONDNL(2 * intlen + 4);
-        PUTC('(',f);
+        PUTC('(', f);
         do {
           fputs(s, f);
           curlen += intlen + 1;
@@ -1376,16 +1379,16 @@ void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
             sprintf(s, "%d", l + labelorg);
             intlen = strlen(s);
             CONDNL(intlen + 2);
-            PUTC(' ',f);
+            PUTC(' ', f);
           }
         } while (l != i);
-        PUTC(')',f);
+        PUTC(')', f);
         ++curlen;
       }
     }
 
     if (curlen == 0) fputs("(1)\n", f);
-    else PUTC('\n',f);
+    else PUTC('\n', f);
   }
 }
 
@@ -1403,21 +1406,21 @@ void writeperm(FILE *f, int *perm, boolean cartesian, int linelength, int n)
 
 void fmperm(int *perm, set *fix, set *mcr, int m, int n)
 {
-  int i,k,l;
+  int i, k, l;
 
 #if !MAXN
   DYNALLOC1(int, workperm0, workperm0_sz, n, "writeperm");
 #endif
 
-  EMPTYSET(fix,m);
-  EMPTYSET(mcr,m);
+  EMPTYSET(fix, m);
+  EMPTYSET(mcr, m);
 
   for (i = n; --i >= 0; ) workperm0[i] = 0;
 
   for (i = 0; i < n; ++i)
     if (perm[i] == i) {
-      ADDELEMENT(fix,i);
-      ADDELEMENT(mcr,i);
+      ADDELEMENT(fix, i);
+      ADDELEMENT(mcr, i);
     } else if (workperm0[i] == 0) {
       l = i;
       do {
@@ -1426,7 +1429,7 @@ void fmperm(int *perm, set *fix, set *mcr, int m, int n)
         workperm0[k] = 1;
       } while (l != i);
 
-      ADDELEMENT(mcr,i);
+      ADDELEMENT(mcr, i);
     }
 }
 
@@ -1445,21 +1448,21 @@ void fmperm(int *perm, set *fix, set *mcr, int m, int n)
 
 void fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int n)
 {
-  int i,lmin;
+  int i, lmin;
 
-  EMPTYSET(fix,m);
-  EMPTYSET(mcr,m);
+  EMPTYSET(fix, m);
+  EMPTYSET(mcr, m);
 
   for (i = 0; i < n; ++i)
     if (ptn[i] <= level) {
-      ADDELEMENT(fix,lab[i]);
-      ADDELEMENT(mcr,lab[i]);
+      ADDELEMENT(fix, lab[i]);
+      ADDELEMENT(mcr, lab[i]);
     } else {
       lmin = lab[i];
       do
         if (lab[++i] < lmin) lmin = lab[i];
       while (ptn[i] > level);
-      ADDELEMENT(mcr,lmin);
+      ADDELEMENT(mcr, lmin);
     }
 }
 
@@ -1495,7 +1498,7 @@ void fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int n)
  *
  */
 
-#define SORT_MEDIAN_OF_3(a,b,c) \
+#define SORT_MEDIAN_OF_3(a, b, c) \
   ((a) <= (b) ? ((b) <= (c) ? (b) : (c) <= (a) ? (a) : (c)) \
    : ((a) <= (c) ? (a) : (c) <= (b) ? (b) : (c)))
 
@@ -1515,19 +1518,19 @@ void fmptn(int *lab, int *ptn, int level, set *fix, set *mcr, int m, int n)
 #define SORT_MINMEDIAN9 320
 #endif
 
-#define SORT_SWAP1(x,y) tmp1 = x; x = y; y = tmp1;
-#define SORT_SWAP2(x,y) tmp2 = x; x = y; y = tmp2;
+#define SORT_SWAP1(x, y) tmp1 = x; x = y; y = tmp1;
+#define SORT_SWAP2(x, y) tmp2 = x; x = y; y = tmp2;
 
 /*******************************************************************/
 
 static void
 sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
 {
-  int i,j;
-  int a,d,ba,dc,s,nn;
-  SORT_TYPE2 tmp2,*y0,*ya,*yb,*yc,*yd,*yl,*yh;
-  SORT_TYPE1 tmp1,v,v1,v2,v3;
-  SORT_TYPE1 *x0,*xa,*xb,*xc,*xd,*xh,*xl;
+  int i, j;
+  int a, d, ba, dc, s, nn;
+  SORT_TYPE2 tmp2, *y0, *ya, *yb, *yc, *yd, *yl, *yh;
+  SORT_TYPE1 tmp1, v, v1, v2, v3;
+  SORT_TYPE1 *x0, *xa, *xb, *xc, *xd, *xh, *xl;
   struct { SORT_TYPE1 *addr; int len; } stack[40];
   int top;
 
@@ -1560,12 +1563,12 @@ sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
     }
 
     if (nn < SORT_MINMEDIAN9)
-      v = SORT_MEDIAN_OF_3(x0[0],x0[nn / 2],x0[nn - 1]);
+      v = SORT_MEDIAN_OF_3(x0[0], x0[nn / 2], x0[nn - 1]);
     else {
-      v1 = SORT_MEDIAN_OF_3(x0[0],x0[1],x0[2]);
-      v2 = SORT_MEDIAN_OF_3(x0[nn / 2 - 1],x0[nn / 2],x0[nn / 2 + 1]);
-      v3 = SORT_MEDIAN_OF_3(x0[nn - 3],x0[nn - 2],x0[nn - 1]);
-      v = SORT_MEDIAN_OF_3(v1,v2,v3);
+      v1 = SORT_MEDIAN_OF_3(x0[0], x0[1], x0[2]);
+      v2 = SORT_MEDIAN_OF_3(x0[nn / 2 - 1], x0[nn / 2], x0[nn / 2 + 1]);
+      v3 = SORT_MEDIAN_OF_3(x0[nn - 3], x0[nn - 2], x0[nn - 1]);
+      v = SORT_MEDIAN_OF_3(v1, v2, v3);
     }
 
     xa = xb = x0;  xc = xd = x0 + (nn - 1);
@@ -1574,20 +1577,20 @@ sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
       while (xb <= xc && *xb <= v) {
         if (*xb == v) {
           *xb = *xa; *xa = v; ++xa;
-          SORT_SWAP2(*ya,*yb); ++ya;
+          SORT_SWAP2(*ya, *yb); ++ya;
         }
         ++xb; ++yb;
       }
       while (xc >= xb && *xc >= v) {
         if (*xc == v) {
           *xc = *xd; *xd = v; --xd;
-          SORT_SWAP2(*yc,*yd); --yd;
+          SORT_SWAP2(*yc, *yd); --yd;
         }
         --xc; --yc;
       }
       if (xb > xc) break;
-      SORT_SWAP1(*xb,*xc);
-      SORT_SWAP2(*yb,*yc);
+      SORT_SWAP1(*xb, *xc);
+      SORT_SWAP2(*yb, *yc);
       ++xb; ++yb;
       --xc; --yc;
     }
@@ -1597,14 +1600,14 @@ sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
     if (ba > a) s = a; else s = ba;
     for (xl = x0, xh = xb - s, yl = y0, yh = yb - s; s > 0; --s) {
       *xl = *xh; *xh = v; ++xl; ++xh;
-      SORT_SWAP2(*yl,*yh); ++yl; ++yh;
+      SORT_SWAP2(*yl, *yh); ++yl; ++yh;
     }
     d = xd - x0;
     dc = xd - xc;
     if (dc > nn - 1 - d) s = nn - 1 - d; else s = dc;
     for (xl = xb, xh = x0 + (nn - s), yl = yb, yh = y0 + (nn - s); s > 0; --s) {
       *xh = *xl; *xl = v; ++xl; ++xh;
-      SORT_SWAP2(*yl,*yh); ++yl; ++yh;
+      SORT_SWAP2(*yl, *yh); ++yl; ++yh;
     }
 
     if (ba > dc) {
@@ -1658,15 +1661,15 @@ sortparallel(SORT_TYPE1 *x, SORT_TYPE2 *y, int n)
 *****************************************************************************/
 
 void doref(graph *g, int *lab, int *ptn, int level, int *numcells,
-    int *qinvar, int *invar, set *active, int *code,
-    void (*refproc)(graph*,int*,int*,int,int*,int*,set*,int*,int,int),
-    void (*invarproc)(graph*,int*,int*,int,int,int,int*,
-                      int,boolean,int,int),
-    int mininvarlev, int maxinvarlev, int invararg,
-    boolean digraph, int m, int n)
+           int *qinvar, int *invar, set *active, int *code,
+           void (*refproc)(graph*, int*, int*, int, int*, int*, set*, int*, int, int),
+           void (*invarproc)(graph*, int*, int*, int, int, int, int*,
+                             int, boolean, int, int),
+           int mininvarlev, int maxinvarlev, int invararg,
+           boolean digraph, int m, int n)
 {
   int pw;
-  int i,cell1,cell2,nc,tvpos,minlev,maxlev;
+  int i, cell1, cell2, nc, tvpos, minlev, maxlev;
   long longcode;
   boolean same;
 
@@ -1674,17 +1677,17 @@ void doref(graph *g, int *lab, int *ptn, int level, int *numcells,
   DYNALLOC1(int, workperm0, workperm0_sz, n, "doref");
 #endif
 
-  if ((tvpos = nextelement(active,M,-1)) < 0) tvpos = 0;
+  if ((tvpos = nextelement(active, M, -1)) < 0) tvpos = 0;
 
-  (*refproc)(g,lab,ptn,level,numcells,invar,active,code,M,n);
+  (*refproc)(g, lab, ptn, level, numcells, invar, active, code, M, n);
 
   minlev = (mininvarlev < 0 ? -mininvarlev : mininvarlev);
   maxlev = (maxinvarlev < 0 ? -maxinvarlev : maxinvarlev);
   if (invarproc != NULL && *numcells < n
       && level >= minlev && level <= maxlev) {
-    (*invarproc)(g,lab,ptn,level,*numcells,tvpos,invar,invararg,
-                 digraph,M,n);
-    EMPTYSET(active,m);
+    (*invarproc)(g, lab, ptn, level, *numcells, tvpos, invar, invararg,
+                 digraph, M, n);
+    EMPTYSET(active, m);
     for (i = n; --i >= 0; ) workperm0[i] = invar[lab[i]];
     nc = *numcells;
     for (cell1 = 0; cell1 < n; cell1 = cell2 + 1) {
@@ -1701,15 +1704,15 @@ void doref(graph *g, int *lab, int *ptn, int level, int *numcells,
         if (workperm0[i] != workperm0[i - 1]) {
           ptn[i - 1] = level;
           ++*numcells;
-          ADDELEMENT(active,i);
+          ADDELEMENT(active, i);
         }
     }
 
     if (*numcells > nc) {
       *qinvar = 2;
       longcode = *code;
-      (*refproc)(g,lab,ptn,level,numcells,invar,active,code,M,n);
-      longcode = MASH(longcode,*code);
+      (*refproc)(g, lab, ptn, level, numcells, invar, active, code, M, n);
+      longcode = MASH(longcode, *code);
       *code = CLEANUP(longcode);
     } else
       *qinvar = 1;
@@ -1737,21 +1740,21 @@ void doref(graph *g, int *lab, int *ptn, int level, int *numcells,
 *****************************************************************************/
 
 void maketargetcell(graph *g, int *lab, int *ptn, int level, set *tcell,
-    int *tcellsize, int *cellpos, int tc_level,
-    int hint,
-    int (*targetcell)(graph*,int*,int*,int,int,int,int),
-    int m, int n)
+                    int *tcellsize, int *cellpos, int tc_level,
+                    int hint,
+                    int (*targetcell)(graph*, int*, int*, int, int, int, int),
+                    int m, int n)
 {
-  int i,j,k;
+  int i, j, k;
 
-  i = (*targetcell)(g,lab,ptn,level,tc_level,hint,n);
+  i = (*targetcell)(g, lab, ptn, level, tc_level, hint, n);
   for (j = i + 1; ptn[j] > level; ++j) {
   }
 
   *tcellsize = j - i + 1;
 
-  EMPTYSET(tcell,m);
-  for (k = i; k <= j; ++k) ADDELEMENT(tcell,lab[k]);
+  EMPTYSET(tcell, m);
+  for (k = i; k <= j; ++k) ADDELEMENT(tcell, lab[k]);
 
   *cellpos = i;
 }
@@ -1770,7 +1773,7 @@ void shortprune(set *set1, set *set2, int m)
 {
   int i;
 
-  for (i = 0; i < M; ++i) INTERSECT(set1[i],set2[i]);
+  for (i = 0; i < M; ++i) INTERSECT(set1[i], set2[i]);
 }
 
 
@@ -1791,10 +1794,10 @@ void
 breakout(int *lab, int *ptn, int level, int tc, int tv,
          set *active, int m)
 {
-  int i,prev,next;
+  int i, prev, next;
 
-  EMPTYSET(active,m);
-  ADDELEMENT(active,tc);
+  EMPTYSET(active, m);
+  ADDELEMENT(active, tc);
 
   i = tc;
   prev = tv;
@@ -1827,11 +1830,11 @@ void longprune(set *tcell, set *fix, set *bottom, set *top, int m)
 
   while (bottom < top) {
     for (i = 0; i < M; ++i)
-      if (NOTSUBSET(fix[i],bottom[i])) break;
+      if (NOTSUBSET(fix[i], bottom[i])) break;
     bottom += M;
 
     if (i == M)
-      for (i = 0; i < M; ++i) INTERSECT(tcell[i],bottom[i]);
+      for (i = 0; i < M; ++i) INTERSECT(tcell[i], bottom[i]);
     bottom += M;
   }
 }
@@ -1850,13 +1853,13 @@ void longprune(set *tcell, set *fix, set *bottom, set *top, int m)
 void writegroupsize(FILE *f, double gpsize1, int gpsize2)
 {
   if (gpsize2 == 0)
-    fprintf(f,"%.0f",gpsize1 + 0.1);
+    fprintf(f, "%.0f", gpsize1 + 0.1);
   else {
     while (gpsize1 >= 10.0) {
       gpsize1 /= 10.0;
       ++gpsize2;
     }
-    fprintf(f,"%14.12fe%d",gpsize1,gpsize2);
+    fprintf(f, "%14.12fe%d", gpsize1, gpsize2);
   }
 }
 
@@ -1870,7 +1873,7 @@ void writegroupsize(FILE *f, double gpsize1, int gpsize2)
 
 void alloc_error(char *s)
 {
-  fprintf(ERRFILE,"Dynamic allocation failed: %s\n",s);
+  fprintf(ERRFILE, "Dynamic allocation failed: %s\n", s);
   exit(2);
 }
 
@@ -1885,7 +1888,7 @@ void alloc_error(char *s)
 void nautil_freedyn(void)
 {
 #if !MAXN
-  DYNFREE(workperm0,workperm0_sz);
+  DYNFREE(workperm0, workperm0_sz);
 #endif
 }
 
@@ -1987,27 +1990,27 @@ static void writemarker(int, int, int, int, int, int);
 #define OPTCALL(proc) if (proc != NULL) (*proc)
 
 /* copies of some of the options: */
-static boolean getcanon,digraph,writeautoms,domarkers,cartesian;
+static boolean getcanon, digraph, writeautoms, domarkers, cartesian;
 #ifdef NAU_SCHREIER
 static boolean doschreier;
 #endif
-static int linelength,tc_level,mininvarlevel,maxinvarlevel,invararg;
-static void (*usernodeproc)(graph*,int*,int*,int,int,int,int,int,int);
-static void (*userautomproc)(int,int*,int*,int,int,int);
+static int linelength, tc_level, mininvarlevel, maxinvarlevel, invararg;
+static void (*usernodeproc)(graph*, int*, int*, int, int, int, int, int, int);
+static void (*userautomproc)(int, int*, int*, int, int, int);
 static void (*userlevelproc)
-(int*,int*,int,int*,statsblk *,int,int,int,int,int,int);
+(int*, int*, int, int*, statsblk *, int, int, int, int, int, int);
 static void (*invarproc)
-(graph *,int*,int*,int,int,int,int*,int,boolean,int,int);
+(graph *, int*, int*, int, int, int, int*, int, boolean, int, int);
 static FILE *outfile;
 static dispatchvec dispatch;
 
 /* local versions of some of the arguments: */
-static int m,n;
-static graph *g,*canong;
+static int m, n;
+static graph *g, *canong;
 static int *orbits;
 static statsblk *stats;
 /* temporary versions of some stats: */
-static unsigned long invapplics,invsuccesses;
+static unsigned long invapplics, invsuccesses;
 static int invarsuclevel;
 
 /* working variables: <the "bsf leaf" is the leaf which is best guess so
@@ -2036,17 +2039,17 @@ static int gca_first, /* level of greatest common ancestor of
 static boolean needshortprune;  /* used to flag calls to shortprune */
 
 #if !MAXN
-DYNALLSTAT(set,defltwork,defltwork_sz);
+DYNALLSTAT(set, defltwork, defltwork_sz);
 /* cz: this variable must be renamed to avoid the conflict
  * with the variable of the same name in nautil.h */
 DYNALLSTAT(int, workperm1, workperm1_sz);
-DYNALLSTAT(set,fixedpts,fixedpts_sz);
-DYNALLSTAT(int,firstlab,firstlab_sz);
-DYNALLSTAT(int,canonlab,canonlab_sz);
-DYNALLSTAT(short,firstcode,firstcode_sz);
-DYNALLSTAT(short,canoncode,canoncode_sz);
-DYNALLSTAT(int,firsttc,firsttc_sz);
-DYNALLSTAT(set,active,active_sz);
+DYNALLSTAT(set, fixedpts, fixedpts_sz);
+DYNALLSTAT(int, firstlab, firstlab_sz);
+DYNALLSTAT(int, canonlab, canonlab_sz);
+DYNALLSTAT(short, firstcode, firstcode_sz);
+DYNALLSTAT(short, canoncode, canoncode_sz);
+DYNALLSTAT(int, firsttc, firsttc_sz);
+DYNALLSTAT(set, active, active_sz);
 
 /* In the dynamically allocated case (MAXN=0), each level of recursion
    needs one set (tcell) to represent the target cell.  This is
@@ -2057,7 +2060,7 @@ DYNALLSTAT(set,active,active_sz);
    tcnodes and tcells are kept between calls to nauty, except that
    they are freed and reallocated if m gets bigger than alloc_m.  */
 
-static tcnode tcnode0 = { NULL,NULL };
+static tcnode tcnode0 = { NULL, NULL };
 static int alloc_m = 0;
 
 #else
@@ -2076,8 +2079,8 @@ static set active[MAXM];     /* used to contain index to cells now
                                     active for refinement purposes */
 #endif
 
-static set *workspace,*worktop;  /* first and just-after-last
-                                    addresses of work area to hold automorphism data */
+static set *workspace, *worktop;  /* first and just-after-last
+                                     addresses of work area to hold automorphism data */
 static set *fmptr;                   /* pointer into workspace */
 
 #ifdef NAU_SCHREIER
@@ -2140,14 +2143,14 @@ void nauty(graph * RESTRICT g_arg,
   int numcells;
   int initstatus;
 #if !MAXN
-  tcnode *tcp,*tcq;
+  tcnode *tcp, *tcq;
 #endif
 
   /* determine dispatch vector */
 
   if (options->dispatch == NULL) {
-    fprintf(ERRFILE,">E nauty: null dispatch vector\n");
-    fprintf(ERRFILE,"Maybe you need to recompile\n");
+    fprintf(ERRFILE, ">E nauty: null dispatch vector\n");
+    fprintf(ERRFILE, "Maybe you need to recompile\n");
     exit(1);
   } else
     dispatch = *(options->dispatch);
@@ -2159,7 +2162,7 @@ void nauty(graph * RESTRICT g_arg,
 
   if (dispatch.refine == NULL || dispatch.updatecan == NULL
       || dispatch.targetcell == NULL || dispatch.cheapautom == NULL) {
-    fprintf(ERRFILE,">E bad dispatch vector\n");
+    fprintf(ERRFILE, ">E bad dispatch vector\n");
     exit(1);
   }
 
@@ -2168,26 +2171,26 @@ void nauty(graph * RESTRICT g_arg,
 #if !MAXN
   if (m_arg > NAUTY_INFINITY / WORDSIZE + 1) {
     stats_arg->errstatus = MTOOBIG;
-    fprintf(ERRFILE,"nauty: need m <= %d, but m=%d\n\n",
-            NAUTY_INFINITY / WORDSIZE + 1,m_arg);
+    fprintf(ERRFILE, "nauty: need m <= %d, but m=%d\n\n",
+            NAUTY_INFINITY / WORDSIZE + 1, m_arg);
     return;
   }
   if (n_arg > NAUTY_INFINITY - 2 || n_arg > WORDSIZE * m_arg) {
     stats_arg->errstatus = NTOOBIG;
-    fprintf(ERRFILE,"nauty: need n <= min(%d,%d*m), but n=%d\n\n",
-            NAUTY_INFINITY - 2,WORDSIZE,n_arg);
+    fprintf(ERRFILE, "nauty: need n <= min(%d,%d*m), but n=%d\n\n",
+            NAUTY_INFINITY - 2, WORDSIZE, n_arg);
     return;
   }
 #else
   if (m_arg > MAXM) {
     stats_arg->errstatus = MTOOBIG;
-    fprintf(ERRFILE,"nauty: need m <= %d\n\n",MAXM);
+    fprintf(ERRFILE, "nauty: need m <= %d\n\n", MAXM);
     return;
   }
   if (n_arg > MAXN || n_arg > WORDSIZE * m_arg) {
     stats_arg->errstatus = NTOOBIG;
     fprintf(ERRFILE,
-            "nauty: need n <= min(%d,%d*m)\n\n",MAXM,WORDSIZE);
+            "nauty: need n <= min(%d,%d*m)\n\n", MAXM, WORDSIZE);
     return;
   }
 #endif
@@ -2212,19 +2215,19 @@ void nauty(graph * RESTRICT g_arg,
   m = m_arg;
   n = n_arg;
 
-  nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
-  OPTCALL(dispatch.check) (WORDSIZE,m,n,NAUTYVERSIONID);
+  nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
+  OPTCALL(dispatch.check) (WORDSIZE, m, n, NAUTYVERSIONID);
 
 #if !MAXN
-  DYNALLOC1(set,defltwork,defltwork_sz,2 * m,"nauty");
-  DYNALLOC1(set,fixedpts,fixedpts_sz,m,"nauty");
-  DYNALLOC1(set,active,active_sz,m,"nauty");
+  DYNALLOC1(set, defltwork, defltwork_sz, 2 * m, "nauty");
+  DYNALLOC1(set, fixedpts, fixedpts_sz, m, "nauty");
+  DYNALLOC1(set, active, active_sz, m, "nauty");
   DYNALLOC1(int, workperm1, workperm1_sz, n, "nauty");
-  DYNALLOC1(int,firstlab,firstlab_sz,n,"nauty");
-  DYNALLOC1(int,canonlab,canonlab_sz,n,"nauty");
-  DYNALLOC1(short,firstcode,firstcode_sz,n + 2,"nauty");
-  DYNALLOC1(short,canoncode,canoncode_sz,n + 2,"nauty");
-  DYNALLOC1(int,firsttc,firsttc_sz,n + 2,"nauty");
+  DYNALLOC1(int, firstlab, firstlab_sz, n, "nauty");
+  DYNALLOC1(int, canonlab, canonlab_sz, n, "nauty");
+  DYNALLOC1(short, firstcode, firstcode_sz, n + 2, "nauty");
+  DYNALLOC1(short, canoncode, canoncode_sz, n + 2, "nauty");
+  DYNALLOC1(int, firsttc, firsttc_sz, n + 2, "nauty");
   if (m > alloc_m) {
     tcp = tcnode0.next;
     while (tcp != NULL) {
@@ -2249,7 +2252,7 @@ void nauty(graph * RESTRICT g_arg,
   cartesian = options->cartesian;
 #ifdef NAU_SCHREIER
   doschreier = options->schreier;
-  if (doschreier) schreier_check(WORDSIZE,m,n,NAUTYVERSIONID);
+  if (doschreier) schreier_check(WORDSIZE, m, n, NAUTYVERSIONID);
 #endif
   linelength = options->linelength;
   if (digraph) tc_level = 0;
@@ -2286,8 +2289,8 @@ void nauty(graph * RESTRICT g_arg,
       ptn[i] = NAUTY_INFINITY;
     }
     ptn[n - 1] = 0;
-    EMPTYSET(active,m);
-    ADDELEMENT(active,0);
+    EMPTYSET(active, m);
+    ADDELEMENT(active, 0);
     numcells = 1;
   } else {
     ptn[n - 1] = 0;
@@ -2296,9 +2299,9 @@ void nauty(graph * RESTRICT g_arg,
       if (ptn[i] != 0) ptn[i] = NAUTY_INFINITY;
       else ++numcells;
     if (active_arg == NULL) {
-      EMPTYSET(active,m);
+      EMPTYSET(active, m);
       for (i = 0; i < n; ++i) {
-        ADDELEMENT(active,i);
+        ADDELEMENT(active, i);
         while (ptn[i]) ++i;
       }
     } else
@@ -2307,8 +2310,8 @@ void nauty(graph * RESTRICT g_arg,
 
   g = canong = NULL;
   initstatus = 0;
-  OPTCALL(dispatch.init) (g_arg,&g,canong_arg,&canong,
-                          lab,ptn,active,options,&initstatus,m,n);
+  OPTCALL(dispatch.init) (g_arg, &g, canong_arg, &canong,
+                          lab, ptn, active, options, &initstatus, m, n);
   if (initstatus) {
     stats->errstatus = initstatus;
     return;
@@ -2318,7 +2321,7 @@ void nauty(graph * RESTRICT g_arg,
   if (canong == NULL) canong = canong_arg;
 
 #ifdef NAU_SCHREIER
-  if (doschreier) newgroup(&gp,&gens,n);
+  if (doschreier) newgroup(&gp, &gens, n);
 #endif
 
   for (i = 0; i < n; ++i) orbits[i] = i;
@@ -2330,7 +2333,7 @@ void nauty(graph * RESTRICT g_arg,
   stats->tctotal = 0;
   stats->canupdates = 0;
   stats->numorbits = n;
-  EMPTYSET(fixedpts,m);
+  EMPTYSET(fixedpts, m);
   noncheaplevel = 1;
   eqlev_canon = -1;         /* needed even if !getcanon */
 
@@ -2350,14 +2353,14 @@ void nauty(graph * RESTRICT g_arg,
   invapplics = invsuccesses = 0;
 
 #if !MAXN
-  firstpathnode0(lab,ptn,1,numcells,&tcnode0);
+  firstpathnode0(lab, ptn, 1, numcells, &tcnode0);
 #else
-  firstpathnode(lab,ptn,1,numcells);
+  firstpathnode(lab, ptn, 1, numcells);
 #endif
 
   {
     if (getcanon) {
-      (*dispatch.updatecan)(g,canong,canonlab,samerows,M,n);
+      (*dispatch.updatecan)(g, canong, canonlab, samerows, M, n);
       for (i = 0; i < n; ++i) lab[i] = canonlab[i];
     }
     stats->invarsuclevel =
@@ -2373,12 +2376,12 @@ void nauty(graph * RESTRICT g_arg,
     nauty_freedyn();
   }
 #endif
-  OPTCALL(dispatch.cleanup) (g_arg,&g,canong_arg,&canong,
-                             lab,ptn,options,stats,m,n);
+  OPTCALL(dispatch.cleanup) (g_arg, &g, canong_arg, &canong,
+                             lab, ptn, options, stats, m, n);
 
 #ifdef NAU_SCHREIER
   if (doschreier) {
-    freeschreier(&gp,&gens);
+    freeschreier(&gp, &gens);
     if (n >= 320) schreier_freedyn();
   }
 #endif
@@ -2414,16 +2417,16 @@ firstpathnode(int *lab, int *ptn, int level, int numcells)
 #endif
 {
   int tv;
-  int tv1,index,rtnlevel,tcellsize,tc,childcount,qinvar,refcode;
+  int tv1, index, rtnlevel, tcellsize, tc, childcount, qinvar, refcode;
 #if !MAXN
   set *tcell;
   tcnode *tcnode_this;
 
   tcnode_this = tcnode_parent->next;
   if (tcnode_this == NULL) {
-    if ((tcnode_this = (tcnode*)ALLOCS(1,sizeof(tcnode))) == NULL ||
+    if ((tcnode_this = (tcnode*)ALLOCS(1, sizeof(tcnode))) == NULL ||
         (tcnode_this->tcellptr
-           = (set*)ALLOCS(alloc_m,sizeof(set))) == NULL)
+           = (set*)ALLOCS(alloc_m, sizeof(set))) == NULL)
       alloc_error("tcell");
     tcnode_parent->next = tcnode_this;
     tcnode_this->next = NULL;
@@ -2436,9 +2439,9 @@ firstpathnode(int *lab, int *ptn, int level, int numcells)
   ++stats->numnodes;
 
   /* refine partition : */
-  doref(g,lab,ptn,level,&numcells,&qinvar,workperm1,
-        active,&refcode,dispatch.refine,invarproc,
-        mininvarlevel,maxinvarlevel,invararg,digraph,M,n);
+  doref(g, lab, ptn, level, &numcells, &qinvar, workperm1,
+        active, &refcode, dispatch.refine, invarproc,
+        mininvarlevel, maxinvarlevel, invararg, digraph, M, n);
   firstcode[level] = (short)refcode;
   if (qinvar > 0) {
     ++invapplics;
@@ -2454,74 +2457,74 @@ firstpathnode(int *lab, int *ptn, int level, int numcells)
   if (numcells != n) {
     /* locate new target cell, setting tc to its position in lab, tcell
                      to its contents, and tcellsize to its size: */
-    maketargetcell(g,lab,ptn,level,tcell,&tcellsize,
-                   &tc,tc_level,-1,dispatch.targetcell,M,n);
+    maketargetcell(g, lab, ptn, level, tcell, &tcellsize,
+                   &tc, tc_level, -1, dispatch.targetcell, M, n);
     stats->tctotal += tcellsize;
   }
   firsttc[level] = tc;
 
   /* optionally call user-defined node examination procedure: */
   OPTCALL(usernodeproc)
-    (g,lab,ptn,level,numcells,tc,(int)firstcode[level],M,n);
+    (g, lab, ptn, level, numcells, tc, (int)firstcode[level], M, n);
 
   if (numcells == n) {      /* found first leaf? */
-    firstterminal(lab,level);
-    OPTCALL(userlevelproc) (lab,ptn,level,orbits,stats,0,1,1,n,0,n);
+    firstterminal(lab, level);
+    OPTCALL(userlevelproc) (lab, ptn, level, orbits, stats, 0, 1, 1, n, 0, n);
     return level - 1;
   }
 
   if (noncheaplevel >= level
-      && !(*dispatch.cheapautom)(ptn,level,digraph,n))
+      && !(*dispatch.cheapautom)(ptn, level, digraph, n))
     noncheaplevel = level + 1;
 
   /* use the elements of the target cell to produce the children: */
   index = 0;
-  for (tv1 = tv = nextelement(tcell,M,-1); tv >= 0;
-       tv = nextelement(tcell,M,tv)) {
+  for (tv1 = tv = nextelement(tcell, M, -1); tv >= 0;
+       tv = nextelement(tcell, M, tv)) {
     if (orbits[tv] == tv) {     /* ie, not equiv to previous child */
-      breakout(lab,ptn,level + 1,tc,tv,active,M);
-      ADDELEMENT(fixedpts,tv);
+      breakout(lab, ptn, level + 1, tc, tv, active, M);
+      ADDELEMENT(fixedpts, tv);
       cosetindex = tv;
       if (tv == tv1) {
 #if !MAXN
-        rtnlevel = firstpathnode0(lab,ptn,level + 1,numcells + 1,
+        rtnlevel = firstpathnode0(lab, ptn, level + 1, numcells + 1,
                                   tcnode_this);
 #else
-        rtnlevel = firstpathnode(lab,ptn,level + 1,numcells + 1);
+        rtnlevel = firstpathnode(lab, ptn, level + 1, numcells + 1);
 #endif
         childcount = 1;
         gca_first = level;
         stabvertex = tv1;
       } else {
 #if !MAXN
-        rtnlevel = othernode0(lab,ptn,level + 1,numcells + 1,
+        rtnlevel = othernode0(lab, ptn, level + 1, numcells + 1,
                               tcnode_this);
 #else
-        rtnlevel = othernode(lab,ptn,level + 1,numcells + 1);
+        rtnlevel = othernode(lab, ptn, level + 1, numcells + 1);
 #endif
         ++childcount;
       }
-      DELELEMENT(fixedpts,tv);
+      DELELEMENT(fixedpts, tv);
       if (rtnlevel < level)
         return rtnlevel;
       if (needshortprune) {
         needshortprune = FALSE;
-        shortprune(tcell,fmptr - M,M);
+        shortprune(tcell, fmptr - M, M);
       }
-      recover(ptn,level);
+      recover(ptn, level);
     }
     if (orbits[tv] == tv1)      /* ie, in same orbit as tv1 */
       ++index;
   }
-  MULTIPLY(stats->grpsize1,stats->grpsize2,index);
+  MULTIPLY(stats->grpsize1, stats->grpsize2, index);
 
   if (tcellsize == index && allsamelevel == level + 1)
     --allsamelevel;
 
   if (domarkers)
-    writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);
-  OPTCALL(userlevelproc) (lab,ptn,level,orbits,stats,tv1,index,tcellsize,
-                          numcells,childcount,n);
+    writemarker(level, tv1, index, tcellsize, stats->numorbits, numcells);
+  OPTCALL(userlevelproc) (lab, ptn, level, orbits, stats, tv1, index, tcellsize,
+                          numcells, childcount, n);
   return level - 1;
 }
 
@@ -2547,7 +2550,7 @@ othernode(int *lab, int *ptn, int level, int numcells)
 #endif
 {
   int tv;
-  int tv1,refcode,rtnlevel,tcellsize,tc,qinvar;
+  int tv1, refcode, rtnlevel, tcellsize, tc, qinvar;
   short code;
 #if !MAXN
   set *tcell;
@@ -2555,9 +2558,9 @@ othernode(int *lab, int *ptn, int level, int numcells)
 
   tcnode_this = tcnode_parent->next;
   if (tcnode_this == NULL) {
-    if ((tcnode_this = (tcnode*)ALLOCS(1,sizeof(tcnode))) == NULL ||
+    if ((tcnode_this = (tcnode*)ALLOCS(1, sizeof(tcnode))) == NULL ||
         (tcnode_this->tcellptr
-           = (set*)ALLOCS(alloc_m,sizeof(set))) == NULL)
+           = (set*)ALLOCS(alloc_m, sizeof(set))) == NULL)
       alloc_error("tcell");
     tcnode_parent->next = tcnode_this;
     tcnode_this->next = NULL;
@@ -2570,9 +2573,9 @@ othernode(int *lab, int *ptn, int level, int numcells)
   ++stats->numnodes;
 
   /* refine partition : */
-  doref(g,lab,ptn,level,&numcells,&qinvar,workperm1,active,
-        &refcode,dispatch.refine,invarproc,mininvarlevel,maxinvarlevel,
-        invararg,digraph,M,n);
+  doref(g, lab, ptn, level, &numcells, &qinvar, workperm1, active,
+        &refcode, dispatch.refine, invarproc, mininvarlevel, maxinvarlevel,
+        invararg, digraph, M, n);
   code = (short)refcode;
   if (qinvar > 0) {
     ++invapplics;
@@ -2605,57 +2608,57 @@ othernode(int *lab, int *ptn, int level, int numcells)
   if (numcells < n && (eqlev_first == level ||
                        (getcanon && comp_canon >= 0))) {
     if (!getcanon || comp_canon < 0) {
-      maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,
-                     tc_level,firsttc[level],dispatch.targetcell,M,n);
+      maketargetcell(g, lab, ptn, level, tcell, &tcellsize, &tc,
+                     tc_level, firsttc[level], dispatch.targetcell, M, n);
       if (tc != firsttc[level]) eqlev_first = level - 1;
     } else
-      maketargetcell(g,lab,ptn,level,tcell,&tcellsize,&tc,
-                     tc_level,-1,dispatch.targetcell,M,n);
+      maketargetcell(g, lab, ptn, level, tcell, &tcellsize, &tc,
+                     tc_level, -1, dispatch.targetcell, M, n);
     stats->tctotal += tcellsize;
   }
 
   /* optionally call user-defined node examination procedure: */
-  OPTCALL(usernodeproc) (g,lab,ptn,level,numcells,tc,(int)code,M,n);
+  OPTCALL(usernodeproc) (g, lab, ptn, level, numcells, tc, (int)code, M, n);
 
   /* call processnode to classify the type of this node: */
 
-  rtnlevel = processnode(lab,ptn,level,numcells);
+  rtnlevel = processnode(lab, ptn, level, numcells);
   if (rtnlevel < level)     /* keep returning if necessary */
     return rtnlevel;
   if (needshortprune) {
     needshortprune = FALSE;
-    shortprune(tcell,fmptr - M,M);
+    shortprune(tcell, fmptr - M, M);
   }
 
-  if (!(*dispatch.cheapautom)(ptn,level,digraph,n))
+  if (!(*dispatch.cheapautom)(ptn, level, digraph, n))
     noncheaplevel = level + 1;
 
   /* use the elements of the target cell to produce the children: */
-  for (tv1 = tv = nextelement(tcell,M,-1); tv >= 0;
-       tv = nextelement(tcell,M,tv)) {
-    breakout(lab,ptn,level + 1,tc,tv,active,M);
-    ADDELEMENT(fixedpts,tv);
+  for (tv1 = tv = nextelement(tcell, M, -1); tv >= 0;
+       tv = nextelement(tcell, M, tv)) {
+    breakout(lab, ptn, level + 1, tc, tv, active, M);
+    ADDELEMENT(fixedpts, tv);
 #if !MAXN
-    rtnlevel = othernode0(lab,ptn,level + 1,numcells + 1,tcnode_this);
+    rtnlevel = othernode0(lab, ptn, level + 1, numcells + 1, tcnode_this);
 #else
-    rtnlevel = othernode(lab,ptn,level + 1,numcells + 1);
+    rtnlevel = othernode(lab, ptn, level + 1, numcells + 1);
 #endif
-    DELELEMENT(fixedpts,tv);
+    DELELEMENT(fixedpts, tv);
 
     if (rtnlevel < level) return rtnlevel;
     /* use stored automorphism data to prune target cell: */
     if (needshortprune) {
       needshortprune = FALSE;
-      shortprune(tcell,fmptr - M,M);
+      shortprune(tcell, fmptr - M, M);
     }
     if (tv == tv1) {
-      longprune(tcell,fixedpts,workspace,fmptr,M);
+      longprune(tcell, fixedpts, workspace, fmptr, M);
 #ifdef NAU_SCHREIER
-      if (doschreier) pruneset(fixedpts,gp,&gens,tcell,M,n);
+      if (doschreier) pruneset(fixedpts, gp, &gens, tcell, M, n);
 #endif
     }
 
-    recover(ptn,level);
+    recover(ptn, level);
   }
 
   return level - 1;
@@ -2729,7 +2732,7 @@ firstterminal(int *lab, int level)
 static int
 processnode(int *lab, int *ptn, int level, int numcells)
 {
-  int i,code,save,newlevel;
+  int i, code, save, newlevel;
   boolean ispruneok;
   int sr;
 
@@ -2741,7 +2744,7 @@ processnode(int *lab, int *ptn, int level, int numcells)
       for (i = 0; i < n; ++i) workperm1[firstlab[i]] = lab[i];
 
       if (gca_first >= noncheaplevel ||
-          (*dispatch.isautom)(g,workperm1,digraph,M,n))
+          (*dispatch.isautom)(g, workperm1, digraph, M, n))
         code = 1;
     }
     if (code == 0) {
@@ -2752,10 +2755,10 @@ processnode(int *lab, int *ptn, int level, int numcells)
             comp_canon = 1;
           else {
             (*dispatch.updatecan)
-              (g,canong,canonlab,samerows,M,n);
+              (g, canong, canonlab, samerows, M, n);
             samerows = n;
             comp_canon
-              = (*dispatch.testcanlab)(g,canong,lab,&sr,M,n);
+              = (*dispatch.testcanlab)(g, canong, lab, &sr, M, n);
           }
         }
         if (comp_canon == 0) {
@@ -2778,36 +2781,36 @@ processnode(int *lab, int *ptn, int level, int numcells)
 
   case 1:                   /* lab is equivalent to firstlab */
     if (fmptr == worktop) fmptr -= 2 * M;
-    fmperm(workperm1,fmptr,fmptr + M,M,n);
+    fmperm(workperm1, fmptr, fmptr + M, M, n);
     fmptr += 2 * M;
     if (writeautoms)
-      writeperm(outfile,workperm1,cartesian,linelength,n);
-    stats->numorbits = orbjoin(orbits,workperm1,n);
+      writeperm(outfile, workperm1, cartesian, linelength, n);
+    stats->numorbits = orbjoin(orbits, workperm1, n);
     ++stats->numgenerators;
-    OPTCALL(userautomproc) (stats->numgenerators,workperm1,orbits,
-                            stats->numorbits,stabvertex,n);
+    OPTCALL(userautomproc) (stats->numgenerators, workperm1, orbits,
+                            stats->numorbits, stabvertex, n);
 #ifdef NAU_SCHREIER
-    if (doschreier) addgenerator(&gp,&gens,workperm1,n);
+    if (doschreier) addgenerator(&gp, &gens, workperm1, n);
 #endif
     return gca_first;
 
   case 2:                   /* lab is equivalent to canonlab */
     if (fmptr == worktop) fmptr -= 2 * M;
-    fmperm(workperm1,fmptr,fmptr + M,M,n);
+    fmperm(workperm1, fmptr, fmptr + M, M, n);
     fmptr += 2 * M;
     save = stats->numorbits;
-    stats->numorbits = orbjoin(orbits,workperm1,n);
+    stats->numorbits = orbjoin(orbits, workperm1, n);
     if (stats->numorbits == save) {
       if (gca_canon != gca_first) needshortprune = TRUE;
       return gca_canon;
     }
     if (writeautoms)
-      writeperm(outfile,workperm1,cartesian,linelength,n);
+      writeperm(outfile, workperm1, cartesian, linelength, n);
     ++stats->numgenerators;
-    OPTCALL(userautomproc) (stats->numgenerators,workperm1,orbits,
-                            stats->numorbits,stabvertex,n);
+    OPTCALL(userautomproc) (stats->numgenerators, workperm1, orbits,
+                            stats->numorbits, stabvertex, n);
 #ifdef NAU_SCHREIER
-    if (doschreier) addgenerator(&gp,&gens,workperm1,n);
+    if (doschreier) addgenerator(&gp, &gens, workperm1, n);
 #endif
     if (orbits[cosetindex] < cosetindex)
       return gca_first;
@@ -2833,7 +2836,7 @@ processnode(int *lab, int *ptn, int level, int numcells)
   if (level != noncheaplevel) {
     ispruneok = TRUE;
     if (fmptr == worktop) fmptr -= 2 * M;
-    fmptn(lab,ptn,noncheaplevel,fmptr,fmptr + M,M,n);
+    fmptn(lab, ptn, noncheaplevel, fmptr, fmptr + M, M, n);
     fmptr += 2 * M;
   } else
     ispruneok = FALSE;
@@ -2898,7 +2901,7 @@ recover(int *ptn, int level)
 *****************************************************************************/
 
 static void writemarker(int level, int tv, int index, int tcellsize,
-            int numorbits, int numcells)
+                        int numorbits, int numcells)
 {
   fprintf(outfile, "level %d: ", level);
   if (numcells != numorbits) {
@@ -2925,24 +2928,24 @@ void
 nauty_check(int wordsize, int m, int n, int version)
 {
   if (wordsize != WORDSIZE) {
-    fprintf(ERRFILE,"Error: WORDSIZE mismatch in nauty.c\n");
+    fprintf(ERRFILE, "Error: WORDSIZE mismatch in nauty.c\n");
     exit(1);
   }
 
 #if MAXN
   if (m > MAXM) {
-    fprintf(ERRFILE,"Error: MAXM inadequate in nauty.c\n");
+    fprintf(ERRFILE, "Error: MAXM inadequate in nauty.c\n");
     exit(1);
   }
 
   if (n > MAXN) {
-    fprintf(ERRFILE,"Error: MAXN inadequate in nauty.c\n");
+    fprintf(ERRFILE, "Error: MAXN inadequate in nauty.c\n");
     exit(1);
   }
 #endif
 
   if (version < NAUTYREQUIRED) {
-    fprintf(ERRFILE,"Error: nauty.c version mismatch\n");
+    fprintf(ERRFILE, "Error: nauty.c version mismatch\n");
     exit(1);
   }
 }
@@ -2959,11 +2962,11 @@ void
 extra_autom(int *p, int n)
 {
   if (writeautoms)
-    writeperm(outfile,p,cartesian,linelength,n);
-  stats->numorbits = orbjoin(orbits,p,n);
+    writeperm(outfile, p, cartesian, linelength, n);
+  stats->numorbits = orbjoin(orbits, p, n);
   ++stats->numgenerators;
-  OPTCALL(userautomproc) (stats->numgenerators,p,orbits,
-                          stats->numorbits,stabvertex,n);
+  OPTCALL(userautomproc) (stats->numgenerators, p, orbits,
+                          stats->numorbits, stabvertex, n);
 }
 
 
@@ -2978,11 +2981,11 @@ extra_autom(int *p, int n)
 void extra_level(int level, int *lab, int *ptn, int numcells, int tv1, int index,
                  int tcellsize, int childcount, int n)
 {
-  MULTIPLY(stats->grpsize1,stats->grpsize2,index);
+  MULTIPLY(stats->grpsize1, stats->grpsize2, index);
   if (domarkers)
-    writemarker(level,tv1,index,tcellsize,stats->numorbits,numcells);
-  OPTCALL(userlevelproc) (lab,ptn,level,orbits,stats,tv1,index,tcellsize,
-                          numcells,childcount,n);
+    writemarker(level, tv1, index, tcellsize, stats->numorbits, numcells);
+  OPTCALL(userlevelproc) (lab, ptn, level, orbits, stats, tv1, index, tcellsize,
+                          numcells, childcount, n);
 }
 
 
@@ -2996,7 +2999,7 @@ void extra_level(int level, int *lab, int *ptn, int numcells, int tv1, int index
 void nauty_freedyn(void)
 {
 #if !MAXN
-  tcnode *tcp,*tcq;
+  tcnode *tcp, *tcq;
 
   tcp = tcnode0.next;
   while (tcp != NULL) {
@@ -3007,15 +3010,15 @@ void nauty_freedyn(void)
   }
   alloc_m = 0;
   tcnode0.next = NULL;
-  DYNFREE(firsttc,firsttc_sz);
-  DYNFREE(canoncode,canoncode_sz);
-  DYNFREE(firstcode,firstcode_sz);
-  DYNFREE(workperm1,workperm1_sz);
-  DYNFREE(canonlab,canonlab_sz);
-  DYNFREE(firstlab,firstlab_sz);
-  DYNFREE(defltwork,defltwork_sz);
-  DYNFREE(fixedpts,fixedpts_sz);
-  DYNFREE(active,active_sz);
+  DYNFREE(firsttc, firsttc_sz);
+  DYNFREE(canoncode, canoncode_sz);
+  DYNFREE(firstcode, firstcode_sz);
+  DYNFREE(workperm1, workperm1_sz);
+  DYNFREE(canonlab, canonlab_sz);
+  DYNFREE(firstlab, firstlab_sz);
+  DYNFREE(defltwork, defltwork_sz);
+  DYNFREE(fixedpts, fixedpts_sz);
+  DYNFREE(active, active_sz);
 #endif
 }
 
@@ -3030,7 +3033,7 @@ void nauty_freedyn(void)
 
 
 /* macros for hash-codes: */
-#define MASH(l,i) ((((l) ^ 065435) + (i)) & 077777)
+#define MASH(l, i) ((((l) ^ 065435) + (i)) & 077777)
 /* : expression whose long value depends only on long l and int/long i.
    Anything goes, preferably non-commutative. */
 
@@ -3039,10 +3042,10 @@ void nauty_freedyn(void)
    when converted to int then short.  Anything goes. */
 
 #if !MAXN
-DYNALLSTAT(set,workset,workset_sz);
-DYNALLSTAT(int,workperm2,workperm2_sz);
-DYNALLSTAT(int,bucket,bucket_sz);
-DYNALLSTAT(set,dnwork,dnwork_sz);
+DYNALLSTAT(set, workset, workset_sz);
+DYNALLSTAT(int, workperm2, workperm2_sz);
+DYNALLSTAT(int, bucket, bucket_sz);
+DYNALLSTAT(set, dnwork, dnwork_sz);
 #else
 static set workset[MAXM];   /* used for scratch work */
 static int workperm2[MAXN];
@@ -3065,15 +3068,15 @@ isautom(graph *g, int *perm, boolean digraph, int m, int n)
   set *pg;
   int pos;
   set *pgp;
-  int posp,i;
+  int posp, i;
 
   for (pg = g, i = 0; i < n; pg += M, ++i) {
-    pgp = GRAPHROW(g,perm[i],M);
+    pgp = GRAPHROW(g, perm[i], M);
     pos = (digraph ? -1 : i);
 
-    while ((pos = nextelement(pg,M,pos)) >= 0) {
+    while ((pos = nextelement(pg, M, pos)) >= 0) {
       posp = perm[pos];
-      if (!ISELEMENT(pgp,posp)) return FALSE;
+      if (!ISELEMENT(pgp, posp)) return FALSE;
     }
   }
   return TRUE;
@@ -3095,18 +3098,18 @@ isautom(graph *g, int *perm, boolean digraph, int m, int n)
 int
 testcanlab(graph *g, graph *canong, int *lab, int *samerows, int m, int n)
 {
-  int i,j;
+  int i, j;
   set *ph;
 
 #if !MAXN
-  DYNALLOC1(int,workperm2,workperm2_sz,n,"testcanlab");
-  DYNALLOC1(set,workset,workset_sz,m,"testcanlab");
+  DYNALLOC1(int, workperm2, workperm2_sz, n, "testcanlab");
+  DYNALLOC1(set, workset, workset_sz, m, "testcanlab");
 #endif
 
   for (i = 0; i < n; ++i) workperm2[lab[i]] = i;
 
   for (i = 0, ph = canong; i < n; ++i, ph += M) {
-    permset(GRAPHROW(g,lab[i],M),workset,M,workperm2);
+    permset(GRAPHROW(g, lab[i], M), workset, M, workperm2);
     for (j = 0; j < M; ++j)
       if (workset[j] < ph[j]) {
         *samerows = i;
@@ -3139,14 +3142,14 @@ updatecan(graph *g, graph *canong, int *lab, int samerows, int m, int n)
   set *ph;
 
 #if !MAXN
-  DYNALLOC1(int,workperm2,workperm2_sz,n,"updatecan");
+  DYNALLOC1(int, workperm2, workperm2_sz, n, "updatecan");
 #endif
 
   for (i = 0; i < n; ++i) workperm2[lab[i]] = i;
 
-  for (i = samerows, ph = GRAPHROW(canong,samerows,M);
+  for (i = samerows, ph = GRAPHROW(canong, samerows, M);
        i < n; ++i, ph += M)
-    permset(GRAPHROW(g,lab[i],M),ph,M,workperm2);
+    permset(GRAPHROW(g, lab[i], M), ph, M, workperm2);
 }
 
 
@@ -3170,38 +3173,38 @@ updatecan(graph *g, graph *canong, int *lab, int samerows, int m, int n)
 *****************************************************************************/
 
 void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
-       int *count, set *active, int *code, int m, int n)
+            int *count, set *active, int *code, int m, int n)
 {
 #if MAXM == 1
-  refine1(g,lab,ptn,level,numcells,count,active,code,m,n);
+  refine1(g, lab, ptn, level, numcells, count, active, code, m, n);
 #else
-  int i,c1,c2,labc1;
+  int i, c1, c2, labc1;
   setword x;
-  set *set1,*set2;
-  int split1,split2,cell1,cell2;
-  int cnt,bmin,bmax;
+  set *set1, *set2;
+  int split1, split2, cell1, cell2;
+  int cnt, bmin, bmax;
   long longcode;
   set *gptr;
-  int maxcell,maxpos,hint;
+  int maxcell, maxpos, hint;
 
 #if !MAXN
-  DYNALLOC1(int,workperm2,workperm2_sz,n,"refine");
-  DYNALLOC1(set,workset,workset_sz,m,"refine");
-  DYNALLOC1(int,bucket,bucket_sz,n + 2,"refine");
+  DYNALLOC1(int, workperm2, workperm2_sz, n, "refine");
+  DYNALLOC1(set, workset, workset_sz, m, "refine");
+  DYNALLOC1(int, bucket, bucket_sz, n + 2, "refine");
 #endif
 
   longcode = *numcells;
   split1 = -1;
   hint = 0;
-  while (*numcells < n && ((split1 = hint, ISELEMENT(active,split1))
-                           || (split1 = nextelement(active,M,split1)) >= 0
-                           || (split1 = nextelement(active,M,-1)) >= 0)) {
-    DELELEMENT(active,split1);
+  while (*numcells < n && ((split1 = hint, ISELEMENT(active, split1))
+                           || (split1 = nextelement(active, M, split1)) >= 0
+                           || (split1 = nextelement(active, M, -1)) >= 0)) {
+    DELELEMENT(active, split1);
     for (split2 = split1; ptn[split2] > level; ++split2) {
     }
-    longcode = MASH(longcode,split1 + split2);
+    longcode = MASH(longcode, split1 + split2);
     if (split1 == split2) {         /* trivial splitting cell */
-      gptr = GRAPHROW(g,lab[split1],M);
+      gptr = GRAPHROW(g, lab[split1], M);
       for (cell1 = 0; cell1 < n; cell1 = cell2 + 1) {
         for (cell2 = cell1; ptn[cell2] > level; ++cell2) {
         }
@@ -3210,7 +3213,7 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
         c2 = cell2;
         while (c1 <= c2) {
           labc1 = lab[c1];
-          if (ISELEMENT(gptr,labc1))
+          if (ISELEMENT(gptr, labc1))
             ++c1;
           else {
             lab[c1] = lab[c2];
@@ -3220,22 +3223,22 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
         }
         if (c2 >= cell1 && c1 <= cell2) {
           ptn[c2] = level;
-          longcode = MASH(longcode,c2);
+          longcode = MASH(longcode, c2);
           ++*numcells;
-          if (ISELEMENT(active,cell1) || c2 - cell1 >= cell2 - c1) {
-            ADDELEMENT(active,c1);
+          if (ISELEMENT(active, cell1) || c2 - cell1 >= cell2 - c1) {
+            ADDELEMENT(active, c1);
             if (c1 == cell2) hint = c1;
           } else {
-            ADDELEMENT(active,cell1);
+            ADDELEMENT(active, cell1);
             if (c2 == cell1) hint = cell1;
           }
         }
       }
     } else {        /* nontrivial splitting cell */
-      EMPTYSET(workset,m);
+      EMPTYSET(workset, m);
       for (i = split1; i <= split2; ++i)
-        ADDELEMENT(workset,lab[i]);
-      longcode = MASH(longcode,split2 - split1 + 1);
+        ADDELEMENT(workset, lab[i]);
+      longcode = MASH(longcode, split2 - split1 + 1);
 
       for (cell1 = 0; cell1 < n; cell1 = cell2 + 1) {
         for (cell2 = cell1; ptn[cell2] > level; ++cell2) {
@@ -3243,7 +3246,7 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
         if (cell1 == cell2) continue;
         i = cell1;
         set1 = workset;
-        set2 = GRAPHROW(g,lab[i],m);
+        set2 = GRAPHROW(g, lab[i], m);
         cnt = 0;
         for (c1 = m; --c1 >= 0; )
           if ((x = (*set1++) & (*set2++)) != 0)
@@ -3253,7 +3256,7 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
         bucket[cnt] = 1;
         while (++i <= cell2) {
           set1 = workset;
-          set2 = GRAPHROW(g,lab[i],m);
+          set2 = GRAPHROW(g, lab[i], m);
           cnt = 0;
           for (c1 = m; --c1 >= 0; )
             if ((x = (*set1++) & (*set2++)) != 0)
@@ -3265,7 +3268,7 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
           count[i] = cnt;
         }
         if (bmin == bmax) {
-          longcode = MASH(longcode,bmin + cell1);
+          longcode = MASH(longcode, bmin + cell1);
           continue;
         }
         c1 = cell1;
@@ -3274,13 +3277,13 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
           if (bucket[i]) {
             c2 = c1 + bucket[i];
             bucket[i] = c1;
-            longcode = MASH(longcode,i + c1);
+            longcode = MASH(longcode, i + c1);
             if (c2 - c1 > maxcell) {
               maxcell = c2 - c1;
               maxpos = c1;
             }
             if (c1 != cell1) {
-              ADDELEMENT(active,c1);
+              ADDELEMENT(active, c1);
               if (c2 - c1 == 1) hint = c1;
               ++*numcells;
             }
@@ -3290,18 +3293,20 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
         for (i = cell1; i <= cell2; ++i)
           workperm2[bucket[count[i]]++] = lab[i];
         for (i = cell1; i <= cell2; ++i) lab[i] = workperm2[i];
-        if (!ISELEMENT(active,cell1)) {
-          ADDELEMENT(active,cell1);
-          DELELEMENT(active,maxpos);
+        if (!ISELEMENT(active, cell1)) {
+          ADDELEMENT(active, cell1);
+          DELELEMENT(active, maxpos);
         }
       }
     }
   }
 
-  longcode = MASH(longcode,*numcells);
+  longcode = MASH(longcode, *numcells);
   *code = CLEANUP(longcode);
 #endif /* else case of MAXM==1 */
 }
+
+
 
 /*****************************************************************************
 *                                                                            *
@@ -3313,35 +3318,35 @@ void refine(graph *g, int *lab, int *ptn, int level, int *numcells,
 *****************************************************************************/
 
 void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
-        int *count, set *active, int *code, int m, int n)
+             int *count, set *active, int *code, int m, int n)
 {
-  int i,c1,c2,labc1;
+  int i, c1, c2, labc1;
   setword x;
-  int split1,split2,cell1,cell2;
-  int cnt,bmin,bmax;
+  int split1, split2, cell1, cell2;
+  int cnt, bmin, bmax;
   long longcode;
-  set *gptr,workset0;
-  int maxcell,maxpos,hint;
+  set *gptr, workset0;
+  int maxcell, maxpos, hint;
 
   if (m != 1) exit(1);
 #if !MAXN
-  DYNALLOC1(int,workperm2,workperm2_sz,n,"refine1");
-  DYNALLOC1(int,bucket,bucket_sz,n + 2,"refine1");
+  DYNALLOC1(int, workperm2, workperm2_sz, n, "refine1");
+  DYNALLOC1(int, bucket, bucket_sz, n + 2, "refine1");
 #endif
 
   longcode = *numcells;
   split1 = -1;
 
   hint = 0;
-  while (*numcells < n && ((split1 = hint, ISELEMENT1(active,split1))
-                           || (split1 = nextelement(active,1,split1)) >= 0
-                           || (split1 = nextelement(active,1,-1)) >= 0)) {
-    DELELEMENT1(active,split1);
+  while (*numcells < n && ((split1 = hint, ISELEMENT1(active, split1))
+                           || (split1 = nextelement(active, 1, split1)) >= 0
+                           || (split1 = nextelement(active, 1, -1)) >= 0)) {
+    DELELEMENT1(active, split1);
     for (split2 = split1; ptn[split2] > level; ++split2) {
     }
-    longcode = MASH(longcode,split1 + split2);
+    longcode = MASH(longcode, split1 + split2);
     if (split1 == split2) {         /* trivial splitting cell */
-      gptr = GRAPHROW(g,lab[split1],1);
+      gptr = GRAPHROW(g, lab[split1], 1);
       for (cell1 = 0; cell1 < n; cell1 = cell2 + 1) {
         for (cell2 = cell1; ptn[cell2] > level; ++cell2) {
         }
@@ -3350,7 +3355,7 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
         c2 = cell2;
         while (c1 <= c2) {
           labc1 = lab[c1];
-          if (ISELEMENT1(gptr,labc1))
+          if (ISELEMENT1(gptr, labc1))
             ++c1;
           else {
             lab[c1] = lab[c2];
@@ -3360,13 +3365,13 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
         }
         if (c2 >= cell1 && c1 <= cell2) {
           ptn[c2] = level;
-          longcode = MASH(longcode,c2);
+          longcode = MASH(longcode, c2);
           ++*numcells;
-          if (ISELEMENT1(active,cell1) || c2 - cell1 >= cell2 - c1) {
-            ADDELEMENT1(active,c1);
+          if (ISELEMENT1(active, cell1) || c2 - cell1 >= cell2 - c1) {
+            ADDELEMENT1(active, c1);
             if (c1 == cell2) hint = c1;
           } else {
-            ADDELEMENT1(active,cell1);
+            ADDELEMENT1(active, cell1);
             if (c2 == cell1) hint = cell1;
           }
         }
@@ -3374,8 +3379,8 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
     } else {        /* nontrivial splitting cell */
       workset0 = 0;
       for (i = split1; i <= split2; ++i)
-        ADDELEMENT1(&workset0,lab[i]);
-      longcode = MASH(longcode,split2 - split1 + 1);
+        ADDELEMENT1(&workset0, lab[i]);
+      longcode = MASH(longcode, split2 - split1 + 1);
 
       for (cell1 = 0; cell1 < n; cell1 = cell2 + 1) {
         for (cell2 = cell1; ptn[cell2] > level; ++cell2) {
@@ -3399,7 +3404,7 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
           count[i] = cnt;
         }
         if (bmin == bmax) {
-          longcode = MASH(longcode,bmin + cell1);
+          longcode = MASH(longcode, bmin + cell1);
           continue;
         }
         c1 = cell1;
@@ -3408,13 +3413,13 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
           if (bucket[i]) {
             c2 = c1 + bucket[i];
             bucket[i] = c1;
-            longcode = MASH(longcode,i + c1);
+            longcode = MASH(longcode, i + c1);
             if (c2 - c1 > maxcell) {
               maxcell = c2 - c1;
               maxpos = c1;
             }
             if (c1 != cell1) {
-              ADDELEMENT1(active,c1);
+              ADDELEMENT1(active, c1);
               if (c2 - c1 == 1) hint = c1;
               ++*numcells;
             }
@@ -3424,15 +3429,15 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
         for (i = cell1; i <= cell2; ++i)
           workperm2[bucket[count[i]]++] = lab[i];
         for (i = cell1; i <= cell2; ++i) lab[i] = workperm2[i];
-        if (!ISELEMENT1(active,cell1)) {
-          ADDELEMENT1(active,cell1);
-          DELELEMENT1(active,maxpos);
+        if (!ISELEMENT1(active, cell1)) {
+          ADDELEMENT1(active, cell1);
+          DELELEMENT1(active, maxpos);
         }
       }
     }
   }
 
-  longcode = MASH(longcode,*numcells);
+  longcode = MASH(longcode, *numcells);
   *code = CLEANUP(longcode);
 }
 
@@ -3454,7 +3459,7 @@ void refine1(graph *g, int *lab, int *ptn, int level, int *numcells,
 boolean
 cheapautom(int *ptn, int level, boolean digraph, int n)
 {
-  int i,k,nnt;
+  int i, k, nnt;
 
   if (digraph) return FALSE;
 
@@ -3490,13 +3495,13 @@ static int bestcell(graph *g, int *lab, int *ptn, int level, int n)
 {
   int i;
   set *gp;
-  setword setword1,setword2;
-  int v1,v2,nnt;
+  setword setword1, setword2;
+  int v1, v2, nnt;
 
 #if !MAXN
   DYNALLOC1(int, workperm2, workperm2_sz, n, "bestcell");
-  DYNALLOC1(set,workset,workset_sz,m,"bestcell");
-  DYNALLOC1(int,bucket,bucket_sz,n + 2,"bestcell");
+  DYNALLOC1(set, workset, workset_sz, m, "bestcell");
+  DYNALLOC1(int, bucket, bucket_sz, n + 2, "bestcell");
 #endif
 
   /* find non-singleton cells: put starts in workperm2[0..nnt-1] */
@@ -3518,11 +3523,11 @@ static int bestcell(graph *g, int *lab, int *ptn, int level, int n)
   for (i = nnt; --i >= 0; ) bucket[i] = 0;
 
   for (v2 = 1; v2 < nnt; ++v2) {
-    EMPTYSET(workset,m);
+    EMPTYSET(workset, m);
     i = workperm2[v2] - 1;
     do {
       ++i;
-      ADDELEMENT(workset,lab[i]);
+      ADDELEMENT(workset, lab[i]);
     } while (ptn[i] > level);
     for (v1 = 0; v1 < v2; ++v1) {
       gp = GRAPHROW(g, lab[workperm2[v1]], m);
@@ -3569,7 +3574,7 @@ static int bestcell(graph *g, int *lab, int *ptn, int level, int n)
 *****************************************************************************/
 
 int targetcell(graph *g, int *lab, int *ptn, int level, int tc_level,
-           int hint, int n)
+               int hint, int n)
 {
   int i;
 
@@ -3577,7 +3582,7 @@ int targetcell(graph *g, int *lab, int *ptn, int level, int tc_level,
       (hint == 0 || ptn[hint - 1] <= level))
     return hint;
   else if (level <= tc_level)
-    return bestcell(g,lab,ptn,level,n);
+    return bestcell(g, lab, ptn, level, n);
   else {
     for (i = 0; i < n && ptn[i] <= level; ++i) {
     }
@@ -3590,18 +3595,18 @@ int targetcell(graph *g, int *lab, int *ptn, int level, int tc_level,
 void naugraph_freedyn(void)
 {
 #if !MAXN
-  DYNFREE(workset,workset_sz);
-  DYNFREE(workperm2,workperm2_sz);
-  DYNFREE(bucket,bucket_sz);
-  DYNFREE(dnwork,dnwork_sz);
+  DYNFREE(workset, workset_sz);
+  DYNFREE(workperm2, workperm2_sz);
+  DYNFREE(bucket, bucket_sz);
+  DYNFREE(dnwork, dnwork_sz);
 #endif
 }
 
 
 
 dispatchvec dispatch_graph =
-{ isautom,testcanlab,updatecan,refine,refine1,cheapautom,targetcell,
-  naugraph_freedyn,nauty_check,NULL,NULL };
+{ isautom, testcanlab, updatecan, refine, refine1, cheapautom, targetcell,
+  naugraph_freedyn, nauty_check, NULL, NULL };
 
 
 
@@ -3612,7 +3617,7 @@ void densenauty(graph * RESTRICT g,
                 int m, int n, graph * RESTRICT h)
 {
   if (options->dispatch != &dispatch_graph) {
-    fprintf(ERRFILE,"Error: densenauty() needs standard options block\n");
+    fprintf(ERRFILE, "Error: densenauty() needs standard options block\n");
     exit(1);
   }
 
@@ -3632,9 +3637,13 @@ void densenauty(graph * RESTRICT g,
 
 #ifdef __INTEL_COMPILER
   #pragma warning pop
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && defined(__GNUC_MINOR__) \
+  && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+  /* diagnostic push and pop are added in GCC 4.6 */
   #pragma GCC diagnostic pop
 #endif
+
+
 
 #endif /* NAU0_H__ */
 

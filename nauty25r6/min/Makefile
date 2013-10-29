@@ -19,3 +19,8 @@ $(progs) : % : %.c $(deps)
 
 clean:
 	$(RM) -rf $(progs) $(iprogs) *~ a.out bin obj
+
+uncrustify: uncrustify.cfg Makefile
+	uncrustify -c $< --replace nau0*.h
+	cd ..
+	uncrustify -c $< --replace $(comh) $(comc)

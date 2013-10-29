@@ -2,7 +2,7 @@
 #define ONE_WORD_SETS /* try to use one word sets when possible */
 #define WORDSIZE 32
 /* #include "nau0.h" */
-#include "nau0s.h"
+#include "nau0.h"
 
 
 static void printgr(graph *g, int n, const char *name)
@@ -19,6 +19,7 @@ static void printgr(graph *g, int n, const char *name)
 }
 
 
+
 int main(void)
 {
   int n = 12, m, v, u;
@@ -30,7 +31,7 @@ int main(void)
   options.getcanon = TRUE;
   m = SETWORDSNEEDED(n);
   printf("WORDSIZE %d, MAXN %d, n %d, m %d\n",
-      (int) sizeof(setword), MAXN, n, m);
+         (int) sizeof(setword), MAXN, n, m);
 
   nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
 
@@ -58,3 +59,6 @@ int main(void)
   printgr(ng, n, "output");
   return 0;
 }
+
+
+
