@@ -682,7 +682,7 @@ static boolean
 isbiconnected(graph *g, int n)
 /* test if g is biconnected */
 {
-    int sp,v,w;
+    int sp, v, w, par;
     setword sw;
     setword visited;
     int numvis,num[MAXN],lp[MAXN],stack[MAXN];
@@ -701,12 +701,17 @@ isbiconnected(graph *g, int n)
     {
         if ((sw = g[v] & ~visited))           /* not "==" */
         {
-            w = v;
+            par = v;
             v = FIRSTBITNZ(sw);       /* visit next child */
             stack[++sp] = v;
             visited |= bit[v];
             lp[v] = num[v] = numvis++;
-            sw = g[v] & visited & ~bit[w];
+            /* update the low-point of `v' lp[v] for possible backedges
+             * a backedge is an edge from `v' to a previously vertex `w'
+             * encountered in the search tree that is adjacent to `w'
+             * thus the set of `w' is given by visited & g[v]
+             * with the exclusion of the parent `par' */
+            sw = g[v] & visited & ~bit[par];
             while (sw)
             {
                 w = FIRSTBITNZ(sw);
@@ -720,6 +725,7 @@ isbiconnected(graph *g, int n)
             if (sp <= 1)          return numvis == n;
             v = stack[--sp];
             if (lp[w] >= num[v])  return FALSE;
+            /* update the low-point value for the parent `v' of `w' */
             if (lp[w] < lp[v])    lp[v] = lp[w];
         }
     }

@@ -26,7 +26,8 @@
 
 #define DEFAULT_WORDSIZE 0
 #define SIZEOF_INT 4
-#define SIZEOF_LONG 8
+//#define SIZEOF_LONG 8
+#define SIZEOF_LONG 4
 #define SIZEOF_LONG_LONG 8   /* 0 if nonexistent */
 
 #define HAVE_CONST 1    /* compiler properly supports const */

@@ -1,8 +1,8 @@
 #define MAXN 132
-#define ONE_WORD_SETS /* try to use one word sets when possible */
 #define WORDSIZE 32
+#define ONE_WORD_SETS /* try to use one word sets when possible */
 /* #include "nau0.h" */
-#include "nau0.h"
+#include "nau0s.h"
 
 
 static void printgr(graph *g, int n, const char *name)

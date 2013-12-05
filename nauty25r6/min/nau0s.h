@@ -25,6 +25,14 @@
   #endif
   #pragma GCC diagnostic ignored "-Wunused-parameter"
   #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#elif defined(_MSC_VER)
+  /* disable CRT security warning for "_s" versions */
+  #ifndef _CRT_SECURE_NO_DEPRECATE
+  #define _CRT_SECURE_NO_DEPRECATE 1
+  #endif
+  #ifndef _CRT_SECURE_NO_WARNINGS
+  #define _CRT_SECURE_NO_WARNINGS 1
+  #endif
 #endif
 
 #ifndef INLINE
