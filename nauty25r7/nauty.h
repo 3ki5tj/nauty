@@ -26,7 +26,6 @@
 
 #define DEFAULT_WORDSIZE 0
 #define SIZEOF_INT 4
-//#define SIZEOF_LONG 8
 #define SIZEOF_LONG 4
 #define SIZEOF_LONG_LONG 8   /* 0 if nonexistent */
 
@@ -986,7 +985,7 @@ extern void free(void*);
 #define DYNREALLOC(type, name, name_sz, sz, msg) \
   { if ((size_t)(sz) > name_sz) \
     { if ((name = (type*)REALLOCS(name, (sz) * sizeof(type))) == NULL) \
-      { alloc_error(msg); } else name_sz = (sz); } }
+     { alloc_error(msg); } else name_sz = (sz); } }
 #define DYNFREE(name, name_sz) if (name_sz) { FREES(name); name_sz = 0; }
 #define CONDYNFREE(name, name_sz, minsz) \
   if (name_sz > (size_t)(minsz)) { FREES(name); name_sz = 0; }

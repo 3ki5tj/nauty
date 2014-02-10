@@ -2,9 +2,10 @@
  *                                                                            *
  * This is the header file for traces() version 2.0, which is included into   *
  *   nauty() version 2.5.                                                     *
- *  nauty is Copyright (1984-2013) Brendan McKay.  All rights reserved.       *
- *  Subject to the waivers and disclaimers in nauty.h.                        *
- *  Traces is Copyright Adolfo Piperno, 2008-2013.  All rights reserved.      *
+ *                                                                            *
+ *   nauty is Copyright (1984-2014) Brendan McKay. All rights reserved.       *
+ *   Subject to the waivers and disclaimers in nauty.h.                       *
+ *   Traces is Copyright (2008-2014) Adolfo Piperno. All rights reserved.     *
  *                                                                            *
  *   CHANGE HISTORY                                                           *
  *       28-Dec-12 : final changes for version 2.0                            *
@@ -24,7 +25,7 @@ typedef struct TracesOptions {
 	int strategy;
 	int verbosity;
 	permnode **generators;
-    void (*userautomproc)(int,int*,int);
+	void (*userautomproc)(int,int*,int);
 } TracesOptions;
 
 #define DEFAULTOPTIONS_TRACES(opts) TracesOptions opts \

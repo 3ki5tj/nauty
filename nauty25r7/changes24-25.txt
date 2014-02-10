@@ -112,3 +112,6 @@ Changes from nauty 2.4 to nauty 2.5
   Versions 25r4 and 25r5 fixed other rare errors in Traces
   Version 25r6 updated the configuration code.  Now it should work
      in recent versions of Cygwin under Windows.
+  Version 25r7 fixed some boundary cases in Traces 
+        (thanks to Geoff Bailey, Shreedhar Hardikar, John Call, Alisa Maas), 
+        also a bug in planarg -p for n >= 65536.

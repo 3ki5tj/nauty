@@ -65,15 +65,25 @@ CFLAGS=$user_cflags
 MORECFLAGS=""
 dnl  we need  AC_SYS_LARGEFILE and AC_FUNC_FSEEKO
 AC_SYS_LARGEFILE
+if test x"$ac_cv_sys_file_offset_bits" = xno ; then
+   ac_cv_sys_file_offset_bits=0
+fi
 AC_SUBST(ac_cv_sys_file_offset_bits)
 
 if test x"$user_cflags" = x"" -o x"$user_cflags" = x-m32 ; then
-  AC_TRY_CFLAGS([-O4],[CFLAGS="$CFLAGS -O4"]);
-  if test x"$ac_cv_try_cflags_ok" = x"no"; then
-     AC_TRY_CFLAGS([-O3],[CFLAGS="$CFLAGS -O3"]);
-     if test x"$ac_cv_try_cflags_ok" = x"no"; then
-         AC_TRY_CFLAGS([-O2],[CFLAGS="$CFLAGS -O2"],[CFLAGS="$CFLAGS -O"]);
-     fi
+  if test "$CC" = "icc" ; then
+    AC_TRY_CFLAGS([-O3],[CFLAGS="$CFLAGS -O3"]);
+    if test x"$ac_cv_try_cflags_ok" = x"no"; then
+        AC_TRY_CFLAGS([-O2],[CFLAGS="$CFLAGS -O2"],[CFLAGS="$CFLAGS -O"]);
+    fi
+  else
+    AC_TRY_CFLAGS([-O4],[CFLAGS="$CFLAGS -O4"]);
+    if test x"$ac_cv_try_cflags_ok" = x"no"; then
+       AC_TRY_CFLAGS([-O3],[CFLAGS="$CFLAGS -O3"]);
+       if test x"$ac_cv_try_cflags_ok" = x"no"; then
+          AC_TRY_CFLAGS([-O2],[CFLAGS="$CFLAGS -O2"],[CFLAGS="$CFLAGS -O"]);
+       fi
+    fi
   fi
  
   if test "$CC" = "gcc" ; then
@@ -136,16 +146,16 @@ AC_EXEEXT
 dnl Checks for header files.
 dnl AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(stddef.h unistd.h sys/types.h sys/wait.h stdlib.h string.h errno.h pthread.h)
+AC_CHECK_HEADERS(signal.h stddef.h unistd.h sys/types.h sys/wait.h stdlib.h string.h errno.h pthread.h)
 CVT_YESNO(ac_cv_header_stddef_h,header_stddef_h)
 CVT_YESNO(ac_cv_header_unistd_h,header_unistd_h)
 CVT_YESNO(ac_cv_header_stdlib_h,header_stdlib_h)
 CVT_YESNO(ac_cv_header_string_h,header_string_h)
-CVT_YESNO(ac_cv_header_signal_h,header_signal_h)
 CVT_YESNO(ac_cv_header_sys_wait_h,header_sys_wait_h)
 CVT_YESNO(ac_cv_header_sys_types_h,header_sys_types_h)
 CVT_YESNO(ac_cv_header_errno_h,header_errno_h)
 CVT_YESNO(ac_cv_header_pthread_h,header_pthread_h)
+CVT_YESNO(ac_cv_header_signal_h,header_signal_h)
 
 AC_TYPE_PID_T
 CVT_YESNO(ac_cv_type_pid_t,have_pid_t)
@@ -253,6 +263,9 @@ AC_CHECK_FUNC(putenv,have_putenv=1,have_putenv=0)
 AC_SUBST(have_putenv)
 AC_CHECK_FUNC(setenv,have_setenv=1,have_setenv=0)
 AC_SUBST(have_setenv)
+AC_FUNC_FORK
+CVT_YESNO(ac_cv_func_fork,have_fork)
+AC_SUBST(have_fork)
 AC_CHECK_FUNC(fseeko,have_fseeko=1,have_fseeko=0)
 AC_SUBST(have_fseeko)
 AC_CHECK_FUNC(sigaction,have_sigaction=1,have_sigaction=0)
@@ -295,7 +308,7 @@ else
     fi
 fi
 
-if test $have_pipe -eq 1 -a $have_wait -eq 1 ; then
+if test $have_pipe -eq 1 -a $have_wait -eq 1 -a $have_fork -eq 1 ; then
     shortg=1
     shortg_or_null=shortg
 else

@@ -1,0 +1,12 @@
+Changes made when upgrading from 25r6 to 25r7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* uncrustify -c uncrustify.cfg --replace naugraph.c
+  ...
+
+
+* fromdos changes24-25.txt
+
+* changes in geng.c (isbiconnected)
+
+* SIZEOF_LONG from 8 to 4

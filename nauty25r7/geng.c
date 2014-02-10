@@ -682,7 +682,7 @@ static boolean
 isbiconnected(graph *g, int n)
 /* test if g is biconnected */
 {
-    int sp, v, w, par;
+    int sp,v,w;
     setword sw;
     setword visited;
     int numvis,num[MAXN],lp[MAXN],stack[MAXN];
@@ -701,7 +701,7 @@ isbiconnected(graph *g, int n)
     {
         if ((sw = g[v] & ~visited))           /* not "==" */
         {
-            par = v;
+            w = v;
             v = FIRSTBITNZ(sw);       /* visit next child */
             stack[++sp] = v;
             visited |= bit[v];
@@ -710,8 +710,8 @@ isbiconnected(graph *g, int n)
              * a backedge is an edge from `v' to a previously vertex `w'
              * encountered in the search tree that is adjacent to `w'
              * thus the set of `w' is given by visited & g[v]
-             * with the exclusion of the parent `par' */
-            sw = g[v] & visited & ~bit[par];
+             * with the exclusion of the parent `w' */
+            sw = g[v] & visited & ~bit[w];
             while (sw)
             {
                 w = FIRSTBITNZ(sw);

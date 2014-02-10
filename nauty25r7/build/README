@@ -1,0 +1,5 @@
+cd nauty25r7
+mkdir build
+cd build
+../configure
+ln -s ../*.[ch] .
