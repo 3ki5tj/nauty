@@ -36,7 +36,7 @@ write_planarcode(FILE *f, t_ver_sparse_rep *VR, t_adjl_sparse_rep *A,
     DYNALLSTAT(unsigned char,buff,buff_sz);
 #define PUT1(x) buff[j++]=(x);
 #define PUT2(x) w=(x); buff[j++]=(w>>8)&0xFF; buff[j++]=w&0xff;
-#define PUT4(x) w=(x); buff[j++]=(w>>24)&0xFF; buff[j++]=(x>>16)&0xff; \
+#define PUT4(x) w=(x); buff[j++]=(w>>24)&0xFF; buff[j++]=(w>>16)&0xff; \
              buff[j++]=(w>>8)&0xFF; buff[j++]=w&0xff;
 
     if (n <= 255)        bytes = 1;
