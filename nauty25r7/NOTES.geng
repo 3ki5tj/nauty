@@ -1,0 +1,67 @@
+Notes on geng.c
+=================
+
+* Key references
+
+  Isomorph-free exhaustive generation, Brendan D. McKay
+  Practical graph isomorphism, Brendan D. McKay
+  Isomorph-free generation of 2-connected graphs with applications, Derrick Stolee 2011
+
+
+* output is in graph6 format 
+  this is done by function writeg6() in gtools.c
+  writeg6()
+    ntog6()
+
+  #define BIAS6 63  (gtools.h)
+
+* the main searching function is
+    genextend() or spaextend()
+  which uses vertex augmentation
+
+* global/common variables
+
+  maxn = maximal number of vertices
+  g = the graph
+  n = number of vertices in g
+  bigint nodes[n]; # number of graphs with n vertices
+
+
+* local variables in genextend()
+
+  dmax = maximal degree of the graph
+         the canonical label sorts vertices by the degrees
+         so dmax = deg[n - 1]
+  dcrit = lowest possible degree
+  d = a bit mask for vertices with degrees equal to dmax
+
+* The function isbiconnected() tests the biconnectivity of the graph.
+
+* large integer counting uses the structure bigint
+    typedef struct { long hi, lo; } bigint;
+  where the .hi and .lo components are should not exceed 10^9.
+
+  ADDBIG(bigint a, long b)            a += b
+
+
+* The key datatype of the search (the stack) is
+    typedef struct
+    {
+        int ne,dmax;          /* values used for xlb,xub calculation */
+        int xlb,xub;          /* saved bounds on extension degree */
+        xword lo,hi;          /* work purposes for orbit calculation */
+        xword xstart[MAXN+1]; /* index into xset[] for each cardinality */
+        xword *xset;          /* array of all x-sets in card order */
+        xword *xcard;         /* cardinalities of all x-sets */
+        xword *xinv;          /* map from x-set to index in xset */
+        xword *xorb;          /* min orbit representative */
+        xword *xx;            /* (-b, -t, -s, -m) candidate x-sets */
+                          /*   note: can be the same as xcard */
+        xword xlim;           /* number of x-sets in xx[] */
+    } leveldata;
+ 
+    leveldata data[MAXN];
+
+* accept1()
+
+  xw 

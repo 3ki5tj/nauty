@@ -1396,6 +1396,8 @@ accept1(graph *g, int n, xword x, graph *gx, int *deg, boolean *rigid)
     gx[n] = 0;
     deg[n] = degn = XPOPCOUNT(x);
 
+    /* augment the graph with a new vertex `n'
+     * which is adjacent to vertices in `x' (as bits) */
     xw = x;
     while (xw)
     {
