@@ -9,7 +9,7 @@ Changes from nauty 2.4 to nauty 2.5
   and available.  This allows parallel running of nauty and Traces
   in separate threads.
 
-* The makefile now creates static libraries like nauty.a in 
+* The makefile now creates static libraries like nauty.a in
   addition to object files like nauty.o.
 
 * Remove all use of types permutation, nvector, np2vector, shortish.
@@ -47,7 +47,7 @@ Changes from nauty 2.4 to nauty 2.5
   densenauty() and sparsenauty() are now the recommended ways to
   call nauty from a program.  See the sample programs in the package.
 
-* Use quicksort in place of shell sort in many places.  This is 
+* Use quicksort in place of shell sort in many places.  This is
   implemented in the file sorttemplates.c that can be used in any
   applications.
 
@@ -86,7 +86,7 @@ Changes from nauty 2.4 to nauty 2.5
     M command is extended; now applies to i as well as x.
     Implement ANSI controls if requested.
     File names for > and < can be given in "..." to allow spaces.
- 
+
 * Updates to utilities:
      listg:  add -b (Bliss format), -G (GRAPE format) and
           -y/-Y (dotty format), -H (HCP format)
@@ -112,8 +112,8 @@ Changes from nauty 2.4 to nauty 2.5
   Versions 25r4 and 25r5 fixed other rare errors in Traces
   Version 25r6 updated the configuration code.  Now it should work
      in recent versions of Cygwin under Windows.
-  Version 25r7 fixed some boundary cases in Traces 
-        (thanks to Geoff Bailey, Shreedhar Hardikar, John Call, Alisa Maas), 
+  Version 25r7 fixed some boundary cases in Traces
+        (thanks to Geoff Bailey, Shreedhar Hardikar, John Call, Alisa Maas),
         also a bug in planarg -p for n >= 65536.
   Version 25r8 fixed g++ code in some header files, removed CPUDEFS
         from dreadnaut.c and traces.c (already in gtools.h), and

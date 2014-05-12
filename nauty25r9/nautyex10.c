@@ -58,7 +58,7 @@ main(int argc, char *argv[])
                 sg1.v[i] = 3*i;     /* Position of vertex i in v array */
                 sg1.d[i] = 3;       /* Degree of vertex i */
             }
-             
+
             for (i = 0; i < n; i += 2)   /* Spokes */
             {
                 sg1.e[sg1.v[i]] = i+1;
@@ -74,7 +74,7 @@ main(int argc, char *argv[])
                 sg1.e[sg1.v[i]+2] = i-2;
             sg1.e[sg1.v[1]+2] = n-2;
             sg1.e[sg1.v[0]+2] = n-1;
-                
+
          /* Now make the second graph */
 
             SG_ALLOC(sg2,n,3*n,"malloc");
@@ -104,11 +104,11 @@ main(int argc, char *argv[])
 
             We have declared a variable "generators" that will be
             used to hold the group generators between the two calls.
-            It has to be initialised to NULL and its address has to 
+            It has to be initialised to NULL and its address has to
             be given to Traces using options.generators.  After the
             second call, we need to discard the generators with a
             call to freeschreier(), which also initializes it again. */
-            
+
             generators = NULL;
             options.generators = &generators;
 

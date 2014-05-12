@@ -1,5 +1,5 @@
 /* This program prints the entire automorphism group of an n-vertex
-   polygon, where n is a number supplied by the user. 
+   polygon, where n is a number supplied by the user.
 */
 
 #include "nauty.h"    /* which includes <stdio.h> */
@@ -33,7 +33,7 @@ main(int argc, char *argv[])
 
  /* The following cause nauty to call two procedures which
         store the group information as nauty runs. */
-        
+
     options.userautomproc = groupautomproc;
     options.userlevelproc = grouplevelproc;
 
@@ -61,18 +61,18 @@ main(int argc, char *argv[])
             structure will be "cut loose" so that it won't be used
             again the next time nauty() is called.  Otherwise, as
             here, the same structure is used repeatedly. */
-                
+
             group = groupptr(FALSE);
 
          /* Expand the group structure to include a full set of coset
             representatives at every level.  This step is necessary
             if allgroup() is to be called. */
-                
+
             makecosetreps(group);
 
          /* Call the procedure writeautom() for every element of the group.
             The first call is always for the identity. */
-                
+
             allgroup(group,writeautom);
         }
         else

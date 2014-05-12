@@ -34,7 +34,7 @@ extern FILE *popen(const char*,const char*);
 
 /*
   Version 1.1: Fixed sparse6 input for powers of 2.  May 9, 1998
-  Version 1.2: Added "cmd: ..." option for opengraphfile(). 
+  Version 1.2: Added "cmd: ..." option for opengraphfile().
                Fixed readg() bug (could not be invisible).  Oct 5, 1998
   Version 1.3: Added "is_pipe".  June 20, 2002
   Version 1.4: Stuff for autoconf.  August 30, 2002
@@ -56,10 +56,10 @@ extern FILE *popen(const char*,const char*);
 #define M(i) ((1 << (i))-1)
 
 /*********************************************************************
-opengraphfile(filename,codetype,assumefixed,position) 
+opengraphfile(filename,codetype,assumefixed,position)
           opens and positions a file for reading graphs.
 
-  filename = the name of the file to open 
+  filename = the name of the file to open
                 (NULL means stdin, assumed already open)
              If filename starts with "cmd:", the remainder is taken
              to be a command to open a subshell for, using a pipe.
@@ -81,9 +81,9 @@ opengraphfile(filename,codetype,assumefixed,position)
   If the file starts with ">", there must be a header.
   Otherwise opengraphfile() fails.
 
-  The value returned is a file pointer or NULL.  
+  The value returned is a file pointer or NULL.
   If assumedfixed is not zero and position > 1, the global variable
-  ogf_linelen is set to the length (including \n) of the length of the 
+  ogf_linelen is set to the length (including \n) of the length of the
   first record.  UPDATE
 
   The global variable is_pipe is set to whether the input file is a pipe.
@@ -151,9 +151,9 @@ opengraphfile(char *filename, int *codetype, int assumefixed, long position)
         bad_header = FALSE;
         if ((c = GETC(f)) == EOF || c != '>')
             bad_header = TRUE;
-        if (!bad_header && ((c = GETC(f)) == EOF || 
+        if (!bad_header && ((c = GETC(f)) == EOF ||
 	         (c != 'g' && c != 's' && c != 'p')))
-            bad_header = TRUE;        
+            bad_header = TRUE;
         if (!bad_header && c == 'g')
         {
             if ((c = GETC(f)) == EOF || c != 'r' ||
@@ -307,7 +307,7 @@ opengraphfile(char *filename, int *codetype, int assumefixed, long position)
             FUNLOCKFILE(f);
             return NULL;
         }
-        
+
         pos2 = FTELL_VER(f);
         if (pos2 < 0)
         {
@@ -442,7 +442,7 @@ graphsize(char *s)
     else             p = s;
     n = *p++ - BIAS6;
 
-    if (n > SMALLN) 
+    if (n > SMALLN)
     {
         n = *p++ - BIAS6;
         if (n > SMALLN)
@@ -473,7 +473,7 @@ encodegraphsize(int n, char **pp)
     char *p;
 
     p = *pp;
-    if (n <= SMALLN) 
+    if (n <= SMALLN)
         *p++ = BIAS6 + n;
     else if (n <= SMALLISHN)
     {
@@ -482,7 +482,7 @@ encodegraphsize(int n, char **pp)
         *p++ = BIAS6 + ((n >> 6) & C6MASK);
         *p++ = BIAS6 + (n & C6MASK);
     }
-    else 
+    else
     {
         *p++ = MAXBYTE;
         *p++ = MAXBYTE;
@@ -512,7 +512,7 @@ stringcounts(char *s, int *pn, size_t *pe)
     *pn = n;
 
     p = s + (s[0] == ':') + SIZELEN(n);
- 
+
     if (s[0] == ':')  /* sparse6 */
     {
         count = 0;
@@ -612,7 +612,7 @@ stringtograph(char *s, graph *g, int m)
         for (j = 1; j < n; ++j)
         {
             gj = GRAPHROW(g,j,m);
-    
+
             for (i = 0; i < j; ++i)
             {
                 if (--k == 0)
@@ -620,7 +620,7 @@ stringtograph(char *s, graph *g, int m)
                     k = 6;
                     x = *(p++) - BIAS6;
                 }
-        
+
                 if (x & TOPBIT6)
                 {
                     gi = GRAPHROW(g,i,m);
@@ -699,13 +699,13 @@ stringtograph(char *s, graph *g, int m)
 /***********************************************************************/
 
 graph*                 /* read graph into nauty format */
-readg(FILE *f, graph *g, int reqm, int *pm, int *pn) 
-/* graph6 and sparse6 formats are supported 
-   f = an open file 
-   g = place to put the answer (NULL for dynamic allocation) 
-   reqm = the requested value of m (0 => compute from n) 
-   *pm = the actual value of m 
-   *pn = the value of n 
+readg(FILE *f, graph *g, int reqm, int *pm, int *pn)
+/* graph6 and sparse6 formats are supported
+   f = an open file
+   g = place to put the answer (NULL for dynamic allocation)
+   reqm = the requested value of m (0 => compute from n)
+   *pm = the actual value of m
+   *pn = the value of n
 */
 {
     char *s,*p;
@@ -725,7 +725,7 @@ readg(FILE *f, graph *g, int reqm, int *pm, int *pn)
         p = s;
     }
 
-    while (*p >= BIAS6 && *p <= MAXBYTE) 
+    while (*p >= BIAS6 && *p <= MAXBYTE)
         ++p;
     if (*p == '\0')
         gt_abort(">E readg: missing newline\n");
@@ -761,7 +761,7 @@ readg(FILE *f, graph *g, int reqm, int *pm, int *pn)
 void
 stringtosparsegraph(char *s, sparsegraph *sg, int *nloops)
 /* Convert string (graph6 or sparse6 format) to sparse graph.
- * Assumes sg exists and is initialised               
+ * Assumes sg exists and is initialised
  * Also returns the number of loops  */
 {
     char *p,*q;
@@ -797,7 +797,7 @@ stringtosparsegraph(char *s, sparsegraph *sg, int *nloops)
                     k = 6;
                     x = *(p++) - BIAS6;
                 }
-        
+
                 if (x & TOPBIT6)
                 {
                     d[i]++;
@@ -828,7 +828,7 @@ stringtosparsegraph(char *s, sparsegraph *sg, int *nloops)
                     k = 6;
                     x = *(p++) - BIAS6;
                 }
-        
+
                 if (x & TOPBIT6)
                 {
                     e[v[i]+d[i]++] = j;
@@ -983,11 +983,11 @@ stringtosparsegraph(char *s, sparsegraph *sg, int *nloops)
 /***********************************************************************/
 
 sparsegraph*                 /* read graph into sparsegraph format */
-read_sg_loops(FILE *f, sparsegraph *sg, int *nloops) 
+read_sg_loops(FILE *f, sparsegraph *sg, int *nloops)
 /* graph6 and sparse6 formats are supported
  * f = an open file
- * sg = place to put the answer (NULL for dynamic allocation) 
- *      - must be initialised if not NULL 
+ * sg = place to put the answer (NULL for dynamic allocation)
+ *      - must be initialised if not NULL
  * nloops := number of loops (each loop in a sparse6 string
  *        gives one loop in the sparse representation)
  */
@@ -1009,7 +1009,7 @@ read_sg_loops(FILE *f, sparsegraph *sg, int *nloops)
         p = s;
     }
 
-    while (*p >= BIAS6 && *p <= MAXBYTE) 
+    while (*p >= BIAS6 && *p <= MAXBYTE)
         ++p;
     if (*p == '\0')
         gt_abort(">E read_sg: missing newline\n");
@@ -1039,13 +1039,13 @@ sparsegraph*                 /* read graph into sparsegraph format */
 read_sg(FILE *f, sparsegraph *sg)
 /* graph6 and sparse6 formats are supported
  *  *f = an open file
- *  *sg = place to put the answer (NULL for dynamic allocation) 
- *      - must be initialised if not NULL 
+ *  *sg = place to put the answer (NULL for dynamic allocation)
+ *      - must be initialised if not NULL
  */
 {
     int loops;
 
-    return read_sg_loops(f,sg,&loops); 
+    return read_sg_loops(f,sg,&loops);
 }
 
 /****************************************************************************/
@@ -1508,13 +1508,13 @@ writepc_sg(FILE *f, sparsegraph *sg)
 
 sparsegraph*
 readpc_sg(FILE *f,sparsegraph *sg)
-/* read a planar_code graph into sparse graph format 
+/* read a planar_code graph into sparse graph format
     *f = an open file
-    *sg = place to put the answer (NULL for dynamic allocation) 
-        - must be initialised if not NULL 
+    *sg = place to put the answer (NULL for dynamic allocation)
+        - must be initialised if not NULL
 */
 {
-#define BEGET1(x) { x = GETC(f); } 
+#define BEGET1(x) { x = GETC(f); }
 #define BEGET2(x) { w1=GETC(f); w2=GETC(f); if (w2==EOF) x = EOF; else \
                  x = (w1<<8) | w2; }
 #define BEGET4(x) { w1=GETC(f); w2=GETC(f); w3=GETC(f); w4=GETC(f); \
@@ -1547,7 +1547,7 @@ readpc_sg(FILE *f,sparsegraph *sg)
 	        gt_abort(">E readpc_sg : error 3 on reading\n");
 	}
     }
- 
+
     if (sg == NULL)
     {
         if ((sg = (sparsegraph*)ALLOCS(1,sizeof(sparsegraph))) == NULL)
@@ -1596,13 +1596,13 @@ readpc_sg(FILE *f,sparsegraph *sg)
 
 sparsegraph*
 readpcle_sg(FILE *f,sparsegraph *sg)
-/* read a planar_code graph into sparse graph format 
+/* read a planar_code graph into sparse graph format
     *f = an open file
-    *sg = place to put the answer (NULL for dynamic allocation) 
-        - must be initialised if not NULL 
+    *sg = place to put the answer (NULL for dynamic allocation)
+        - must be initialised if not NULL
 */
 {
-#define LEGET1(x) { x = GETC(f); } 
+#define LEGET1(x) { x = GETC(f); }
 #define LEGET2(x) { w2=GETC(f); w1=GETC(f); if (w1==EOF) x = EOF; else \
                  x = (w1<<8) | w2; }
 #define LEGET4(x) { w4=GETC(f); w3=GETC(f); w2=GETC(f); w1=GETC(f); \
@@ -1635,7 +1635,7 @@ readpcle_sg(FILE *f,sparsegraph *sg)
 	        gt_abort(">E readpcle_sg : error 3 on reading\n");
 	}
     }
- 
+
     if (sg == NULL)
     {
         if ((sg = (sparsegraph*)ALLOCS(1,sizeof(sparsegraph))) == NULL)
@@ -1711,7 +1711,7 @@ longvalue(char **ps, long *l)
         ++s;
     }
 
-    if (*s < '0' || *s > '9') 
+    if (*s < '0' || *s > '9')
     {
         *ps = s;
         return (pos || neg) ? ARG_ILLEGAL : ARG_MISSING;
@@ -1733,7 +1733,7 @@ longvalue(char **ps, long *l)
     *l = neg ? -sofar : sofar;
     return ARG_OK;
 }
-    
+
 /*************************************************************************/
 
 void

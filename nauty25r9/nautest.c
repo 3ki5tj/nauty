@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 	    printf("\n ***** FIRSTBIT(0) error *****\n\n");
 	    ++bad;
 	}
-	
+
 	for (i = 0; i < WORDSIZE; ++i)
             if (POPCOUNT(BITT[i]) != 1)
 	    {
@@ -123,4 +123,4 @@ main(int argc, char *argv[])
 	else      printf("\nXXXXXXX %d errors found XXXXXXX\n",bad);
 
 	exit(0);
-} 
+}

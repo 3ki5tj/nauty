@@ -38,7 +38,7 @@ used, it is necessary to check they are correct.
 
 /*==================================================================*/
 
-#ifndef MAXN 
+#ifndef MAXN
 #define MAXN  0
 #endif
 
@@ -46,7 +46,7 @@ used, it is necessary to check they are correct.
 	/* length of size code in bytes */
 #define G6LEN(n) (SIZELEN(n) \
  + ((size_t)(n)/12)*((size_t)(n)-1) + (((size_t)(n)%12)*((size_t)(n)-1)+11)/12)
-  /* exactly graph6 string length excluding \n\0 
+  /* exactly graph6 string length excluding \n\0
      This twisted expression works up to n=227023 in 32-bit arithmetic
      and for larger n if size_t has 64 bits.  */
 
@@ -141,7 +141,7 @@ int setenv(const char*,const char*,int);
 #define SWRANGE(c,sep,bool,val1,val2,id) if (sw==c) \
 	{bool=TRUE;arg_range(&arg,sep,&val1,&val2,id);}
 
-#ifdef HELPTEXT2 
+#ifdef HELPTEXT2
 #define PUTHELPTEXT printf("\nUsage: %s\n\n%s",USAGE,HELPTEXT1);\
 		    printf("%s",HELPTEXT2);
 #else
@@ -173,7 +173,7 @@ fprintf(stderr,"   Use %s -help to see more detailed instructions.\n",argv[0])
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
+
 extern void gtools_check(int,int,int,int);
 extern FILE *opengraphfile(char*,int*,boolean,long);
 extern void writeline(FILE*,char*);

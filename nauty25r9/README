@@ -1,4 +1,4 @@
-README file for nauty 2.5 
+README file for nauty 2.5
 
 Brendan McKay, bdm@cs.anu.edu.au
 Adolfo Piperno, piperno@di.uniroma1.it
@@ -16,7 +16,7 @@ purposes. The details are in the file nauty.h.
 
 The code in the file traces.c is copyright to Adolfo Piperno.
 The code in the file planarity.c (used by the planarg program)
-is copyright to the Magma project. 
+is copyright to the Magma project.
 
 ------------------------------------------------------------
 
@@ -27,7 +27,7 @@ See the manual for more information.
 If you have a working shell, and "make", you can run
    ./configure
 followed by
-   make 
+   make
 to compile nauty and Traces for your system.
 
 If that succeeds without problem, you will have have the

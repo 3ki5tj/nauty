@@ -10,9 +10,9 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 
-typedef struct 
+typedef struct
 {
    int v,w;
 } vpair;
@@ -67,7 +67,7 @@ readblissgraph(FILE *f, sparsegraph *g)
 	    {
                 fprintf(stderr,"Missing p line\n");
                 return FALSE;
-            }  
+            }
             if (fscanf(f,"%d%d",&w,&v) != 2 || w < 1 || w > n)
             {
                 fprintf(stderr,"Bad n line\n");
@@ -107,7 +107,7 @@ readblissgraph(FILE *f, sparsegraph *g)
     g->nde = 2*ne;
 
     for (i = 0; i < n; ++i) g->d[i] = 0;
-    for (j = 0; j < ne; ++j) 
+    for (j = 0; j < ne; ++j)
     {
 	++(g->d[elist[j].v]);
 	++(g->d[elist[j].w]);
@@ -116,7 +116,7 @@ readblissgraph(FILE *f, sparsegraph *g)
     for (i = 1; i < n; ++i) g->v[i] = g->v[i-1] + g->d[i-1];
     for (i = 0; i < n; ++i) g->d[i] = 0;
 
-    for (j = 0; j < ne; ++j) 
+    for (j = 0; j < ne; ++j)
     {
 	v = elist[j].v;
 	w = elist[j].w;
@@ -191,4 +191,4 @@ main(int argc, char *argv[])
     }
 
     exit(0);
-}    
+}

@@ -32,7 +32,7 @@ openfile_head(char *filename, char **header)
         f = stdin;
         actname = "stdin";
     }
-    else 
+    else
     {
         f = fopen(filename,"r");
         actname = filename;

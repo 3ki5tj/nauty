@@ -44,7 +44,7 @@ same value of n. */
 	return p;
     }
 
-    p = (permrec*) malloc(sizeof(permrec)+(freelist_n-2)*sizeof(int)); 
+    p = (permrec*) malloc(sizeof(permrec)+(freelist_n-2)*sizeof(int));
 
     if (p == NULL)
     {
@@ -276,7 +276,7 @@ makecosetreps(grouprec *grp)
 
 int
 permcycles(int *p, int n, int *len, boolean sort)
-/* Puts in len[0..] the cycle lengths of p.  If sort, sort them. 
+/* Puts in len[0..] the cycle lengths of p.  If sort, sort them.
    Return the number of cycles. */
 {
     int m,i,j,k,h,nc,leni;
@@ -291,7 +291,7 @@ permcycles(int *p, int n, int *len, boolean sort)
         if (!ISELEMENT(workset,i))
 	{
 	    k = 1;
-	    for (j = p[i]; j != i; j = p[j]) 
+	    for (j = p[i]; j != i; j = p[j])
 	    {
 		ADDELEMENT(workset,j);
 		++k;
@@ -337,7 +337,7 @@ groupelts(levelrec *lr, int n, int level, void (*action)(int*,int),
     int i,j,orbsize;
     int *p,*cr;
     cosetrec *coset;
-    
+
     coset = lr[level].replist;
     orbsize = lr[level].orbitsize;
 
@@ -354,7 +354,7 @@ groupelts(levelrec *lr, int n, int level, void (*action)(int*,int),
 	    for (i = 0; i < n; ++i) p[i] = cr[before[i]];
 	}
 
-	if (level == 0) 
+	if (level == 0)
 	    (*action)((p == NULL ? id : p),n);
 	else
 	    groupelts(lr,n,level-1,action,p,after+n,id);
@@ -365,7 +365,7 @@ groupelts(levelrec *lr, int n, int level, void (*action)(int*,int),
 
 void
 allgroup(grouprec *grp, void (*action)(int*,int))
-/* Call action(p,n) for every element of the group, including the identity. 
+/* Call action(p,n) for every element of the group, including the identity.
    The identity is always the first call. */
 {
     int i,depth,n;
@@ -398,7 +398,7 @@ groupelts2(levelrec *lr, int n, int level,
     int i,j,orbsize;
     int *p,*cr;
     cosetrec *coset;
-    
+
     coset = lr[level].replist;
     orbsize = lr[level].orbitsize;
 
@@ -415,7 +415,7 @@ groupelts2(levelrec *lr, int n, int level,
 	    for (i = 0; i < n; ++i) p[i] = cr[before[i]];
 	}
 
-	if (level == 0) 
+	if (level == 0)
 	    (*action)((p == NULL ? id : p),n,abort);
 	else
 	    groupelts2(lr,n,level-1,action,p,after+n,id,abort);

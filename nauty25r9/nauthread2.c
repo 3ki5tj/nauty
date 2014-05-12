@@ -1,13 +1,13 @@
 /* nauthread2.c
 
    This program tests sparse nauty running in multiple threads.
-   It must be linked with nauty as configured with 
+   It must be linked with nauty as configured with
    --enable-tls and will only run on systems which support
    thread-local storage.
 */
 
 #include <pthread.h>
-#include "nauty.h"   
+#include "nauty.h"
 #include "nausparse.h"
 /* MAXN=0 is defined by nauty.h, which implies dynamic allocation */
 
@@ -78,7 +78,7 @@ runit(void * threadarg)          /* Main routine for one thread */
         fprintf(stderr,">E group error\n");
 
  /* If we are using multiple threads, we need to free all the dynamic
-    memory we have allocated.  We don't have to do this after each 
+    memory we have allocated.  We don't have to do this after each
     call to nauty, just once before the thread finishes. */
 
     SG_FREE(sg);
@@ -114,7 +114,7 @@ main(int argc, char *argv[])
 	{
 	    if ((ret = pthread_join(thread[finished],NULL)) != 0)
 	    {
-                fprintf(stderr,">E Thread joining failed, code=%d\n",ret);    
+                fprintf(stderr,">E Thread joining failed, code=%d\n",ret);
                 exit(1);
             }
 	    ++finished;
@@ -129,7 +129,7 @@ main(int argc, char *argv[])
             if ((ret = pthread_create(&thread[started],NULL,
 					runit,&par[started])) != 0)
             {
-                fprintf(stderr,">E Thread creation failed, code=%d\n",ret);       
+                fprintf(stderr,">E Thread creation failed, code=%d\n",ret);
                 exit(1);
             }
 	    ++started;

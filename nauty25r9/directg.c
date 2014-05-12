@@ -28,11 +28,11 @@
 #include "gtools.h"
 #include "naugroup.h"
 
-nauty_counter dg_nin,gd_ngen,dg_nout; 
+nauty_counter dg_nin,gd_ngen,dg_nout;
 
 FILE *outfile;
 
-#define MAXNV 128 
+#define MAXNV 128
 #define MAXNE 1024
 static int v0[MAXNE],v1[MAXNE];
 static int edgeno[MAXNV][MAXNV];
@@ -50,9 +50,9 @@ static unsigned long groupsize;
 static unsigned long newgroupsize;
 static boolean Gswitch,Vswitch,ntgroup,ntisol;
 
-/* DEGPRUNE feature 
+/* DEGPRUNE feature
  *
- * If DEGPRUNE is defined it must have a value equal to the name of a 
+ * If DEGPRUNE is defined it must have a value equal to the name of a
  * procedure to be supplied by the user and linked to this program.
  * The prototype must be
  *     int DEGPRUNE(int *indeg, int outdeg*, int v, int n)
@@ -238,7 +238,7 @@ trythisone(grouprec *group, int ne, int n)
         {
             fprintf(outfile,"%d %d",n,ne);
             if (Gswitch) fprintf(outfile," %lu",newgroupsize);
-    
+
             for (i = -1; (i = nextelement(x,me,i)) >= 0; )
             {
                 k = i >> 1;
@@ -360,7 +360,7 @@ direct(graph *g, int nfixed, long minarcs, long maxarcs,
     j0 = -1;  /* last vertex with degree 0 */
     j1 = n;   /* first vertex with degree > 0 */
     isol0 = isol1 = 0;
- 
+
     ne = 0;
     for (i = 0, gi = g; i < n; ++i, gi += m)
     {

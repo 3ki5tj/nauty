@@ -416,7 +416,7 @@ typedef unsigned long nauty_counter;
 #endif
 #define PRINT_COUNTER(f, x) fprintf(f, COUNTER_FMT, x)
 
-#define NAUTYVERSIONID (25480)  /* 10000*version */
+#define NAUTYVERSIONID (25490)  /* 10000*version */
 #define NAUTYREQUIRED NAUTYVERSIONID  /* Minimum compatible version */
 
 #if WORDSIZE == 16
@@ -3058,7 +3058,7 @@ DYNALLSTAT(set, dnwork, dnwork_sz);
 static set workset[MAXM];   /* used for scratch work */
 static int workperm2[MAXN];
 static int bucket[MAXN + 2];
-static set dnwork[40 * MAXM];
+static set dnwork[2 * 60 * MAXM];
 #endif
 
 

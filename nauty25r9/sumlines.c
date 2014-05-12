@@ -85,7 +85,7 @@
    %m  - matches a integer of unbounded size (if GMP!=0)
    %f  - matches a real number of the form ddddd.ddd or -ddddd.ddd
    %v  - same as %f but reports the average rather than the sum
-   %sx - matches a string, where 'x' is any character. 
+   %sx - matches a string, where 'x' is any character.
          If 'x' is not a space, match zero or more characters from the
              current position up but not including the first 'x'.
          If 'x' is a space, match one or more characters from the current
@@ -138,12 +138,12 @@ typedef long integer;
 #define VOUT "%.4f"
 #elif defined(__sun) || defined(__GNUC__) || (__STDC_VERSION__ > 199900L)
 typedef long long integer;
-#define DOUT "%lld"   
+#define DOUT "%lld"
 #define FOUT "%.2f"
 #define VOUT "%.4f"
 #else
 typedef long long integer;
-#define DOUT "%Ld"   
+#define DOUT "%Ld"
 #define FOUT "%.2f"
 #define VOUT "%.4f"
 #endif
@@ -187,7 +187,7 @@ typedef union
 
 #define MAXLINELEN 100000   /* Maximum input line size
                               (longer lines are broken in bits) */
-#define MAXVALUES 16  /* Maximum  total number of 
+#define MAXVALUES 16  /* Maximum  total number of
                              %d,%x,%p,%m,%v,%f or %l items in a format */
 
 #define MAXFORMATS 1000
@@ -264,7 +264,7 @@ numstrcmp(char *s1, char *s2)
         {
             for (s1 = a1+1; isdigit(*s1); ++s1) {}
         }
-        else 
+        else
         {
             a1 = s1;
             ++s1;
@@ -272,9 +272,9 @@ numstrcmp(char *s1, char *s2)
 
         for (a2 = s2; *a2 == ' '; ++a2) {}
         if (isdigit(*a2))
-        {   
+        {
             for (s2 = a2+1; isdigit(*s2); ++s2) {}
-        }  
+        }
         else
         {
             a2 = s2;
@@ -422,12 +422,12 @@ print_common(countnode *root)
     comm0 = comm1 = minlen = maxlen = s1-s0;
 
     while (p)
-    {   
+    {
         switch (code)    /* deliberate flow-ons */
         {
          case A:
             if (p->left)
-            {   
+            {
                 p = p->left;
                 break;
             }
@@ -512,7 +512,7 @@ splay(countnode *p)
         {
             p->parent = NULL;
         }
-        
+
         switch (code)
         {
          case L:
@@ -586,10 +586,10 @@ add_one(countnode **to_root, char *fmt, integer pmod, int nval,
                     }
                 }
 #if GMP
-                else if (valtype[i] == M) 
+                else if (valtype[i] == M)
                     mpz_add(*(p->total[i].m),*(p->total[i].m),*(val[i].m));
 #endif
-                else  
+                else
                     p->total[i].f += val[i].f;   /* F and V */
             ++p->count;
             splay(p);
@@ -641,13 +641,13 @@ add_one(countnode **to_root, char *fmt, integer pmod, int nval,
         {
             if ((new_node->total[i].l
                         = (integerlist*)malloc(sizeof(integerlist))) == NULL)
-            {  
+            {
                 fprintf(stderr,"Malloc failed\n");
                 exit(1);
             }
             if ((new_node->total[i].l->val
                  = (integer*)malloc(sizeof(integer)*val[i].l->nvals)) == NULL)
-            {  
+            {
                 fprintf(stderr,"Malloc failed\n");
                 exit(1);
             }
@@ -691,7 +691,7 @@ scanline(char *s, char *f, number *val, int *valtype,
    with unassigned values replaced by '*' and %s replaced by what
    it matches.  Assigned values except %s are put into val[] with
    their types in valtype[].  The number of values (not counting %#)
-   is returned. 
+   is returned.
    Integers matching %# are put into *seqno, with an error if there
    are more than one, and -1 if there are none.
    If the format doesn't match, -1 is returned.
@@ -713,7 +713,7 @@ scanline(char *s, char *f, number *val, int *valtype,
 #if GMP
     char mp_line[MAXLINELEN+1],*mp;
 #endif
-        
+
     n = 0;
     *seqno = -1;
     badgmp = oflow = FALSE;
@@ -758,7 +758,7 @@ scanline(char *s, char *f, number *val, int *valtype,
                 --s;
             }
             else if (*f == 'c')
-            {   
+            {
                 if (*s == ' ' || *s == '\t' || *s == '\n') return -1;
                 if (doass) *outf++ = *s;
                 else       *outf++ = '*';
@@ -784,7 +784,7 @@ scanline(char *s, char *f, number *val, int *valtype,
                 if (!doass) *outf++ = '*';
                 ++f;
             }
-#if GMP         
+#if GMP
             else if (*f == 'd' || *f == 'x' || *f == 'p')
             {
 #else
@@ -900,13 +900,13 @@ scanline(char *s, char *f, number *val, int *valtype,
 #if GMP
             else if (*f == 'm')
             {
-                while (*s == ' ' || *s == '\t') ++s;        
+                while (*s == ' ' || *s == '\t') ++s;
                 if (!isdigit(*s) && *s != '-' && *s != '+') return -1;
                 mp = mp_line;
                 if      (*s == '-') *mp++ = *s++;
                 else if (*s == '+') s++;
                 while (isdigit(*s)) *mp++ = *s++;
-                *mp = '\0'; 
+                *mp = '\0';
                 if (doass)
                 {
                     valtype[n] = M;
@@ -937,7 +937,7 @@ scanline(char *s, char *f, number *val, int *valtype,
                 }
                 if (*seqno >= 0)
                 {
-                    fprintf(stderr, 
+                    fprintf(stderr,
                             ">E %%# can only be used once per format\n");
                     exit(1);
                 }
@@ -1108,7 +1108,7 @@ read_formats(char *filename, int *numformatsp, boolean mustexist)
 /* Read formats from the given file. */
 {
     FILE *f;
-    int i,c,flags,ignore;  
+    int i,c,flags,ignore;
     char flagname[52];
     char line[MAXLINELEN+3];
     integer pmod;
@@ -1137,7 +1137,7 @@ read_formats(char *filename, int *numformatsp, boolean mustexist)
         while (c == ' ' || c == '\t') c = getc(f);
         if (c == '\n') continue;
         if (c == EOF) break;
-        
+
         if (c == '#')
         {
             while (c != '\n' && c != EOF) c = getc(f);
@@ -1201,7 +1201,7 @@ read_formats(char *filename, int *numformatsp, boolean mustexist)
                     fprintf(stderr,">E Value for P= is too large\n");
                     exit(1);
                 }
-    
+
             }
             else
             {
@@ -1347,7 +1347,7 @@ doglob(char *patt, glob_t *globlk)
 
 
     if (globlk->gl_pathc == 0) printf("WARNING: no files match %s\n",patt);
-    
+
     if (globlk->gl_pathc >= 2)
         qsort(globlk->gl_pathv,globlk->gl_pathc,sizeof(char*),pnumstrcmp);
 }
@@ -1433,7 +1433,7 @@ main(int argc, char *argv[])
 #if GMP
     for (i = 0; i < MAXVALUES; ++i) mpz_init(mp_value[i]);
 #endif
-    for (i = 0; i < MAXVALUES; ++i) 
+    for (i = 0; i < MAXVALUES; ++i)
     {
         il[i].nvals = 0;
         il[i].val = NULL;
@@ -1508,7 +1508,7 @@ main(int argc, char *argv[])
                 line[MAXLINELEN+1] = '\0';
                 if (line[0] == '\n') continue;
                 ++line_number;
-    
+
                 for (i = 0; i < numformats; ++i)
                 {
                     nvals
@@ -1523,12 +1523,12 @@ main(int argc, char *argv[])
                         total_position[i] += line_number;
                         add_one(&count_root[i],outf,format[i].pmod,nvals,
                              val,valtype,i,HAS(i,NUMERIC));
-                        if (matching_lines[i] > 1 && seq >= 0 
+                        if (matching_lines[i] > 1 && seq >= 0
                                                && seq != lastseq[i]+1)
                         {
                             printf("WARNING: Sequence number");
                             if (seq == lastseq[i])
-                            {   
+                            {
                                 printf(" ");
                                 printf(dout,seq);
                                 printf(" is repeated.\n");
@@ -1552,7 +1552,7 @@ main(int argc, char *argv[])
                         if (!HAS(i,CONTINUE)) break;
                     }
                 }
-    
+
                 if (i == numformats) ++unmatched;
             }
             if (errorlines != 0)

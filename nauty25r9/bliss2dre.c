@@ -6,7 +6,7 @@
  * written to the output before and after the graph.
  */
 
-typedef struct 
+typedef struct
 {
    int v,w;
 } vpair;
@@ -85,7 +85,7 @@ main(int argc, char *argv[])
 	    {
                 fprintf(stderr,"Missing p line\n");
                 exit(1);
-            }  
+            }
             if (scanf("%d%d",&w,&v) != 2 || w < 1 || w > n)
             {
                 fprintf(stderr,"Bad n line\n");
@@ -125,7 +125,7 @@ main(int argc, char *argv[])
 
     printf("$=1 n=%d g\n",n);
     qsort(elist,ne,sizeof(vpair),comparedge);
-    
+
     v = -1;
     for (j = 0; j < ne; ++j)
     {

@@ -436,7 +436,7 @@ typedef unsigned long nauty_counter;
 #endif
 #define PRINT_COUNTER(f, x) fprintf(f, COUNTER_FMT, x)
 
-#define NAUTYVERSIONID (25480 + HAVE_TLS)  /* 10000*version + HAVE_TLS */
+#define NAUTYVERSIONID (25490 + HAVE_TLS)  /* 10000*version + HAVE_TLS */
 #define NAUTYREQUIRED NAUTYVERSIONID  /* Minimum compatible version */
 
 #if WORDSIZE == 16

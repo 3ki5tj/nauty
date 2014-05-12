@@ -205,7 +205,7 @@ ranregR(FILE *f, int degree, int multmax, int loopmax, int n)
     fprintf(f,"\n");
     if (ferror(f)) gt_abort(">E genrang output error\n");
 }
- 
+
 /**************************************************************************/
 
 static void
@@ -500,7 +500,7 @@ main(int argc, char *argv[])
     nc2 = ln*loopmax + ln*(ln-1)/2*multmax;
 
     if (eswitch && evalue > nc2)
-    {   
+    {
         fprintf(stderr,
              ">E There are no graphs of order %d and %ld edges\n",
              n,evalue);
@@ -510,7 +510,7 @@ main(int argc, char *argv[])
     if (rswitch && (((n&1) != 0 && (rvalue&1) != 0)
         || rvalue > (n-1)*multmax+2*loopmax))
     {
-        fprintf(stderr,     
+        fprintf(stderr,
              ">E There are no such graphs of order %d and degree %ld\n",
              n,rvalue);
         exit(1);
@@ -551,7 +551,7 @@ main(int argc, char *argv[])
             else
                 writes6(outfile,g,m,n);
 	}
-        else 
+        else
 	{
 	    if (usesparse)
 		writeg6_sg(outfile,&sg);

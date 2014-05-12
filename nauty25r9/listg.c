@@ -103,7 +103,7 @@ putsetx(FILE *f, set *set1, int *curlenp, int linelength, int m,
             first = FALSE;
         }
         else
-        {    
+        {
             fprintf(f," %s",s);
             *curlenp += slen + 1;
         }
@@ -161,7 +161,7 @@ putedges(FILE *f, graph *g, boolean ptn, int linelength, int m, int n)
     for (i = 0, pg = g; i < n; ++i, pg += m)
     {
         for (j = i-1; (j = nextelement(pg,m,j)) >= 0;)
-        { 
+        {
             if (curlen > linelength - 10 && linelength > 0)
             {
                 fprintf(f,"\n");
@@ -276,7 +276,7 @@ putGRAPE(FILE *f, graph *g, int m, int n)
     fprintf(f,
        "  representatives := Immutable([1..%d]),\n",n);
     fprintf(f,"  adjacencies := [\n");
-    
+
     for (i = 0, pg = g; i < n; ++i, pg += m)
     {
 	first = TRUE;

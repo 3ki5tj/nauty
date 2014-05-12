@@ -203,7 +203,7 @@ numtriangles(graph *g, int m, int n)
 	}
 
     return total;
-}    
+}
 
 /**************************************************************************/
 
@@ -279,7 +279,7 @@ delete1(graph *g, graph *h, int v, int n)
 /**************************************************************************/
 
 void
-contract1(graph *g, graph *h, int v, int w, int n)  
+contract1(graph *g, graph *h, int v, int w, int n)
 /* Contract distinct vertices v and w (not necessarily adjacent)
    with result in h.  No loops are created. */
 {
@@ -289,12 +289,12 @@ contract1(graph *g, graph *h, int v, int w, int n)
 
     if (w < v)
     {
-	x = w; 
+	x = w;
 	y = v;
     }
     else
     {
-	x = v; 
+	x = v;
 	y = w;
     }
 
@@ -329,7 +329,7 @@ conncontent(graph *g, int m, int n)
     int i,j,v1,v2,x,y;
     int minv,mindeg,deg,goodv;
     long ne;
-    
+
     if (m > 1) ABORT("conncontent only implemented for m=1");
 
  /* First handle tiny graphs */
@@ -441,7 +441,7 @@ conncontent(graph *g, int m, int n)
 
 /* Case of more than 2/3 dense but not complete */
 
-    if (3*ne > n*n-n) 
+    if (3*ne > n*n-n)
     {
 	j = FIRSTBITNZ(g[minv] ^ bit[minv] ^ ALLMASK(n));   /* non-neighbour */
 
@@ -453,10 +453,10 @@ conncontent(graph *g, int m, int n)
 
         contract1(g,h,minv,j,n);
         v2 = conncontent(h,m,n-1);
-    
+
         return v1 + v2;
     }
- 
+
 /* All remaining cases */
 
     j = FIRSTBITNZ(g[minv]);     /* neighbour */
@@ -466,7 +466,7 @@ conncontent(graph *g, int m, int n)
     v1 = conncontent(g,m,n);
     g[minv] ^= bit[j];
     g[j] ^= bit[minv];
-    
+
     contract1(g,h,minv,j,n);
     v2 = conncontent(h,m,n-1);
 

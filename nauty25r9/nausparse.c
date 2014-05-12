@@ -391,13 +391,13 @@ testcanlab_tr(sparsegraph *g, sparsegraph *canong,
     int k,n;
     size_t *v,*cv,vi,vli,j;
     int mina;
-    
+
     SG_VDE(g,v,d,e);
     SG_VDE(canong,cv,cd,ce);
     n = g->nv;
-    
+
     PREPAREMARKS1(n);
-    
+
     for (i = 0; i < n; ++i)
     {
             /* compare g[lab[i]]^invlab to canong[i] */
@@ -405,14 +405,14 @@ testcanlab_tr(sparsegraph *g, sparsegraph *canong,
         di = cd[i];
         vli = v[lab[i]];
         dli = d[lab[i]];
-            
+
         if (di != dli)
         {
             *samerows = i;
             if (di < dli) return -1;
             return 1;
         }
- 
+
         RESETMARKS1;
         mina = n;
         for (j = 0; j < di; ++j) MARK1(ce[vi+j]);
@@ -434,7 +434,7 @@ testcanlab_tr(sparsegraph *g, sparsegraph *canong,
             return 1;
         }
     }
- 
+
     *samerows = n;
     return 0;
 }
@@ -456,19 +456,19 @@ updatecan_tr(sparsegraph *g, sparsegraph *canong,
     int *cd,*ce;
     int i,dli,n;
     size_t *v,*cv,vli,j,k;
-    
+
     SG_VDE(g,v,d,e);
     SG_VDE(canong,cv,cd,ce);
     n = g->nv;
-    
+
     PREPAREMARKS1(n);
-    
+
     canong->nv = n;
     canong->nde = g->nde;
-    
+
     if (samerows == 0) k = 0;
     else               k = cv[samerows-1]+cd[samerows-1];
-    
+
     for (i = samerows; i < n; ++i)
     {
         cv[i] = k;
@@ -644,7 +644,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
     {
         isplit = ACTIVE[--nactive];
         DELELEMENT(active,isplit);
-    
+
         distvals((sparsegraph*)g,lab[isplit],HITS,n);
 
         for (v1 = 0; v1 < n; )
@@ -706,7 +706,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                     w2 = w3;
                 }
             } while (ptn[j++] > level);
-    
+
             longcode = MASH(longcode,w2);
             longcode = MASH(longcode,v2);
             if (j != v2)   /* At least two fragments
@@ -714,7 +714,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
             {
                 if (v2 == v1+1)
                     CELLSTART[lab[v1]] = n;
-    
+
                 if (v3 == v2+1)
                     CELLSTART[lab[v2]] = n;
                 else
@@ -722,7 +722,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                         CELLSTART[lab[k]] = v2;
                 ++*numcells;
                 ptn[v2-1] = level;
-    
+
                 if (j == v3)
                 {
                  /* Two fragments only */
@@ -737,7 +737,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                         ACTIVE[nactive++] = v2;
                     }
                 }
-                else 
+                else
                 {
                  /* Extra fragments: v3..j-1 > w2 */
                     sortindirect(lab+v3,HITS,j-v3);
@@ -778,7 +778,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                             }
                         }
                     }
-    
+
                     if (bigpos >= 0 && !ISELEMENT(active,v1))
                     {
                         longcode = MASH(longcode,bigpos);
@@ -812,7 +812,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
 
         DELELEMENT(active,isplit);
         longcode = MASH(longcode,isplit);
-    
+
         if (trivsplit)
         {
             RESETMARKS1;
@@ -912,11 +912,11 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                     }
                 }
             } while (ptn[isplit++] > level);
-    
+
             if (hitcells > 1) sortints(HITCELL,hitcells);
-    
+
          /* divide cells according to hit counts */
-    
+
             longcode = MASH(longcode,hitcells);
             for (i = 0; i < hitcells; ++i)
             {
@@ -930,7 +930,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                 if (ptn[v2-1] <= level) continue;
                 w2 = NAUTY_INFINITY;
                 v3 = j = v2;
-    
+
                 do
                 {
                     lj = lab[j];
@@ -967,7 +967,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                         w2 = w3;
                     }
                 } while (ptn[j++] > level);
-    
+
                 longcode = MASH(longcode,w1);
                 longcode = MASH(longcode,v2);
                 if (j != v2)   /* At least two fragments
@@ -975,7 +975,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                 {
                     if (v2 == v1+1)
                         CELLSTART[lab[v1]] = n;
-    
+
                     if (v3 == v2+1)
                         CELLSTART[lab[v2]] = n;
                     else
@@ -983,7 +983,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                             CELLSTART[lab[k]] = v2;
                     ++*numcells;
                     ptn[v2-1] = level;
-    
+
                     if (j == v3)
                     {
                      /* Two fragments only */
@@ -998,7 +998,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                             ACTIVE[nactive++] = v2;
                         }
                     }
-                    else 
+                    else
                     {
                      /* Extra fragments: v3..j-1 > w2 */
                         longcode = MASH(longcode,v3);
@@ -1041,7 +1041,7 @@ refine_sg(graph *g, int *lab, int *ptn, int level, int *numcells,
                                 }
                             }
                         }
-    
+
                         if (bigpos >= 0 && !ISELEMENT(active,v1))
                         {
                             DELELEMENT(active,ACTIVE[bigpos]);
@@ -1117,11 +1117,11 @@ bestcell_sg(graph *g, int *lab, int *ptn, int level,
 
     SG_VDE(g,v,d,e);
 
-#if !MAXN 
-    DYNALLOC1(int,work1,work1_sz,n,"bestcell_sg"); 
-    DYNALLOC1(int,work2,work2_sz,n,"bestcell_sg"); 
-    DYNALLOC1(int,work3,work3_sz,n,"bestcell_sg"); 
-    DYNALLOC1(int,work4,work4_sz,n,"bestcell_sg"); 
+#if !MAXN
+    DYNALLOC1(int,work1,work1_sz,n,"bestcell_sg");
+    DYNALLOC1(int,work2,work2_sz,n,"bestcell_sg");
+    DYNALLOC1(int,work3,work3_sz,n,"bestcell_sg");
+    DYNALLOC1(int,work4,work4_sz,n,"bestcell_sg");
 #endif
     work1b = work1 + (n/2);
 #define START    work1
@@ -1372,7 +1372,7 @@ copy_sg(sparsegraph *sg1, sparsegraph *sg2)
 
     SG_VDE(sg1,v1,d1,e1);
 
-    n = sg1->nv; 
+    n = sg1->nv;
 
     k = 0;
     for (i = 0; i < n; ++i)
@@ -1502,7 +1502,7 @@ distances_sg(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
             longcode = 0;
             head = 0;
             tail = 1;
-            
+
             while (tail < n && head < tail)
             {
                 i = QUEUE[head++];

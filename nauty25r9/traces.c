@@ -623,14 +623,14 @@ given_gens(sparsegraph *g, permnode *gens, int *orbits, boolean digraph)
 {
 	int i, m, n, norbs;
 	permnode *pn;
-	
+
 	n = g->nv;
 	for (i = 0; i < n; ++i) orbits[i] = i;
 	memcpy(IDENTITY_PERM, orbits, n*sizeof(int));
 	norbs = n;
-	
+
 	if (!gens) return norbs;
-	
+
 	m = SETWORDSNEEDED(n);
 	pn = gens;
 	do {
@@ -643,7 +643,7 @@ given_gens(sparsegraph *g, permnode *gens, int *orbits, boolean digraph)
 	    pn->refcount = 0;
 	    pn = pn->next;
 	} while (pn != gens);
-	
+
 	return norbs;
 }
 
@@ -656,14 +656,14 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 	int temp, tmp;
     trielist *STStart, *STAux;
     searchtrie *TrieNode;
-	
+
     if (g_arg->nv > (NAUTY_INFINITY-2))
     {
         fprintf(ERRFILE, "Traces: need n <= %d, but n=%d\n\n",
                 NAUTY_INFINITY-2, g_arg->nv);
         return;
     }
-    
+
 	struct TracesVars *tv = malloc(sizeof(struct TracesVars));
     if (tv == NULL) {
         fprintf(ERRFILE, "\nError, memory not allocated.\n");
@@ -674,16 +674,16 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
         fprintf(ERRFILE, "\nError, memory not allocated.\n");
         exit(1);
     }
-	
+
     Partition *CurrPart, *NextPart;
     Candidate *CurrCand, *NextCand;
     Candidate *BestCand, *AuxCand;
-	
+
 	const int n = g_arg->nv;
 	const int m = SETWORDSNEEDED(n);
 	trieroot = NULL;
 	NextCand = GarbList = NULL;
-	
+
     tv->canlist = 0;
     tv->compstage = 0;
     tv->expathlength = n;
@@ -700,7 +700,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
     tv->stats = stats_arg;
     tv->treedepth = 0;
     tv->gotonode = NULL;
-    
+
 	if (tv->options->strategy == 0) {
 		tv->steps = n;
 		tv->strategy = 0;
@@ -712,7 +712,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
             tv->steps = n;
         }
 	}
-    
+
 #if !MAXN
     DYNALLOC1(int, AUTPERM, AUTPERM_sz, n, "Traces");
     DYNALLOC1(int, BreakSteps, BreakSteps_sz, n, "Traces");
@@ -746,17 +746,17 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
     DYNALLOC1(TracesSpine, Spine, Spine_sz, n, "Traces");
     DYNALLOC1(trie*, TrieArray, TrieArray_sz, n, "Traces");
 #endif
-    
+
 	outfile = (tv->options->outfile == NULL ? stdout : tv->options->outfile);
-    
+
 	SpOrd = SpCyc = SpSwp = NULL;
 	SpPart1 = SpPart2 = NULL;
-	
+
     if (tv->options->verbosity >= 2) {
         for (i = n, tv->digits = 0; i > 0; i /= 10, ++tv->digits) {}
         sprintf(tv->digstring, "%s%dd ", "%", tv->digits);
     }
-	
+
 #define PERMSTACK WorkArray1
 #define CYCLES WorkArray1
 #define HitCls WorkArray2
@@ -773,13 +773,13 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 #define CYCREP MultRefCells
 #define TempOrbSize TEMPLAB
 #define AutomCount TEMPINVLAB
-    
+
 	/* Initialize group and statistics */
     STATS_INIT
     if (tv->options->verbosity >= 2) {
         TIME_INIT
     }
-    
+
 	if (tv->options->generators) {
 		tv->stats->numorbits = given_gens(g_arg, *tv->options->generators, orbits_arg, tv->options->digraph);
 		newgroup(&gpB, NULL, n);
@@ -797,11 +797,11 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 		ti->identitygroup = TRUE;
 	}
 	tv->currorbit = gpB->orbits;
-	
+
 	memset(fix, 0, n*sizeof(int));
 	memset(TheTraceCC, 0, n*sizeof(int));
 	/* ran_init(1234);  any long int as an argument */
-    
+
 	/* The graph is sparse? */
 	if (g_arg->nde < n || g_arg->nde / n < n / (g_arg->nde / n)) {
 		ti->thegraphisparse = TRUE;
@@ -809,21 +809,21 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 	else {
 		ti->thegraphisparse = FALSE;
 	}
-	
+
 	/* Initialize candidate, partition, cells, orbits */
 	NEWPART(Spine[0].part);
 	Spine[0].part->code = -1;
-	
+
 	NEWPART(NextPart);
 	CurrPart = Spine[0].part;
-	
+
 	CurrCand = NewCandidate(n, &GarbList, TRUE);
 	memset(CurrPart->inv, 0, n*sizeof(int));
-	
+
 	CurrCand->singcode = 0;
     TempOrbits = NULL;
     STStart = NULL;
-    
+
 	if (tv->options->defaultptn) {
 		memcpy(CurrCand->lab, IDENTITY_PERM, n*sizeof(int));
 		memcpy(CurrCand->invlab, IDENTITY_PERM, n*sizeof(int));
@@ -850,7 +850,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 			}
 		}
 	}
-    
+
 	/* Initialization of Spine structure */
 	SpineFL = Spine;
 	SpineFL->tgtcell = SpineFL->tgtpos = 0;
@@ -864,19 +864,19 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
     SpineFL->levelcounter = 1;
     SpineFL->keptcounter = 1;
     SpineFL->updates = 1;
-	
+
 	/* Further initializations */
     tv->mark = tv->stackmark = 1073741825;
 	tv->maxtreelevel = 0;
 	tv->tolevel = 0;
 	tv->tcell = 0;
 	UPDATE_LINELGTH
-    
+
 	/* First refinement */
 	traces_refine(g_arg, CurrCand, m, n, CurrPart, tv, ti, FALSE);
-    
+
     CurrCand->name = 0;
-    
+
 	if (CurrPart->cells == n) {
 		tv->stats->canupdates++;
         /* CANONICAL FORM ? */
@@ -895,11 +895,11 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
         ti->exitfromref = FALSE;
         Spine[1].levelcounter = 0;
         Spine[1].updates = 0;
-        
+
 		do {
 			tv->fromlevel = tv->tolevel;
 			SpineFL = Spine+tv->fromlevel;
-            
+
 			if (CurrCand) {
 				switch (tv->compstage) {
 					case 0: CompStage0(g_arg, CurrPart, NextPart, CurrCand, NextCand, m, n, tv, ti);
@@ -921,7 +921,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 						break;
 				}
 			}
-			
+
 			/* NEXT CANDIDATE */
 			if (ti->thereisnextlevel) {
 				if (tv->nextlevel != tv->fromlevel) {
@@ -933,14 +933,14 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
 			}
 		}
 		while (ti->thereisnextlevel);
-        
+
         if (tv->compstage) {
             memset(CurrOrbSize, 0, n*sizeof(int));
             for (i=0; i<n; i++) {
                 CurrOrbSize[TempOrbits[i]]++;
             }
         }
-        
+
         if (!tv->options->getcanon) {
 			if (tv->compstage) {
                 tv->maxtreelevel++;
@@ -956,21 +956,21 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
                 }
             }
         }
-        
+
         tv->stats->grpsize1 = 1.0;
         tv->stats->grpsize2 = 0;
-        
+
         if (tv->maxtreelevel) PRINT_LINE_PLUS(tv->maxtreelevel);
-        
+
         AuxCand = Spine[tv->maxtreelevel].liststart;
         while (!AuxCand->do_it) {
             AuxCand = AuxCand->next;
         }
-        
+
         /* GROUP ORDER */
         grouporderplus(g_arg, fix, tv->nfix, AuxCand, gpB, &gensB, &(tv->stats->grpsize1), &(tv->stats->grpsize2),
                        n, tv, ti);
-        
+
         /* CANONICAL FORM ? */
         if (tv->options->getcanon) {
             BestCand = AuxCand;
@@ -994,7 +994,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
             memcpy(lab, BestCand->lab, n*sizeof(int));
             if (canong_arg) memcpy(CurrPart->inv, BestCand->invlab, n*sizeof(int));
         }
-        
+
         if (tv->options->verbosity >= 2) {
             if (tv->linelgth < 40) {
                 tv->linelgth = 40;
@@ -1002,14 +1002,14 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
             LINE(tv->linelgth+4, "*")
             NEXTLINE
         }
-        
+
     }
-    
+
     tv->stats->treedepth = tv->treedepth;
     if (Spine[tv->treedepth].part->code == -1) {
         tv->stats->treedepth--;
     }
-    
+
     if (tv->options->verbosity >= 2) {
         fprintf(outfile, "group time: %.2f, %.2f, %.2f; total: %.2f; exp_paths time: %.2f; aut_check time: %.2f\n%lu refinement%s interrupted by trace comparison (%s); special cells: %d\n------", tv->schreier1, tv->schreier2, tv->schreier3, tv->schreier1+tv->schreier2+tv->schreier3,
                 tv->expaths, tv->autchk, SS(tv->stats->interrupted, "", "s"), (tv->options->strategy == 0 ? "breadth-first" : "depth-first"), tv->specialgens);
@@ -1021,7 +1021,7 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
         SG_ALLOC(*canong_arg, g_arg->nv, g_arg->nde, "traces canong");
         updatecan_tr(g_arg, canong_arg, lab, CurrPart->inv, 0);
     }
-    
+
     if (tv->options->generators) {
         deleteunmarked(&gensB);
         *tv->options->generators = gensB;
@@ -1031,14 +1031,14 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
         freeschreier(&gpB, &gensB);
         schreier_freedyn();
     }
-    
+
     while (STStart) {
         STAux = STStart;
         free(STAux->triearray);
         STStart = STStart->next;
         free(STAux);
     }
-    
+
     tv->canlist = 0;
     for (i=0; i<=tv->treedepth; i++) {
         if (Spine[i].liststart) {
@@ -1046,11 +1046,11 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
             Spine[i].liststart = Spine[i].listend = NULL;
         }
     }
-    
+
     if (GarbList) {
         tv->stats->peaknodes = FreeList(GarbList, FALSE);
     }
-    
+
     FREECAND(NextCand)
     FREECAND(SpOrd)
     FREECAND(SpCyc)
@@ -1058,20 +1058,20 @@ Traces(sparsegraph *g_arg, int *lab, int *ptn,
     FREEPART(NextPart)
     FREEPART(SpPart1)
     FREEPART(SpPart2)
-    
+
     if (!tv->options->getcanon && trieroot) {
         for (i=0; i<=tv->triepos; i++) {
             free(TrieArray[i]);
         }
     }
-    
+
     for (i=0; i <= tv->treedepth; i++) {
         FREEPART(Spine[i].part)
     }
-    
+
     CurrCand = GarbList = NULL;
     tv->stats->peaknodes += tv->canlist;
-    
+
     free(tv);
     free(ti);
     traces_freedyn();
@@ -1098,51 +1098,51 @@ int traces_refine(sparsegraph *sg,
 	int BigCell, BigCellPos, BigCellSize;
 	boolean TraceCell = FALSE;
     int *nghb;
-	
+
 	TcSize = Spine[tv->tolevel].tgtsize;
-	
+
 	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	SpineTL = Spine+tv->tolevel;
 	TraceEnd = &(SpineTL->trcend);
 	Traceccend = SpineTL->ccend;
 	Tracestpend = &(SpineTL->stpend);
 	TraceCCInd = SpineTL->ccstart;
 	TraceStepsInd = SpineTL->stpstart;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
     UPDATEMIN(Part->active, n-1);
 	memcpy(CStack+1, TheTrace+SpineTL->trcstart, (Part->active)*sizeof(int));
 	CStackInd = Part->active;
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
     TraceInd = SpineTL->trcstart+Part->active;
-	
+
 	if (!SpineTL->thetracexists) {
 		newtrace = TRUE;
 	}
-    
+
 	while (CStackInd > 0) {
-        
+
 		if (tv->mark > (NAUTY_INFINITY-2)) {
 			memset(Markers, 0, n*sizeof(int));
 			memset(MarkHitVtx, 0, n*sizeof(int));
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
+
 		if (Part->cells == tv->finalnumcells) break;
-		
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -1153,12 +1153,12 @@ int traces_refine(sparsegraph *sg,
 				break;
 			}
 		}
-        
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];
 		StackMarkers[ind0] = 0;
-		
+
 		if (!newtrace) {
 			TraceCell = ((ind0 == TheTraceCC[TraceCCInd]) && (TraceCCInd < Traceccend));
         }
@@ -1168,7 +1168,7 @@ int traces_refine(sparsegraph *sg,
 			HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -1182,7 +1182,7 @@ int traces_refine(sparsegraph *sg,
 				}
 			}
 			tv->mark++;
-            
+
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
 				ind1 = HitCls[j];
@@ -1191,7 +1191,7 @@ int traces_refine(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-			
+
             /* SINGLETON CC CASE */
 			if (SplInd) {
 				if (newtrace) {
@@ -1201,9 +1201,9 @@ int traces_refine(sparsegraph *sg,
                     TheTraceCC[TraceCCInd] = ind0;
                     newtrace = TRUE;
                 }
-                
+
                 TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd, &Traceccend)
-                
+
 				switch (SplInd) {
 					case 0:
 					case 1:
@@ -1235,13 +1235,13 @@ int traces_refine(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
 					i = ind1+cls[ind1]-ElmHitCll[ind1];
                     TRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 				}
-				
+
 				/* REARRANGE THE CELLS */
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
@@ -1249,7 +1249,7 @@ int traces_refine(sparsegraph *sg,
 					newcell = ind1+cls[ind1];
 					cls[newcell] = ElmHitCll[ind1];
 					Part->cells++;
-					
+
 					if (StackMarkers[ind1] != tv->stackmark) {
 						if (cls[newcell] < cls[ind1]) {
 							CStack[++CStackInd] = newcell;
@@ -1264,11 +1264,11 @@ int traces_refine(sparsegraph *sg,
 						CStack[++CStackInd] = newcell;
 						StackMarkers[newcell] = tv->stackmark;
 					}
-					
+
 					SplitCell = HitVtx+ind1;
 					ind3 = cls[newcell];
 					LabCell = lab+newcell;
-					
+
 					for (jk = 0; jk < ind3; jk++) {
 						k = SplitCell[jk];
 						i = LabCell[jk];
@@ -1291,7 +1291,7 @@ int traces_refine(sparsegraph *sg,
                     return 0;
 				}
 			}
-			
+
 		}
 		else {
 			if (ti->thegraphisparse) {
@@ -1335,12 +1335,12 @@ int traces_refine(sparsegraph *sg,
                             }
 						}
 					}
-                    
+
                 }
-				
+
 				tv->mark++;
-				
-                
+
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -1361,7 +1361,7 @@ int traces_refine(sparsegraph *sg,
 						}
 					}
 				}
-                
+
                 /* SPARSE CASE */
 				if (SplInd) {
 					if (newtrace) {
@@ -1372,7 +1372,7 @@ int traces_refine(sparsegraph *sg,
                         newtrace = TRUE;
                     }
                     TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd+n, &Traceccend)
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -1405,7 +1405,7 @@ int traces_refine(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 						ind0 = SplCls[sc];
 						ind1 = ind0 + cls[ind0];
@@ -1414,7 +1414,7 @@ int traces_refine(sparsegraph *sg,
 							SplCnt[SplCntInd++] = 0;
 							SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 						}
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						iend = ind0 + ElmHitCll[ind0];
@@ -1430,11 +1430,11 @@ int traces_refine(sparsegraph *sg,
 							}
 						}
 						tv->mark++;
-						
+
 						if (SplCntInd) {
                             TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+n, Tracestpend)
 						}
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -1467,9 +1467,9 @@ int traces_refine(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
@@ -1492,7 +1492,7 @@ int traces_refine(sparsegraph *sg,
                                 TRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 							}
 						}
-						
+
 						if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 							CStack[BigCellPos] = ind0;
 							StackMarkers[BigCell] = 0;
@@ -1510,7 +1510,7 @@ int traces_refine(sparsegraph *sg,
 							InvLab[lab[k]] = k;
 							NghCounts[value] = 0;
 						}
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind1 - ElmHitCll[ind0];
 						i = newcell;
@@ -1523,13 +1523,13 @@ int traces_refine(sparsegraph *sg,
 							}
 						}
 						while (++i < ind1);
-						
+
 						for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
 							if (cls[i] == 1) {
 								Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
                             }
 						}
-						
+
 					}
 				}
 				else {
@@ -1537,7 +1537,7 @@ int traces_refine(sparsegraph *sg,
                         return 0;
 					}
 				}
-				
+
 			}
 			else {
 				if (sg->d[lab[ind0]] > n/cls[ind0]) {
@@ -1571,10 +1571,10 @@ int traces_refine(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
-                    
+
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -1589,7 +1589,7 @@ int traces_refine(sparsegraph *sg,
 							}
 						}
 					}
-					
+
                     /* DENSE-SPARSE CASE */
 					if (SplInd) {
 						if (newtrace) {
@@ -1600,7 +1600,7 @@ int traces_refine(sparsegraph *sg,
                             newtrace = TRUE;
                         }
                         TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd+2*n, &Traceccend)
-						
+
 						/* Sorting the cells to be split */
 						switch (SplInd) {
 							case 0:
@@ -1633,12 +1633,12 @@ int traces_refine(sparsegraph *sg,
 								quickSort(SplCls, SplInd);
 								break;
 						}
-						
+
 						for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 							ind0 = SplCls[j];
 							ind1 = ind0+cls[ind0];
 							SplCntInd = 0;
-							
+
 							/* According to the numbers of neighbors of C into the current cell */
 							/* compute how many vertices in C will be placed into the same new cell */
 							for (i = ind0; i < ind1; i++) {
@@ -1653,11 +1653,11 @@ int traces_refine(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
 							if (SplCntInd) {
                                 TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+2*n, Tracestpend)
 							}
-							
+
 							/* Sort the values deriving from the previous step */
 							switch (SplCntInd) {
 								case 0:
@@ -1690,9 +1690,9 @@ int traces_refine(sparsegraph *sg,
 									quickSort(SplCnt, SplCntInd);
 									break;
 							}
-							
+
 							Part->cells += SplCntInd-1;
-							
+
 							/* Split the cell C and update the information for sizes of new cells */
 							/* Put the new cells into the stack */
 							i = ind0;
@@ -1702,7 +1702,7 @@ int traces_refine(sparsegraph *sg,
 							for (k = 0; k < SplCntInd; k++) {
 								value = SplPos[SplCnt[k]];
 								cls[i] = value;
-								
+
 								if ((StackMarkers[ind0] != tv->stackmark) && (value > BigCellSize)) {
 									BigCell = i;
 									BigCellPos = CStackInd;
@@ -1716,20 +1716,20 @@ int traces_refine(sparsegraph *sg,
                                     TRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 								}
 							}
-							
+
 							if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 								CStack[BigCellPos] = ind0;
 								StackMarkers[BigCell] = 0;
 								StackMarkers[ind0] = tv->stackmark;
 							}
-							
+
 							/* Permute elements of the cell C */
 							i = ind0;
 							do {
 								SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 							}
 							while(++i < ind1);
-							
+
 							/* Reconstruct the cell C and update the inverse partition */
 							newcell = ind0;
 							i = ind0;
@@ -1737,7 +1737,7 @@ int traces_refine(sparsegraph *sg,
 							do {
 								lab[i] = SplCnt[i];
 								InvLab[lab[i]] = i;
-								
+
 								Part->inv[i] = newcell;
 								if (i == ind2) {
 									newcell = i+1;
@@ -1745,13 +1745,13 @@ int traces_refine(sparsegraph *sg,
 								}
 							}
 							while (++i < ind1);
-							
+
 							for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
 								if (cls[i] == 1) {
 									Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
                                 }
 							}
-							
+
 						}
 					}
 					else {
@@ -1759,7 +1759,7 @@ int traces_refine(sparsegraph *sg,
                             return 0;
 						}
 					}
-					
+
 				}
 				else {
 					if (cls[ind0] == n) {
@@ -1767,7 +1767,7 @@ int traces_refine(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -1782,8 +1782,8 @@ int traces_refine(sparsegraph *sg,
                     while (ind4 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind4+cls[ind4];
 						if (cls[ind4] > 1) {
-							
-                            
+
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind4]];
@@ -1810,12 +1810,12 @@ int traces_refine(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
                             if (SplInd && !TraceCell) newtrace = TRUE;
-                            
+
 							if (SplCntInd) {
                                 TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+3*n, Tracestpend)
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -1848,9 +1848,9 @@ int traces_refine(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind4;
@@ -1860,7 +1860,7 @@ int traces_refine(sparsegraph *sg,
 								for (k = 0; k < SplCntInd; k++) {
 									value = SplPos[SplCnt[k]];
 									cls[i] = value;
-									
+
 									if ((StackMarkers[ind4] != tv->stackmark) && (value > BigCellSize)) {
 										BigCell = i;
 										BigCellPos = CStackInd;
@@ -1879,14 +1879,14 @@ int traces_refine(sparsegraph *sg,
 									StackMarkers[BigCell] = 0;
 									StackMarkers[ind4] = tv->stackmark;
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind4;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind4;
 								i = ind4;
@@ -1901,7 +1901,7 @@ int traces_refine(sparsegraph *sg,
 									}
 								}
 								while (++i < ind1);
-								
+
 								for (i = ind4; i < ind1; i+=cls[i]) {
 									if (cls[i] == 1) {
 										Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
@@ -1911,7 +1911,7 @@ int traces_refine(sparsegraph *sg,
 						}
 						ind4 = ind1;
 					}
-                    
+
                     /* DENSE-DENSE CASE */
 					if (SplInd) {
                         if (!TraceCell) {
@@ -1927,7 +1927,7 @@ int traces_refine(sparsegraph *sg,
                             return 0;
 						}
 					}
-					
+
 				}
 			}
 		}
@@ -1945,7 +1945,7 @@ int traces_refine(sparsegraph *sg,
             }
         }
     }
-    
+
 	Part->code = Cand->code = CLEANUP(longcode);
     tlp1 = tv->tolevel+1;
 	if (newtrace) {
@@ -1963,7 +1963,7 @@ int traces_refine(sparsegraph *sg,
 		*TraceEnd = TraceInd;
 		SpineTL->ccend = TraceCCInd;
 		*Tracestpend = TraceStepsInd;
-		
+
 		SpineTL->thetracexists = TRUE;
 		if (tlp1 < n) {
 			Spine[tlp1].ccstart = TraceCCInd;
@@ -2007,26 +2007,26 @@ void traces_refine_notrace(sparsegraph *sg,
 	int *lab, *cls, *InvLab, *SplitCell, *LabCell;
 	int BigCell, BigCellPos, BigCellSize;
     int *nghb;
-    
+
  	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
 	CStackInd = 1;
     CStack[1] = tv->tcellexpath+cls[tv->tcellexpath];
-	
+
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
-	
+
 	while (CStackInd > 0)
 	{
 		if (tv->mark > (NAUTY_INFINITY-2)) {
@@ -2035,8 +2035,8 @@ void traces_refine_notrace(sparsegraph *sg,
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
-        
+
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -2047,20 +2047,20 @@ void traces_refine_notrace(sparsegraph *sg,
 				break;
 			}
 		}
-		
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];		/* Current Cell */
 		longcode = MASHNONCOMM(longcode, ind0);
 		StackMarkers[ind0] = 0;
-		
+
 		/* Analysis of occurrences of neighbors of the current cell */
 		/* The list of cells with neighbors in the current cell is  built */
 		if (cls[ind0] == 1) {	/* SINGLETON CURRENT CELL CASE */
 			HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -2076,7 +2076,7 @@ void traces_refine_notrace(sparsegraph *sg,
 					longcode = MASHCOMM(longcode, value);
 				}
 			}
-			
+
 			tv->mark++;
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
@@ -2086,7 +2086,7 @@ void traces_refine_notrace(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-			
+
 			switch (SplInd) {
 				case 0:
 				case 1:
@@ -2118,16 +2118,16 @@ void traces_refine_notrace(sparsegraph *sg,
 					quickSort(SplCls, SplInd);
 					break;
 			}
-			
+
 			/* REARRANGE THE CELL */
 			for (j = 0; j < SplInd; j++) {
 				ind1 = SplCls[j];
 				cls[ind1] = cls[ind1]-ElmHitCll[ind1];
 				newcell = ind1+cls[ind1];
 				cls[newcell] = ElmHitCll[ind1];
-				
+
 				Part->cells++;
-				
+
 				if (StackMarkers[ind1] != tv->stackmark) {
 					if (cls[newcell] < cls[ind1]) {
 						CStack[++CStackInd] = newcell;
@@ -2142,11 +2142,11 @@ void traces_refine_notrace(sparsegraph *sg,
 					CStack[++CStackInd] = newcell;
 					StackMarkers[newcell] = tv->stackmark;
 				}
-				
+
 				SplitCell = HitVtx+ind1;
 				ind3 = cls[newcell];
 				LabCell = lab+newcell;
-				
+
 				for (i1 = 0; i1 < ind3; i1++) {
 					k = SplitCell[i1];
 					i = LabCell[i1];
@@ -2209,11 +2209,11 @@ void traces_refine_notrace(sparsegraph *sg,
                             }
 						}
 					}
-                    
+
                 }
-				
+
 				tv->mark++;
-				
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -2271,7 +2271,7 @@ void traces_refine_notrace(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 					ind0 = SplCls[sc];
 					ind1 = ind0 + cls[ind0];
@@ -2280,7 +2280,7 @@ void traces_refine_notrace(sparsegraph *sg,
 						SplCnt[SplCntInd++] = 0;
 						SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 					}
-					
+
 					/* According to the numbers of neighbors of C into the current cell */
 					/* compute how many vertices in C will be placed into the same new cell */
 					iend = ind0 + ElmHitCll[ind0];
@@ -2296,7 +2296,7 @@ void traces_refine_notrace(sparsegraph *sg,
 						}
 					}
 					tv->mark++;
-					
+
 					/* Sort the values deriving from the previous step */
 					switch (SplCntInd) {
 						case 0:
@@ -2330,7 +2330,7 @@ void traces_refine_notrace(sparsegraph *sg,
 							break;
 					}
 					Part->cells += SplCntInd-1;
-					
+
 					/* Split the cell C and update the information for sizes of new cells */
 					/* Put the new cells into the stack */
 					i = ind0;
@@ -2352,7 +2352,7 @@ void traces_refine_notrace(sparsegraph *sg,
 							StackMarkers[i] = tv->stackmark;
 						}
 					}
-					
+
 					if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 						CStack[BigCellPos] = ind0;
 						StackMarkers[BigCell] = 0;
@@ -2370,7 +2370,7 @@ void traces_refine_notrace(sparsegraph *sg,
 						InvLab[lab[k]] = k;
 						NghCounts[value] = 0;
 					}
-					
+
 					/* Reconstruct the cell C and update the inverse partition */
 					newcell = ind1 - ElmHitCll[ind0];
 					i = newcell;
@@ -2383,13 +2383,13 @@ void traces_refine_notrace(sparsegraph *sg,
 						}
 					}
 					while (++i < ind1);
-                    
+
                     for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
                         if (cls[i] == 1) {
                             Cand->pathsingcode = MASHCOMM(Cand->pathsingcode, lab[i]);
                         }
                     }
-                    
+
 				}
 			}
 			else {
@@ -2424,9 +2424,9 @@ void traces_refine_notrace(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -2441,7 +2441,7 @@ void traces_refine_notrace(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -2474,12 +2474,12 @@ void traces_refine_notrace(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 						ind0 = SplCls[j];
 						ind1 = ind0+cls[ind0];
 						SplCntInd = 0;
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						for (i = ind0; i < ind1; i++) {
@@ -2493,9 +2493,9 @@ void traces_refine_notrace(sparsegraph *sg,
 								SplPos[value]++;
 							}
 						}
-						
+
 						tv->mark++;
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -2528,9 +2528,9 @@ void traces_refine_notrace(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
@@ -2557,14 +2557,14 @@ void traces_refine_notrace(sparsegraph *sg,
 							StackMarkers[BigCell] = 0;
 							StackMarkers[ind0] = tv->stackmark;
 						}
-						
+
 						/* Permute elements of the cell C */
 						i = ind0;
 						do {
 							SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 						}
 						while(++i < ind1);
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind0;
 						i = ind0;
@@ -2573,20 +2573,20 @@ void traces_refine_notrace(sparsegraph *sg,
 							lab[i] = SplCnt[i];
 							InvLab[lab[i]] = i;
 							Part->inv[i] = newcell;
-							
+
 							if (i == ind2) {
 								newcell = i+1;
 								if (newcell < n) ind2 = newcell+cls[newcell]-1;
 							}
 						}
 						while (++i < ind1);
-                        
+
                         for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
                             if (cls[i] == 1) {
                                 Cand->pathsingcode = MASHCOMM(Cand->pathsingcode, lab[i]);
                             }
                         }
-                        
+
 					}
 				}
 				else {
@@ -2595,7 +2595,7 @@ void traces_refine_notrace(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -2605,12 +2605,12 @@ void traces_refine_notrace(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					ind0 = 0;
 					while (ind0 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind0+cls[ind0];
 						if (cls[ind0] > 1) {
-							
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind0]];
@@ -2636,10 +2636,10 @@ void traces_refine_notrace(sparsegraph *sg,
 									break;
 								}
 							}
-							
+
 							if (SplCntInd) {
 								tv->mark++;
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -2672,9 +2672,9 @@ void traces_refine_notrace(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind0;
@@ -2701,14 +2701,14 @@ void traces_refine_notrace(sparsegraph *sg,
 									StackMarkers[BigCell] = 0;
 									StackMarkers[ind0] = tv->stackmark;
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind0;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind0;
 								i = ind0;
@@ -2723,13 +2723,13 @@ void traces_refine_notrace(sparsegraph *sg,
 									}
 								}
 								while (++i < ind1);
-                                
+
                                 for (i = ind0; i < ind1; i+=cls[i]) {
 									if (cls[i] == 1) {
 										Cand->pathsingcode = MASHCOMM(Cand->pathsingcode, lab[i]);
                                     }
 								}
-                                
+
 							}
 						}
 						ind0 = ind1;
@@ -2738,7 +2738,7 @@ void traces_refine_notrace(sparsegraph *sg,
 			}
 		}
 	}  /* end while (CStackInd > 0) */
-	
+
 	Cand->code = CLEANUP(longcode);
 	return;
 }
@@ -2761,27 +2761,27 @@ void traces_refine_maketrie(sparsegraph *sg,
 	int *lab, *cls, *InvLab, *SplitCell, *LabCell;
 	int BigCell, BigCellPos, BigCellSize;
     int *nghb;
-    
+
 	TcSize = Spine[tv->tolevel].tgtsize;
-	
+
 	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
 	CStack[1] = Spine[tv->tolevel_tl].tgtpos;
 	CStackInd = 1;
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
-	
+
 	while (CStackInd > 0)
 	{
 		if (tv->mark > (NAUTY_INFINITY-2)) {
@@ -2790,9 +2790,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
+
 		if (Part->cells == tv->finalnumcells) break;
-		
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -2803,20 +2803,20 @@ void traces_refine_maketrie(sparsegraph *sg,
 				break;
 			}
 		}
-		
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];
 		longcode = MASHNONCOMM(longcode, ind0);
 		StackMarkers[ind0] = 0;
-		
+
 		/* Analysis of occurrences of neighbors of the current cell */
 		/* The list of cells with neighbors in the current cell is  built */
 		if (cls[ind0] == 1) {  /* SINGLETON CURRENT CELL CASE */
 			HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -2832,9 +2832,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 					longcode = MASHCOMM(longcode, value);
 				}
 			}
-			
+
 			tv->mark++;
-			
+
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
 				ind1 = HitCls[j];
@@ -2843,7 +2843,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-			
+
 			switch (SplInd) {
 				case 0:
 				case 1:
@@ -2875,22 +2875,22 @@ void traces_refine_maketrie(sparsegraph *sg,
 					quickSort(SplCls, SplInd);
 					break;
 			}
-			
+
 			for (j = 0; j < SplInd; j++) {
 				ind1 = SplCls[j];
 				i = ind1+cls[ind1]-ElmHitCll[ind1];
 				trieref = trie_make(trieref, i, n, tv);
 			}
-			
+
 			/* REARRANGE THE CELL */
 			for (j = 0; j < SplInd; j++) {
 				ind1 = SplCls[j];
 				cls[ind1] = cls[ind1]-ElmHitCll[ind1];
 				newcell = ind1+cls[ind1];
 				cls[newcell] = ElmHitCll[ind1];
-				
+
 				Part->cells++;
-				
+
 				if (StackMarkers[ind1] != tv->stackmark) {
 					if (cls[newcell] < cls[ind1]) {
 						CStack[++CStackInd] = newcell;
@@ -2905,11 +2905,11 @@ void traces_refine_maketrie(sparsegraph *sg,
 					CStack[++CStackInd] = newcell;
 					StackMarkers[newcell] = tv->stackmark;
 				}
-				
+
 				SplitCell = HitVtx+ind1;
 				ind3 = cls[newcell];
 				LabCell = lab+newcell;
-				
+
 				for (i1 = 0; i1 < ind3; i1++) {
 					k = SplitCell[i1];
 					i = LabCell[i1];
@@ -2966,11 +2966,11 @@ void traces_refine_maketrie(sparsegraph *sg,
                             }
 						}
 					}
-                    
+
                 }
-				
+
 				tv->mark++;
-				
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -3028,7 +3028,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 					ind0 = SplCls[sc];
 					ind1 = ind0 + cls[ind0];
@@ -3037,7 +3037,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 						SplCnt[SplCntInd++] = 0;
 						SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 					}
-					
+
 					/* According to the numbers of neighbors of C into the current cell */
 					/* compute how many vertices in C will be placed into the same new cell */
 					iend = ind0 + ElmHitCll[ind0];
@@ -3052,9 +3052,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 							SplPos[value]++;
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					/* Sort the values deriving from the previous step */
 					switch (SplCntInd) {
 						case 0:
@@ -3088,7 +3088,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 							break;
 					}
 					Part->cells += SplCntInd-1;
-					
+
 					/* Split the cell C and update the information for sizes of new cells */
 					/* Put the new cells into the stack */
 					i = ind0;
@@ -3111,7 +3111,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 							trieref = trie_make(trieref, i, n, tv);
 						}
 					}
-					
+
 					if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 						CStack[BigCellPos] = ind0;
 						StackMarkers[BigCell] = 0;
@@ -3129,7 +3129,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 						InvLab[lab[k]] = k;
 						NghCounts[value] = 0;
 					}
-					
+
 					/* Reconstruct the cell C and update the inverse partition */
 					newcell = ind1 - ElmHitCll[ind0];
 					i = newcell;
@@ -3176,9 +3176,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -3193,7 +3193,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -3226,12 +3226,12 @@ void traces_refine_maketrie(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 						ind0 = SplCls[j];
 						ind1 = ind0+cls[ind0];
 						SplCntInd = 0;
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						for (i = ind0; i < ind1; i++) {
@@ -3245,9 +3245,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 								SplPos[value]++;
 							}
 						}
-						
+
 						tv->mark++;
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -3280,9 +3280,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
@@ -3310,14 +3310,14 @@ void traces_refine_maketrie(sparsegraph *sg,
 							StackMarkers[BigCell] = 0;
 							StackMarkers[ind0] = tv->stackmark;
 						}
-						
+
 						/* Permute elements of the cell C */
 						i = ind0;
 						do {
 							SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 						}
 						while(++i < ind1);
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind0;
 						i = ind0;
@@ -3340,7 +3340,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -3350,12 +3350,12 @@ void traces_refine_maketrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					ind0 = 0;
 					while (ind0 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind0+cls[ind0];
 						if (cls[ind0] > 1) {
-							
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind0]];
@@ -3381,10 +3381,10 @@ void traces_refine_maketrie(sparsegraph *sg,
 									break;
 								}
 							}
-							
+
 							if (SplCntInd) {
 								tv->mark++;
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -3417,9 +3417,9 @@ void traces_refine_maketrie(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind0;
@@ -3447,14 +3447,14 @@ void traces_refine_maketrie(sparsegraph *sg,
 									StackMarkers[ind0] = tv->stackmark;
 									trieref = trie_make(trieref, i, n, tv);
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind0;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind0;
 								i = ind0;
@@ -3477,7 +3477,7 @@ void traces_refine_maketrie(sparsegraph *sg,
 			}
 		}
 	}
-	
+
 	Cand->code = CLEANUP(longcode);
 	return;
 }
@@ -3500,25 +3500,25 @@ int traces_refine_comptrie(sparsegraph *sg,
 	int *lab, *cls, *InvLab, *SplitCell, *LabCell;
 	int BigCell, BigCellPos, BigCellSize;
     int *nghb;
-    
+
 	TcSize = Spine[tv->tolevel].tgtsize;
-	
+
 	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
 	CStack[1] = Spine[tv->tolevel_tl].tgtpos;
 	CStackInd = 1;
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
 	while (CStackInd > 0)
 	{
@@ -3528,9 +3528,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
+
 		if (Part->cells == tv->finalnumcells) break;
-		
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -3541,20 +3541,20 @@ int traces_refine_comptrie(sparsegraph *sg,
 				break;
 			}
 		}
-		
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];		/* Current Cell */
 		longcode = MASHNONCOMM(longcode, ind0);
 		StackMarkers[ind0] = 0;
-		
+
 		/* Analysis of occurrences of neighbors of the current cell */
 		/* The list of cells with neighbors in the current cell is  built */
 		if (cls[ind0] == 1) {  /* SINGLETON CURRENT CELL CASE */
 			HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -3570,9 +3570,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 					longcode = MASHCOMM(longcode, value);
 				}
 			}
-			
+
 			tv->mark++;
-			
+
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
 				ind1 = HitCls[j];
@@ -3581,7 +3581,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-			
+
 			switch (SplInd) {
 				case 0:
 				case 1:
@@ -3613,21 +3613,21 @@ int traces_refine_comptrie(sparsegraph *sg,
 					quickSort(SplCls, SplInd);
 					break;
 			}
-			
+
 			for (j = 0; j < SplInd; j++) {
 				ind1 = SplCls[j];
 				i = ind1+cls[ind1]-ElmHitCll[ind1];
 				trieref = trie_comp(trieref, i);
 				if (trieref == NULL) return 0;
 			}
-			
+
 			/* REARRANGE THE CELL */
 			for (j = 0; j < SplInd; j++) {
 				ind1 = SplCls[j];
 				cls[ind1] = cls[ind1]-ElmHitCll[ind1];
 				newcell = ind1+cls[ind1];
 				cls[newcell] = ElmHitCll[ind1];
-				
+
 				Part->cells++;
 				if (StackMarkers[ind1] != tv->stackmark) {
 					if (cls[newcell] < cls[ind1]) {
@@ -3646,7 +3646,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 				SplitCell = HitVtx+ind1;
 				ind3 = cls[newcell];
 				LabCell = lab+newcell;
-				
+
 				for (i1 = 0; i1 < ind3; i1++) {
 					k = SplitCell[i1];
 					i = LabCell[i1];
@@ -3703,11 +3703,11 @@ int traces_refine_comptrie(sparsegraph *sg,
                             }
 						}
 					}
-                    
+
                 }
-				
+
 				tv->mark++;
-				
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -3765,7 +3765,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 					ind0 = SplCls[sc];
 					ind1 = ind0 + cls[ind0];
@@ -3774,7 +3774,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 						SplCnt[SplCntInd++] = 0;
 						SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 					}
-					
+
 					/* According to the numbers of neighbors of C into the current cell */
 					/* compute how many vertices in C will be placed into the same new cell */
 					iend = ind0 + ElmHitCll[ind0];
@@ -3789,9 +3789,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 							SplPos[value]++;
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					/* Sort the values deriving from the previous step */
 					switch (SplCntInd) {
 						case 0:
@@ -3825,7 +3825,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 							break;
 					}
 					Part->cells += SplCntInd-1;
-					
+
 					/* Split the cell C and update the information for sizes of new cells */
 					/* Put the new cells into the stack */
 					i = ind0;
@@ -3849,7 +3849,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 							if (trieref == NULL) return 0;
 						}
 					}
-					
+
 					if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 						CStack[BigCellPos] = ind0;
 						StackMarkers[BigCell] = 0;
@@ -3867,7 +3867,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 						InvLab[lab[k]] = k;
 						NghCounts[value] = 0;
 					}
-					
+
 					/* Reconstruct the cell C and update the inverse partition */
 					newcell = ind1 - ElmHitCll[ind0];
 					i = newcell;
@@ -3914,9 +3914,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -3931,7 +3931,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -3964,12 +3964,12 @@ int traces_refine_comptrie(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 						ind0 = SplCls[j];
 						ind1 = ind0+cls[ind0];
 						SplCntInd = 0;
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						for (i = ind0; i < ind1; i++) {
@@ -3983,9 +3983,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 								SplPos[value]++;
 							}
 						}
-						
+
 						tv->mark++;
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -4018,9 +4018,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
@@ -4049,14 +4049,14 @@ int traces_refine_comptrie(sparsegraph *sg,
 							StackMarkers[BigCell] = 0;
 							StackMarkers[ind0] = tv->stackmark;
 						}
-						
+
 						/* Permute elements of the cell C */
 						i = ind0;
 						do {
 							SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 						}
 						while(++i < ind1);
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind0;
 						i = ind0;
@@ -4065,7 +4065,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 							lab[i] = SplCnt[i];
 							InvLab[lab[i]] = i;
 							Part->inv[i] = newcell;
-							
+
 							if (i == ind2) {
 								newcell = i+1;
 								if (newcell < n) ind2 = newcell+cls[newcell]-1;
@@ -4080,7 +4080,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -4090,12 +4090,12 @@ int traces_refine_comptrie(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					ind0 = 0;
 					while (ind0 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind0+cls[ind0];
 						if (cls[ind0] > 1) {
-							
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind0]];
@@ -4121,10 +4121,10 @@ int traces_refine_comptrie(sparsegraph *sg,
 									break;
 								}
 							}
-							
+
 							if (SplCntInd) {
 								tv->mark++;
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -4157,9 +4157,9 @@ int traces_refine_comptrie(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind0;
@@ -4188,14 +4188,14 @@ int traces_refine_comptrie(sparsegraph *sg,
 									trieref = trie_comp(trieref, i);
 									if (trieref == NULL) return 0;
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind0;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind0;
 								i = ind0;
@@ -4218,7 +4218,7 @@ int traces_refine_comptrie(sparsegraph *sg,
 			}
 		}
 	}
-	
+
 	Cand->code = CLEANUP(longcode);
 	return 1;
 }
@@ -4241,46 +4241,46 @@ int traces_refine_sametrace(sparsegraph *sg,
 	int BigCell, BigCellPos, BigCellSize;
 	boolean TraceCell = FALSE;
     int *nghb;
-    
+
 	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	SpineTL = Spine+tv->tolevel;
 	TraceEnd = &(SpineTL->trcend);
 	Traceccend = SpineTL->ccend;
 	Tracestpend = &(SpineTL->stpend);
 	TraceCCInd = SpineTL->ccstart;
 	TraceStepsInd = SpineTL->stpstart;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
 	UPDATEMIN(Part->active, n-1);
 	memcpy(CStack+1, TheTrace+SpineTL->trcstart, (Part->active)*sizeof(int));
 	CStackInd = Part->active;
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
 	TraceInd = SpineTL->trcstart+Part->active;
-	
+
 	while (CStackInd > 0)
 	{
-        
+
 		if (tv->mark > (NAUTY_INFINITY-2)) {
 			memset(Markers, 0, n*sizeof(int));
 			memset(MarkHitVtx, 0, n*sizeof(int));
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
+
 		if (Part->cells == tv->finalnumcells) break;
-		
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -4291,22 +4291,22 @@ int traces_refine_sametrace(sparsegraph *sg,
 				break;
 			}
 		}
-		
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];
 		StackMarkers[ind0] = 0;
-        
-        
+
+
 		TraceCell = ((ind0 == TheTraceCC[TraceCCInd]) && (TraceCCInd < Traceccend));
-        
+
 		/* Analysis of occurrences of neighbors of the current cell */
 		/* The list of cells with neighbors in the current cell is  built */
 		if (cls[ind0] == 1) {  /* SINGLETON CURRENT CELL CASE */
 			HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -4320,7 +4320,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 				}
 			}
 			tv->mark++;
-			
+
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
 				ind1 = HitCls[j];
@@ -4329,12 +4329,12 @@ int traces_refine_sametrace(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-            
+
             /* SINGLETON CC CASE */
 			if (SplInd) {
 				SAMETRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd, &Traceccend)
-                
-				
+
+
 				switch (SplInd) {
 					case 0:
 					case 1:
@@ -4366,13 +4366,13 @@ int traces_refine_sametrace(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
 					i = ind1+cls[ind1]-ElmHitCll[ind1];
                     SAMETRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 				}
-				
+
 				/* REARRANGE THE CELLS */
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
@@ -4380,7 +4380,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 					newcell = ind1+cls[ind1];
 					cls[newcell] = ElmHitCll[ind1];
 					Part->cells++;
-					
+
 					if (StackMarkers[ind1] != tv->stackmark) {
 						if (cls[newcell] < cls[ind1]) {
 							CStack[++CStackInd] = newcell;
@@ -4395,11 +4395,11 @@ int traces_refine_sametrace(sparsegraph *sg,
 						CStack[++CStackInd] = newcell;
 						StackMarkers[newcell] = tv->stackmark;
 					}
-					
+
 					SplitCell = HitVtx+ind1;
 					ind3 = cls[newcell];
 					LabCell = lab+newcell;
-					
+
 					for (jk = 0; jk < ind3; jk++) {
 						k = SplitCell[jk];
 						i = LabCell[jk];
@@ -4422,7 +4422,7 @@ int traces_refine_sametrace(sparsegraph *sg,
                     return FALSE;
 				}
 			}
-			
+
 		}
 		else {
 			if (ti->thegraphisparse) {
@@ -4466,11 +4466,11 @@ int traces_refine_sametrace(sparsegraph *sg,
                             }
 						}
 					}
-                    
+
                 }
-				
+
 				tv->mark++;
-				
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -4491,11 +4491,11 @@ int traces_refine_sametrace(sparsegraph *sg,
 						}
 					}
 				}
-				
+
                 /* SPARSE CASE */
 				if (SplInd) {
                     SAMETRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd+n, &Traceccend)
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -4528,7 +4528,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 						ind0 = SplCls[sc];
 						ind1 = ind0 + cls[ind0];
@@ -4537,7 +4537,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 							SplCnt[SplCntInd++] = 0;
 							SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 						}
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						iend = ind0 + ElmHitCll[ind0];
@@ -4553,11 +4553,11 @@ int traces_refine_sametrace(sparsegraph *sg,
 							}
 						}
 						tv->mark++;
-						
+
 						if (SplCntInd) {
                             SAMETRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+n, Tracestpend)
 						}
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -4590,9 +4590,9 @@ int traces_refine_sametrace(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
@@ -4615,7 +4615,7 @@ int traces_refine_sametrace(sparsegraph *sg,
                                 SAMETRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 							}
 						}
-						
+
 						if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 							CStack[BigCellPos] = ind0;
 							StackMarkers[BigCell] = 0;
@@ -4633,7 +4633,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 							InvLab[lab[k]] = k;
 							NghCounts[value] = 0;
 						}
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind1 - ElmHitCll[ind0];
 						i = newcell;
@@ -4646,13 +4646,13 @@ int traces_refine_sametrace(sparsegraph *sg,
 							}
 						}
 						while (++i < ind1);
-						
+
 						for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
 							if (cls[i] == 1) {
 								Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
 							}
 						}
-						
+
 					}
 				}
 				else {
@@ -4660,7 +4660,7 @@ int traces_refine_sametrace(sparsegraph *sg,
                         return FALSE;
                     }
 				}
-				
+
 			}
 			else {
 				if (sg->d[lab[ind0]] > n/cls[ind0]) {
@@ -4694,9 +4694,9 @@ int traces_refine_sametrace(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -4711,11 +4711,11 @@ int traces_refine_sametrace(sparsegraph *sg,
 							}
 						}
 					}
-					
+
                     /* DENSE-SPARSE CASE */
 					if (SplInd) {
                         SAMETRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd+2*n, &Traceccend)
-						
+
 						/* Sorting the cells to be split */
 						switch (SplInd) {
 							case 0:
@@ -4748,12 +4748,12 @@ int traces_refine_sametrace(sparsegraph *sg,
 								quickSort(SplCls, SplInd);
 								break;
 						}
-						
+
 						for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 							ind0 = SplCls[j];
 							ind1 = ind0+cls[ind0];
 							SplCntInd = 0;
-							
+
 							/* According to the numbers of neighbors of C into the current cell */
 							/* compute how many vertices in C will be placed into the same new cell */
 							for (i = ind0; i < ind1; i++) {
@@ -4768,11 +4768,11 @@ int traces_refine_sametrace(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
 							if (SplCntInd) {
                                 SAMETRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+2*n, Tracestpend)
 							}
-							
+
 							/* Sort the values deriving from the previous step */
 							switch (SplCntInd) {
 								case 0:
@@ -4805,9 +4805,9 @@ int traces_refine_sametrace(sparsegraph *sg,
 									quickSort(SplCnt, SplCntInd);
 									break;
 							}
-							
+
 							Part->cells += SplCntInd-1;
-							
+
 							/* Split the cell C and update the information for sizes of new cells */
 							/* Put the new cells into the stack */
 							i = ind0;
@@ -4830,20 +4830,20 @@ int traces_refine_sametrace(sparsegraph *sg,
                                     SAMETRACE_CHECK(TheTrace, TraceInd, i, TraceEnd)
 								}
 							}
-							
+
 							if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 								CStack[BigCellPos] = ind0;
 								StackMarkers[BigCell] = 0;
 								StackMarkers[ind0] = tv->stackmark;
 							}
-							
+
 							/* Permute elements of the cell C */
 							i = ind0;
 							do {
 								SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 							}
 							while(++i < ind1);
-							
+
 							/* Reconstruct the cell C and update the inverse partition */
 							newcell = ind0;
 							i = ind0;
@@ -4858,13 +4858,13 @@ int traces_refine_sametrace(sparsegraph *sg,
 								}
 							}
 							while (++i < ind1);
-							
+
 							for (i = ind0, k = 0; k < SplCntInd; i+=cls[i], k++) {
 								if (cls[i] == 1) {
 									Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
 								}
 							}
-							
+
 						}
 					}
 					else {
@@ -4872,7 +4872,7 @@ int traces_refine_sametrace(sparsegraph *sg,
                             return FALSE;
                         }
 					}
-					
+
 				}
 				else {
 					if (cls[ind0] == n) {
@@ -4880,7 +4880,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -4895,7 +4895,7 @@ int traces_refine_sametrace(sparsegraph *sg,
 					while (ind4 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind4+cls[ind4];
 						if (cls[ind4] > 1) {
-							
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind4]];
@@ -4922,10 +4922,10 @@ int traces_refine_sametrace(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
 							if (SplCntInd) {
                                 SAMETRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd+3*n, Tracestpend)
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -4958,9 +4958,9 @@ int traces_refine_sametrace(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind4;
@@ -4988,14 +4988,14 @@ int traces_refine_sametrace(sparsegraph *sg,
 									StackMarkers[BigCell] = 0;
 									StackMarkers[ind4] = tv->stackmark;
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind4;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind4;
 								i = ind4;
@@ -5010,18 +5010,18 @@ int traces_refine_sametrace(sparsegraph *sg,
 									}
 								}
 								while (++i < ind1);
-								
+
 								for (i = ind4, k = 0; k < SplCntInd; i+=cls[i], k++) {
 									if (cls[i] == 1) {
 										Cand->singcode = MASHCOMM(Cand->singcode, Cand->lab[i]);
 									}
 								}
-								
+
 							}
 						}
 						ind4 = ind1;
 					}
-					
+
                     /* DENSE-DENSE CASE */
 					if (SplInd) {
                         SAMETRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd+3*n, &Traceccend)
@@ -5031,12 +5031,12 @@ int traces_refine_sametrace(sparsegraph *sg,
                             return FALSE;
                         }
 					}
-                    
+
 				}
 			}
 		}
 	}  /* end while (CStackInd > 0) */
-    
+
     for (i=SpineTL->trcstart; i < TraceInd; i++) {
 		ind0 = TheTrace[i];
 		longcode = MASHNONCOMM(longcode, Part->inv[ind0]);
@@ -5056,23 +5056,23 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 {
 	int i, j;
 	int TraceEnd;
-	
+
 	struct TracesVars tvar, *tv;
 	struct TracesInfo tinf, *ti;
-	
+
     Partition *CurrPart;
     Candidate *CurrCand;
-	
+
 	const int n = sg->nv;
 	const int m = SETWORDSNEEDED(n);
-	
+
     if (n > (NAUTY_INFINITY-2))
     {
         fprintf(ERRFILE, "Traces: need n <= %d, but n=%d\n\n",
                 NAUTY_INFINITY-2, n);
         return;
     }
-    
+
 #if !MAXN
 	DYNALLOC1(int, Markers, Markers_sz, n, "refine_tr");
 	DYNALLOC1(int, MarkHitVtx, MarkHitVtx_sz, n, "refine_tr");
@@ -5091,14 +5091,14 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 	DYNALLOC1(int, WorkArray5, WorkArray5_sz, n, "refine_tr");
 	DYNALLOC1(TracesSpine, Spine, Spine_sz, n, "refine_tr");
 #endif
-	
+
 #define HitCls WorkArray2
 #define HitVtx WorkArray3
 #define CStack WorkArray4
 #define ElmHitCll WorkArray5
-	
+
 	outfile = (options->outfile == NULL ? stdout : options->outfile);
-	
+
 	tv = &tvar;
 	ti = &tinf;
 	/* The graph is sparse? */
@@ -5108,7 +5108,7 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 	else {
 		ti->thegraphisparse = FALSE;
 	}
-    
+
 	/* Initialize candidate, partition, cells, orbits */
 	CurrPart = malloc(sizeof(Partition));
 	if (CurrPart == NULL) {
@@ -5126,7 +5126,7 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 		exit(1);
 	}
 	CurrPart->code = -1;
-	
+
 	CurrCand = malloc(sizeof(Candidate));
 	if (CurrCand == NULL) {
 		fprintf(ERRFILE, "\nError, memory not allocated.\n");
@@ -5146,13 +5146,13 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 	CurrCand->indnum = 0;
 	CurrCand->code = 0;
 	CurrCand->next = NULL;
-	
+
 	memset(CurrPart->cls, 0, n*sizeof(int));
 	memset(CurrPart->inv, 0, n*sizeof(int));
 	memcpy(CurrCand->lab, lab, n*sizeof(int));
 	memcpy(CurrCand->invlab, lab, n*sizeof(int));
 	CurrPart->cells = 0;
-	
+
 	j = 0;
 	for (i = 0; i < n; i++) {
 		if (j) {
@@ -5165,24 +5165,24 @@ void refine_tr(sparsegraph *sg, int *lab, int *ptn, int *numcells, int *code, Tr
 			j = i+1;
 		}
 	}
-	
+
 	/* Further initializations */
 	tv->mark = tv->stackmark = 1073741825;
 	tv->maxtreelevel = 0;
 	tv->tolevel = 0;
-	
+
 	TraceEnd = traces_refine_refine(sg, CurrCand, m, n, CurrPart, tv, ti);
-	
+
 	for (i = CurrPart->active; i < TraceEnd; i++) {
 		ptn[TheTrace[i]-1] = 0;
 	}
 	memcpy(lab, CurrCand->lab, n*sizeof(int));
 	*code = CurrCand->code;
 	*numcells = CurrPart->cells;
-    
+
 	FREECAND(CurrCand)
 	FREEPART(CurrPart)
-    
+
 #if !MAXN
     DYNFREE(Markers, Markers_sz);
     DYNFREE(MarkHitVtx, MarkHitVtx_sz);
@@ -5222,47 +5222,47 @@ int traces_refine_refine(sparsegraph *sg,
 	int BigCell, BigCellPos, BigCellSize;
 	boolean TraceCell = FALSE;
     int *nghb;
-    
+
 	if (tv->stackmark > (NAUTY_INFINITY-2)) {
 		memset(StackMarkers, 0, n*sizeof(int));
 		tv->stackmark = 0;
 	}
 	tv->stackmark++;
-	
+
 	TraceEnd = Part->active = Part->cells;
 	Traceccend = 0;
 	Tracestpend = 0;
 	TraceCCInd = 0;
 	TraceStepsInd = 0;
-	
+
 	lab = Cand->lab;
 	InvLab = Cand->invlab;
 	cls = Part->cls;
-	
+
 	UPDATEMIN(Part->active, n-1);
 	memcpy(CStack+1, TheTrace, (Part->active)*sizeof(int));
 	CStackInd = Part->active;
 	for (i = 1; i <= CStackInd; i++) {
 		StackMarkers[CStack[i]] = tv->stackmark;
 	}
-	
+
 	longcode = Part->cells;
 	TraceInd = Part->active;
-	
+
 	newtrace = TRUE;
-	
+
 	while (CStackInd > 0)
 	{
-		
+
 		if (tv->mark > (NAUTY_INFINITY-2)) {
 			memset(Markers, 0, n*sizeof(int));
 			memset(MarkHitVtx, 0, n*sizeof(int));
 			tv->mark = 0;
 		}
 		tv->mark++;
-		
+
 		if (Part->cells == n) break;
-		
+
 		j = CStackInd;
 		k = CStackInd;
 		while (--j > 0) {
@@ -5273,7 +5273,7 @@ int traces_refine_refine(sparsegraph *sg,
 				break;
 			}
 		}
-		
+
 		ind0 = CStack[k];
 		ind2 = ind0+cls[ind0];
 		CStack[k] = CStack[CStackInd--];
@@ -5287,7 +5287,7 @@ int traces_refine_refine(sparsegraph *sg,
             HitClsInd = 0;
 			j1 = sg->v[lab[ind0]];
 			iend1 = j1+sg->d[lab[ind0]];
-			
+
 			for (; j1 < iend1; ++j1) {
 				k = sg->e[j1];
 				value = Part->inv[InvLab[k]];
@@ -5301,7 +5301,7 @@ int traces_refine_refine(sparsegraph *sg,
 				}
 			}
 			tv->mark++;
-			
+
 			SplInd = 0;
 			for (j = 0; j < HitClsInd; j++) {
 				ind1 = HitCls[j];
@@ -5310,13 +5310,13 @@ int traces_refine_refine(sparsegraph *sg,
 					SplCls[SplInd++] = ind1;
 				}
 			}
-			
+
 			if (SplInd) {
 				if (newtrace) {
 					TheTraceCC[TraceCCInd] = ind0;
                 }
 				TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd, &Traceccend)
-				
+
 				switch (SplInd) {
 					case 0:
 					case 1:
@@ -5348,13 +5348,13 @@ int traces_refine_refine(sparsegraph *sg,
 						quickSort(SplCls, SplInd);
 						break;
 				}
-				
+
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
 					i = ind1+cls[ind1]-ElmHitCll[ind1];
 					TRACE_CHECK(TheTrace, TraceInd, i, &TraceEnd)
 				}
-				
+
 				/* REARRANGE THE CELLS */
 				for (j = 0; j < SplInd; j++) {
 					ind1 = SplCls[j];
@@ -5362,7 +5362,7 @@ int traces_refine_refine(sparsegraph *sg,
 					newcell = ind1+cls[ind1];
 					cls[newcell] = ElmHitCll[ind1];
 					Part->cells++;
-					
+
 					if (StackMarkers[ind1] != tv->stackmark) {
 						if (cls[newcell] < cls[ind1]) {
 							CStack[++CStackInd] = newcell;
@@ -5377,11 +5377,11 @@ int traces_refine_refine(sparsegraph *sg,
 						CStack[++CStackInd] = newcell;
 						StackMarkers[newcell] = tv->stackmark;
 					}
-					
+
 					SplitCell = HitVtx+ind1;
 					ind3 = cls[newcell];
 					LabCell = lab+newcell;
-					
+
 					for (jk = 0; jk < ind3; jk++) {
 						k = SplitCell[jk];
 						i = LabCell[jk];
@@ -5398,7 +5398,7 @@ int traces_refine_refine(sparsegraph *sg,
 					return 0;
 				}
 			}
-			
+
 		}
 		else {
 			if (ti->thegraphisparse) {
@@ -5443,9 +5443,9 @@ int traces_refine_refine(sparsegraph *sg,
 						}
 					}
                 }
-                
+
 				tv->mark++;
-				
+
 				SplInd = 0;
 				SplCls[0] = n;
 				for (j = 0; j < HitClsInd; j++) {
@@ -5466,13 +5466,13 @@ int traces_refine_refine(sparsegraph *sg,
 						}
 					}
 				}
-				
+
 				if (SplInd) {
 					if (newtrace) {
                         TheTraceCC[TraceCCInd] = ind0;
                     }
 					TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd, &Traceccend)
-					
+
 					/* Sorting the cells to be split */
 					switch (SplInd) {
 						case 0:
@@ -5505,7 +5505,7 @@ int traces_refine_refine(sparsegraph *sg,
 							quickSort(SplCls, SplInd);
 							break;
 					}
-					
+
 					for (sc = 0; sc < SplInd; sc++) {	/* For each cell C to be split */
 						ind0 = SplCls[sc];
 						ind1 = ind0 + cls[ind0];
@@ -5514,7 +5514,7 @@ int traces_refine_refine(sparsegraph *sg,
 							SplCnt[SplCntInd++] = 0;
 							SplPos[0] = cls[ind0] - ElmHitCll[ind0];
 						}
-						
+
 						/* According to the numbers of neighbors of C into the current cell */
 						/* compute how many vertices in C will be placed into the same new cell */
 						iend = ind0 + ElmHitCll[ind0];
@@ -5530,11 +5530,11 @@ int traces_refine_refine(sparsegraph *sg,
 							}
 						}
 						tv->mark++;
-						
+
 						if (SplCntInd) {
 							TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd, &Tracestpend)
 						}
-						
+
 						/* Sort the values deriving from the previous step */
 						switch (SplCntInd) {
 							case 0:
@@ -5567,16 +5567,16 @@ int traces_refine_refine(sparsegraph *sg,
 								quickSort(SplCnt, SplCntInd);
 								break;
 						}
-						
+
 						Part->cells += SplCntInd-1;
-						
+
 						/* Split the cell C and update the information for sizes of new cells */
 						/* Put the new cells into the stack */
 						i = ind0;
 						if (StackMarkers[i] != tv->stackmark) {
 							BigCellSize = 0;
 						}
-						
+
 						for (k = 0; k < SplCntInd; k++) {
 							value = SplPos[SplCnt[k]];
 							cls[i] = value;
@@ -5593,7 +5593,7 @@ int traces_refine_refine(sparsegraph *sg,
 								TRACE_CHECK(TheTrace, TraceInd, i, &TraceEnd)
 							}
 						}
-						
+
 						if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 							CStack[BigCellPos] = ind0;
 							StackMarkers[BigCell] = 0;
@@ -5611,7 +5611,7 @@ int traces_refine_refine(sparsegraph *sg,
 							InvLab[lab[k]] = k;
 							NghCounts[value] = 0;
 						}
-						
+
 						/* Reconstruct the cell C and update the inverse partition */
 						newcell = ind1 - ElmHitCll[ind0];
 						i = newcell;
@@ -5631,7 +5631,7 @@ int traces_refine_refine(sparsegraph *sg,
 						return 0;
 					}
 				}
-				
+
 			}
 			else {
 				if (sg->d[lab[ind0]] > n/cls[ind0]) {
@@ -5665,9 +5665,9 @@ int traces_refine_refine(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					tv->mark++;
-					
+
 					SplInd = 0;
 					for (j = 0; j < HitClsInd; j++) {
 						ind1 = HitCls[j];
@@ -5682,13 +5682,13 @@ int traces_refine_refine(sparsegraph *sg,
 							}
 						}
 					}
-					
+
 					if (SplInd) {
 						if (newtrace) {
                             TheTraceCC[TraceCCInd] = ind0;
                         }
 						TRACE_CHECK(TheTraceSplNum, TraceCCInd, SplInd, &Traceccend)
-						
+
 						/* Sorting the cells to be split */
 						switch (SplInd) {
 							case 0:
@@ -5721,12 +5721,12 @@ int traces_refine_refine(sparsegraph *sg,
 								quickSort(SplCls, SplInd);
 								break;
 						}
-						
+
 						for (j = 0; j < SplInd; j++) {	/* For each cell C to be split */
 							ind0 = SplCls[j];
 							ind1 = ind0+cls[ind0];
 							SplCntInd = 0;
-							
+
 							/* According to the numbers of neighbors of C into the current cell */
 							/* compute how many vertices in C will be placed into the same new cell */
 							for (i = ind0; i < ind1; i++) {
@@ -5741,11 +5741,11 @@ int traces_refine_refine(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
 							if (SplCntInd) {
 								TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd, &Tracestpend)
 							}
-							
+
 							/* Sort the values deriving from the previous step */
 							switch (SplCntInd) {
 								case 0:
@@ -5778,9 +5778,9 @@ int traces_refine_refine(sparsegraph *sg,
 									quickSort(SplCnt, SplCntInd);
 									break;
 							}
-							
+
 							Part->cells += SplCntInd-1;
-							
+
 							/* Split the cell C and update the information for sizes of new cells */
 							/* Put the new cells into the stack */
 							i = ind0;
@@ -5803,20 +5803,20 @@ int traces_refine_refine(sparsegraph *sg,
 									TRACE_CHECK(TheTrace, TraceInd, i, &TraceEnd)
 								}
 							}
-							
+
 							if ((StackMarkers[ind0] != tv->stackmark) && (BigCell != ind0)) {
 								CStack[BigCellPos] = ind0;
 								StackMarkers[BigCell] = 0;
 								StackMarkers[ind0] = tv->stackmark;
 							}
-							
+
 							/* Permute elements of the cell C */
 							i = ind0;
 							do {
 								SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 							}
 							while(++i < ind1);
-							
+
 							/* Reconstruct the cell C and update the inverse partition */
 							newcell = ind0;
 							i = ind0;
@@ -5838,7 +5838,7 @@ int traces_refine_refine(sparsegraph *sg,
 							return 0;
 						}
 					}
-					
+
 				}
 				else {
 					if (cls[ind0] == n) {
@@ -5846,7 +5846,7 @@ int traces_refine_refine(sparsegraph *sg,
 					}
 					else {
 						memset(NghCounts, 0, n*sizeof(int));
-						
+
 						for (i = ind0; i < ind2; i++) {
 							j1 = sg->v[lab[i]];
 							iend1 = j1+sg->d[lab[i]];
@@ -5861,7 +5861,7 @@ int traces_refine_refine(sparsegraph *sg,
 					while (ind4 < n) {	/* For each cell C with size(C) > 1 */
 						ind1 = ind4+cls[ind4];
 						if (cls[ind4] > 1) {
-							
+
 							/* Determine whether C must be split */
 							SplCntInd = 0;
 							value = NghCounts[lab[ind4]];
@@ -5888,10 +5888,10 @@ int traces_refine_refine(sparsegraph *sg,
 								}
 							}
 							tv->mark++;
-							
+
 							if (SplCntInd) {
 								TRACE_CHECK(TheTraceSteps, TraceStepsInd, SplCntInd, &Tracestpend)
-								
+
 								/* Sort the values deriving from the previous step */
 								switch (SplCntInd) {
 									case 0:
@@ -5924,9 +5924,9 @@ int traces_refine_refine(sparsegraph *sg,
 										quickSort(SplCnt, SplCntInd);
 										break;
 								}
-								
+
 								Part->cells += SplCntInd-1;
-								
+
 								/* Split the cell C and update the information for sizes of new cells */
 								/* Put the new cells into the stack */
 								i = ind4;
@@ -5954,14 +5954,14 @@ int traces_refine_refine(sparsegraph *sg,
 									StackMarkers[BigCell] = 0;
 									StackMarkers[ind4] = tv->stackmark;
 								}
-								
+
 								/* Permute elements of the cell C */
 								i = ind4;
 								do {
 									SplCnt[SplPos[NghCounts[lab[i]]]++] = lab[i];
 								}
 								while(++i < ind1);
-								
+
 								/* Reconstruct the cell C and update the inverse partition */
 								newcell = ind4;
 								i = ind4;
@@ -5980,7 +5980,7 @@ int traces_refine_refine(sparsegraph *sg,
 						}
 						ind4 = ind1;
 					}
-					
+
 					if (SplInd) {
 						if (newtrace) {
                             TheTraceCC[TraceCCInd] = ind0;
@@ -5993,12 +5993,12 @@ int traces_refine_refine(sparsegraph *sg,
 							return 0;
 						}
 					}
-					
+
 				}
 			}
 		}
 	} /* end while (CStackInd > 0) */
-	
+
 	for (i=0; i < TraceInd; i++) {
 		ind0 = TheTrace[i];
 		longcode = MASHNONCOMM(longcode, Part->inv[ind0]);
@@ -6022,12 +6022,12 @@ void CopyVect(int *from, int *to, int u, int n)
 }
 
 void quickSort(int *arr, int elements) {
-	
+
 #define MAX_LEVELS 300
-	
+
 	int piv, beg[MAX_LEVELS], end[MAX_LEVELS], i = 0, L, R, swap;
 	int k, value;
-	
+
 	beg[0] = 0;
 	end[0] = elements;
 	while (i>= 0) {
@@ -6073,7 +6073,7 @@ void quickSort(int *arr, int elements) {
 struct Candidate *NewCandidate(int n, Candidate **GarbList, int Mrk)
 {
 	struct Candidate *Cand;
-	
+
 	if (*GarbList) {
 		Cand = *GarbList;
 		*GarbList = (*GarbList)->next;
@@ -6120,7 +6120,7 @@ int FreeList(Candidate *List, int cond)
 		List = List->next;
 		free(Temp);
 	}
-	
+
 	if (cond) {
 		return conta1;
 	}
@@ -6215,12 +6215,12 @@ int CheckForAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Candidate *Ne
 	int temp, tmp, tmp1;
 	int start, start1, step, step1, prev, prev1, ngh1, ngh2;
     searchtrie *TrieCandFrom, *TrieCheckFrom;
-    
+
     tv->gotonode = NULL;
     CheckLevel = 0;
     CheckLevelEnd = 0;
     temp = 0;
-    
+
 	switch (tv->compstage) {
 		case 0:
             if (tv->strategy) {
@@ -6261,7 +6261,7 @@ int CheckForAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Candidate *Ne
 		default:
 			break;
 	}
-    
+
     while (CheckLevel <= CheckLevelEnd) {
 		CheckAutList = Spine[CheckLevel].liststart;
 		while (CheckAutList) {
@@ -6353,7 +6353,7 @@ int CheckForAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Candidate *Ne
 							}
 							tv->stats->numgenerators++;
 							tv->stats->numorbits = orbjoin(tv->orbits, AUTPERM, n);
-                            
+
 							ti->thegrouphaschanged = TRUE;
 							ti->identitygroup = FALSE;
 							if (tv->options->verbosity >= 2 && tv->options->writeautoms) {
@@ -6410,11 +6410,11 @@ int CheckForAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Candidate *Ne
                                 }
                             }
                         }
-                        
+
                         while (TrieCheckFrom->goes_to) {
                             TrieCheckFrom = TrieCheckFrom->goes_to;
                         }
-                        
+
 						for (temp=1; temp<=tv->tolevel; temp++) {
 							if (CheckAutList->lab[Spine[temp].tgtpos] != NextCand->lab[Spine[temp].tgtpos]) {
 								break;
@@ -6504,18 +6504,18 @@ int CheckForSingAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Partition
 	TracesSpine *SpineTL;
 	Candidate *CheckAutList;
     searchtrie *TrieCandFrom, *TrieCheckFrom;
-    
+
 	SpineTL = Spine+tv->tolevel;
 	CheckAutList = SpineTL->liststart;
     tv->gotonode = NULL;
-    
+
 	result = 0;
 	while (CheckAutList != NULL) {
         if (CheckAutList->do_it && (CheckAutList->stnode->father == CurrCand->stnode)) {
             if (CheckAutList->firstsingcode == NextCand->firstsingcode) {
                 memcpy(AUTPERM, IDENTITY_PERM, n*sizeof(int));
                 if ((tv->tolevel == 1) && (Spine[0].part->cells == 1)) tmp = 2; else tmp = tv->tolevel;
-                
+
                 if (TreeFyTwo(g_arg, tmp, tv->tolevel_tl, CheckAutList, NextCand, NextPart, n, tv, ti)) {
                     if (isautom_sg((graph*)g_arg, AUTPERM, tv->options->digraph, m, n)) {
                         if (!findperm(gensB, AUTPERM, n, tv)) {
@@ -6547,9 +6547,9 @@ int CheckForSingAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Partition
                             if (TempOrbits) orbjoin(TempOrbits, AUTPERM, n);
                             result = -CheckAutList->name;
                         }
-                        
-                        
-                        
+
+
+
                         TrieCandFrom = NULL;
                         TrieCheckFrom = CheckAutList->stnode;
                         if (CurrCand->stnode->level <= 1) {
@@ -6588,20 +6588,20 @@ int CheckForSingAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Partition
                                 }
                             }
                         }
-                        
+
                         while (TrieCheckFrom->goes_to) {
                             TrieCheckFrom = TrieCheckFrom->goes_to;
                         }
-                        
-                        
-                        
-                        
+
+
+
+
                         for (temp=1; temp<=tv->tolevel; temp++) {
                             if (CheckAutList->lab[Spine[temp].tgtpos] != NextCand->lab[Spine[temp].tgtpos]) {
                                 break;
                             }
                         }
-                        
+
                         switch (tv->compstage) {
                             case 0:
                                 if (tv->strategy && (tv->steps == 1)) {
@@ -6662,7 +6662,7 @@ int CheckForSingAutomorphisms(sparsegraph *g_arg, Candidate *CurrCand, Partition
                             default:
                                 break;
                         }
-                        
+
                         return result;
                     }
                 }
@@ -6680,12 +6680,12 @@ int CheckForMatching(sparsegraph *g_arg, Candidate *CurrCand, Candidate *NextCan
 	Candidate *CheckAutList;
     int *cls;
     searchtrie *TrieCandFrom, *TrieCheckFrom;
-    
+
     tv->gotonode = NULL;
 	SpineTL = Spine+tv->tolevel;
 	CheckAutList = SpineTL->liststart;
 	cls = Part->cls;
-    
+
 	while (CheckAutList != NULL) {
         if (CheckAutList->do_it && (CheckAutList->singcode == NextCand->singcode)) {
             memcpy(AUTPERM, IDENTITY_PERM, n*sizeof(int));
@@ -6701,7 +6701,7 @@ int CheckForMatching(sparsegraph *g_arg, Candidate *CurrCand, Candidate *NextCan
                 }
             }
             if (i==n && (isautom_sg((graph*)g_arg, AUTPERM, tv->options->digraph, m, n))) {
-                
+
                 if (!findperm(gensB, AUTPERM, n, tv)) {
                     if (tv->options->verbosity >= 2) tv->schreier3 -= CPUTIME;
                     addgenerator(&gpB, &gensB, AUTPERM, n);
@@ -6731,7 +6731,7 @@ int CheckForMatching(sparsegraph *g_arg, Candidate *CurrCand, Candidate *NextCan
                     if (TempOrbits) orbjoin(TempOrbits, AUTPERM, n);
                     result = -CheckAutList->name;
                 }
-                
+
                 TrieCandFrom = NULL;
                 TrieCheckFrom = CheckAutList->stnode;
                 if (CurrCand->stnode->level <= 1) {
@@ -6770,11 +6770,11 @@ int CheckForMatching(sparsegraph *g_arg, Candidate *CurrCand, Candidate *NextCan
                         }
                     }
                 }
-                
+
                 while (TrieCheckFrom->goes_to) {
                     TrieCheckFrom = TrieCheckFrom->goes_to;
                 }
-                
+
                 for (temp=1; temp<=tv->tolevel; temp++) {
                     if (CheckAutList->lab[Spine[temp].tgtpos] != NextCand->lab[Spine[temp].tgtpos]) {
                         break;
@@ -6851,7 +6851,7 @@ int CheckForMatching(sparsegraph *g_arg, Candidate *CurrCand, Candidate *NextCan
 void Individualize(Partition *NextPart, Candidate *NextCand, int K, int Tc, int Cl, int Pos)
 {
 	int i, j;
-	
+
 	NextCand->do_it = TRUE;
 	if (NextPart->cls[Tc] > 1) {
 		NextPart->cells = Cl+1;
@@ -6860,7 +6860,7 @@ void Individualize(Partition *NextPart, Candidate *NextCand, int K, int Tc, int 
 		NextPart->cls[Pos] = 1;
     }
 	NextPart->inv[Pos] = Pos;
-	
+
 	j = NextCand->lab[Pos];
 	i = NextCand->invlab[K];
 	NextCand->lab[Pos] = K;
@@ -6873,7 +6873,7 @@ void Individualize(Partition *NextPart, Candidate *NextCand, int K, int Tc, int 
 boolean TargetCell(sparsegraph *sg, Candidate *TargCand, Partition *Part, int n, struct TracesVars* tv, int Lv) {
 	int TCell = -1, TCSize = 1;
 	int i;
-    
+
 	if (Lv < tv->tcellevel) {
 		tv->tcell = Spine[Lv+1].tgtcell;
 		return TRUE;
@@ -6899,7 +6899,7 @@ boolean TargetCell(sparsegraph *sg, Candidate *TargCand, Partition *Part, int n,
 boolean TargetCellFirstPath(sparsegraph *sg, Candidate *TargCand, Partition *Part, int n, struct TracesVars* tv) {
 	int TCell = -1, TCSize = 1;
 	int Lv, i, Lev;
-    
+
     Lev = Lv = tv->tolevel_tl++;
     while (TCell < 0) {
         for (i = Spine[Lv].tgtcell; i < Spine[Lv].tgtend; i += Part->cls[i]) {
@@ -6923,7 +6923,7 @@ boolean TargetCellFirstPath(sparsegraph *sg, Candidate *TargCand, Partition *Par
     Spine[tv->tolevel_tl].tgtend = Spine[tv->tolevel_tl].tgtcell + TCSize;
     Spine[tv->tolevel_tl].tgtpos = Spine[tv->tolevel_tl].tgtend - 1;
     tv->tcellevel = tv->tolevel_tl;
-    
+
     if (Lv+1 != Lev) {
         BreakSteps[Lev] = ++tv->brkstpcount;
         if (!Spine[tv->tolevel].liststart->firstsingcode) {
@@ -6936,7 +6936,7 @@ boolean TargetCellFirstPath(sparsegraph *sg, Candidate *TargCand, Partition *Par
 boolean TargetCellExpPath(sparsegraph *sg, Candidate *TargCand, Partition *Part, int n, struct TracesVars* tv) {
 	int TCell = -1, TCSize = 1;
 	int Lv, i;
-    
+
     if (Part->cells == tv->finalnumcells) {
 		return FALSE;
 	}
@@ -6972,7 +6972,7 @@ boolean TargetCellExpPath(sparsegraph *sg, Candidate *TargCand, Partition *Part,
 }
 
 boolean SelectNextLevel(sparsegraph *g_arg, int n, struct TracesVars *tv) {
-    
+
 	switch (tv->compstage) {
 		case 2:
 			if (tv->smalldeglevel < n) {
@@ -7030,7 +7030,7 @@ boolean TreeFyTwo(sparsegraph *sg, int From, int Num, Candidate *Cand1, Candidat
 {
 	int k, i, i1, i2;
 	size_t j1, iend;
-    
+
 	i2=0;
 	memcpy(AUTPERM, IDENTITY_PERM, n*sizeof(int));
     i1 = Spine[From].tgtsize;
@@ -7043,7 +7043,7 @@ boolean TreeFyTwo(sparsegraph *sg, int From, int Num, Candidate *Cand1, Candidat
         if (Cand1->lab[k] == Cand2->lab[k]) {
             continue;
         }
-        
+
         j1 = sg->v[Cand1->lab[k]];
 		iend = j1+sg->d[Cand1->lab[k]];
         for (; j1 < iend; j1++) {
@@ -7060,10 +7060,10 @@ boolean TreeFyTwo(sparsegraph *sg, int From, int Num, Candidate *Cand1, Candidat
 void ExperimentalStep(sparsegraph *g_arg, Partition *NextPart, Candidate *NextCand,
 					  TracesVars *tv, TracesInfo *ti, int m, int n) {
 	int i, iend, min, tmp;
-    
+
 	SpineTL_tl = Spine+tv->tolevel_tl;
 	NextPart->active = 1;
-	
+
 	/* EXPERIMENTAL PATH INDIVIDUALIZATION AND REFINEMENT */
     if (tv->answ == 2) {
         min = NextCand->lab[tv->tcellexpath];
@@ -7086,9 +7086,9 @@ void ExperimentalStep(sparsegraph *g_arg, Partition *NextPart, Candidate *NextCa
     else {
         NextCand->pathsingcode = MASHCOMM(NextCand->pathsingcode, NextCand->lab[tmp]);
     }
-    
+
     Individualize(NextPart, NextCand, NextCand->lab[tmp], tv->tcellexpath, NextPart->cells, tv->tcellexpath + NextPart->cls[tv->tcellexpath]-1);
-    
+
 	tv->stats->numnodes++;
 	if (tv->compstage == 0) {
 		traces_refine_notrace(g_arg,
@@ -7215,7 +7215,7 @@ void CopyCand(Candidate *W, Candidate *V, int n) {
 
 void RemoveFromLevel(int from, int to, int strategy, boolean reinit) {
 	int i;
-    
+
 	for (i=from; i<=to; i++) {
 		if (Spine[i].listend) {
 			(Spine[i].listend)->next = GarbList;
@@ -7240,9 +7240,9 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 	boolean closeloop, firstsing;
 	Candidate *SpTLliststart, *AuxCand;
     searchtrie *TreeNode, *TreeNode1, *TreeNode2;
-	
+
     PRINT_FROM_VERB(3)
-    
+
 	if (TargetCell(g_arg, CurrCand, CurrPart, n, tv, tv->tolevel)) {
         ++tv->tolevel;
 		SpineTL = Spine+tv->tolevel;
@@ -7257,13 +7257,13 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 		ti->thereisnextlevel = SelectNextLevel(g_arg, n, tv);
 		return;
 	}
-    
+
     tv->newgotonode = NULL;
-	
+
 	/*  CANDIDATE */
 	temp = CurrCand->lab[Spine[1].tgtpos];
 	k = SpineTL->tgtend;
-	
+
     TreeNode = CurrCand->stnode;
     while (TreeNode) {
         if (TreeNode->goes_to) {
@@ -7272,7 +7272,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
         }
         TreeNode = TreeNode->father;
     }
-    
+
 	if (CurrCand->do_it) {
         if ((tv->orbits[temp] == temp) || tv->tolevel == 1) {
             ti->minimalinorbits = TRUE;
@@ -7287,10 +7287,10 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                              CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell], n, TRUE);
                     if (tv->options->verbosity >= 2) tv->schreier1 += CPUTIME;
                     ti->thegrouphaschanged = FALSE;
-                    
+
                     if (gom_level < tv->nfix) {
                         PRINT_NOTMIN_VERB(3)
-                        
+
                         TreeNode = CurrCand->stnode;
                         j2 = CurrCand->lab[Spine[gom_level+1].tgtpos];
                         i1 = tv->currorbit[j2];
@@ -7314,7 +7314,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                             }
                             TreeNode1->index += TreeNode2->index;
                             TreeNode2->goes_to = TreeNode1;
-                            
+
                             ti->minimalinorbits = FALSE;
                         }
                         else {
@@ -7331,7 +7331,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                 memcpy(TempOrbits, IDENTITY_PERM, n*sizeof(int));
                 tv->currorbit = TempOrbits;
             }
-            
+
             if (ti->minimalinorbits) {
                 memcpy(NextCand->lab, CurrCand->lab, n*sizeof(int));
                 memcpy(NextCand->invlab, CurrCand->invlab, n*sizeof(int));
@@ -7345,15 +7345,15 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     }
                     CurrCand->sortedlab = TRUE;
                 }
-                
+
                 tv->indivstart = tv->tcell+CurrCand->indnum;
                 tv->indivend = tv->indivstart+tv->steps;
                 if (tv->indivend > SpineTL->tgtend) {
                     tv->indivend = SpineTL->tgtend;
                 }
-                
+
                 temp = CurrCand->lab[tv->indivstart];
-                
+
                 for (k = tv->indivstart; k < tv->indivend; k++) {
                     CurrCand->indnum++;
                     NextCand->singcode = CurrCand->singcode;
@@ -7362,11 +7362,11 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     if (NextCand->name == (NAUTY_INFINITY-2)) {
                         NextCand->name = tv->name = 1;
                     }
-                    
+
                     PRINT_INDIV_VERB(3)
                     if (tv->currorbit[NextCand->vertex] != NextCand->vertex) {
                         PRINT_SKIPPED_VERB(3)
-                        
+
                         search_vtx = tv->currorbit[NextCand->vertex];
                         TreeNode = CurrCand->stnode;
                         if (TreeNode->first_child) {
@@ -7387,10 +7387,10 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                         }
                     }
                     PRINT_REFINE_VERB(3)
-                    
+
                     memcpy(NextPart->cls, CurrPart->cls, n*sizeof(int));
                     memcpy(NextPart->inv, CurrPart->inv, n*sizeof(int));
-                    
+
                     if (NextPart->cls[tv->tcell] == 2) {
                         NextCand->singcode = MASHCOMM(NextCand->singcode, CurrCand->lab[tv->tcell]);
                         NextCand->singcode = MASHCOMM(NextCand->singcode, CurrCand->lab[tv->tcell+1]);
@@ -7398,16 +7398,16 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     else {
                         NextCand->singcode = MASHCOMM(NextCand->singcode, NextCand->vertex);
                     }
-                    
+
                     Individualize(NextPart, NextCand, NextCand->vertex, tv->tcell, CurrPart->cells, SpineTL->tgtpos);
                     tv->stats->numnodes++;
-                    
+
                     tv->answ = traces_refine(g_arg,
                                              NextCand,
                                              m,
                                              n,
                                              NextPart, tv, ti, TRUE);
-                    
+
                     if (!tv->strategy && !tv->options->getcanon && (NextPart->cells == tv->finalnumcells) && (tv->tolevel > 1)) {
                         temp = 0;
                         for (i=0; i<tv->tolevel; i++) {
@@ -7424,21 +7424,21 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                             break;
                         case 1 :			/* The same trace has been found once more : add to the list */
                             SpineTL->levelcounter++;
-                            
+
                             NextCand->do_it = TRUE;
                             if (tv->options->verbosity >= 2) PRINT_CANDIDATE(NextCand, tv->tolevel);
-                            
+
                             tv->tolevel_tl = tv->tolevel;
                             NextCand->pathsingcode = NextCand->singcode;
                             NextCand->firstsingcode = 0;
-                            
+
                             if (tv->steps > 1) {
                                 if (tv->tolevel < tv->tcellevel) {
                                     closeloop = CheckForMatching(g_arg, CurrCand, NextCand, NextPart, tv, ti, m, n);
                                     if (NextCand->do_it) {
                                         firstsing = TRUE;
                                         if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
-                                        
+
                                         /* EXPERIMENTAL PATH */
                                         while (NextPart->cells < tv->finalnumcells) {
                                             if (firstsing && BreakSteps[tv->tolevel]) {
@@ -7455,7 +7455,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                             ExperimentalStep(g_arg, NextPart, NextCand, tv, ti, m, n);
                                             PRINT_EXPPATHSTEP(NextCand, TRUE)
                                         }
-                                        
+
                                         if (NextPart->cells == tv->finalnumcells) {
                                             UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                         }
@@ -7467,7 +7467,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                         break;
                                     }
                                 }
-                                
+
                                 if (!tv->strategy && !tv->options->getcanon && (NextPart->cells == tv->finalnumcells) && (tv->tolevel_tl == tv->tolevel + 1)) {
                                     tv->maxtreelevel = tv->tolevel_tl;
                                     if (tv->tolevel == 1) {
@@ -7485,7 +7485,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                         }
                                     }
                                 }
-                                
+
                                 /* ANY AUTOMORPHISM? */
                                 if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
                                 tv->newindex = 0;
@@ -7494,7 +7494,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                     if (!NextCand->do_it && closeloop < tv->tolevel) k = SpineTL->tgtend;
                                 }
                                 if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
-                                
+
                                 if (NextCand->do_it) {
                                     ADDTONEXTLEVEL;
                                     SpineTL->keptcounter++;
@@ -7510,7 +7510,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                             break;
                                         }
                                 }
-                                
+
                                 /* ANY AUTOMORPHISM? */
                                 if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
                                 tv->newindex = 0;
@@ -7519,7 +7519,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                     if (!NextCand->do_it && closeloop < tv->tolevel) k = SpineTL->tgtend;
                                 }
                                 if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
-                                
+
                                 if (NextCand->do_it) {
                                     ADDTONEXTLEVEL;
                                     SpineTL->keptcounter++;
@@ -7530,7 +7530,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                             break;
                         case 2 :	/* Delete the old list and start a new one: a better trace has been found */
                             if (NextPart->cells == tv->finalnumcells) tv->stats->canupdates++;
-                            
+
                             if (tv->tolevel > tv->treedepth) {
                                 tv->treedepth = tv->tolevel;
                                 if (tv->strategy) {
@@ -7540,24 +7540,24 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                     NEWPARTSPINE(tv->tolevel);
                                 }
                             }
-                            
+
                             if (!tv->strategy && (tv->tolevel > 1) && !SpineTL->liststart) {
                                 memcpy(NextCand->lab, TEMPLAB, n*sizeof(int));
                                 memcpy(NextCand->invlab, TEMPINVLAB, n*sizeof(int));
                                 tv->maxtreelevel = tv->tolevel;
-                                
+
                                 SpineTL->liststart = NewCandidate(n, &GarbList, TRUE);
                                 SpineTL->listend = SpineTL->liststart;
-                                
+
                                 if (NextPart->cells != tv->finalnumcells) NextCand->code = auxcode;
                                 CopyCand(SpineTL->liststart, NextCand, n);
                                 COPYPART(SpineTL->part, NextPart);
                                 tv->newindex = 0;
                                 tv->newst_stage1 = searchtrie_make(CurrCand, SpineTL->listend, n, tv);
-                                
+
                                 SpineTL->listcounter = 1;
                                 SpTLliststart = SpineTL->liststart;
-                                
+
                                 i = tv->tolevel;
                                 if (tv->brkstpcount) {
                                     while ((i<n) && !BreakSteps[i]) {
@@ -7565,15 +7565,15 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                     }
                                     if (i<n) SpineTL->liststart->firstsingcode = Spine[i].singcode;
                                 }
-                                
+
                                 SpineTL->updates = 1;
                                 SpineTL->levelcounter = 1;
                                 SpineTL->keptcounter = 1;
                                 PRINT_LINE_PLUS(tv->fromlevel)
-                                
+
                                 if (tv->options->verbosity >= 2) PRINT_CANDIDATE(SpineTL->liststart, tv->tolevel);
                                 PRINT_RETURN;
-                                
+
                                 if (!tv->strategy && !tv->options->getcanon && (tv->tolevel+1 == tv->firstpathlength)) {
                                     if (tv->tolevel == 1) {
                                         EXITFROMSTAGE0EXPATH2;
@@ -7594,34 +7594,34 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                 SpineTL->levelcounter++;
                                 SpineTL->updates++;
                                 SpineTL->keptcounter = 1;
-                                
+
                                 RemoveFromLevel(tv->tolevel, tv->treedepth, tv->strategy, TRUE);
                                 SpineTL->liststart = NewCandidate(n, &GarbList, TRUE);
                                 SpineTL->listend = SpineTL->liststart;
-                                
+
                                 CopyCand(SpineTL->liststart, NextCand, n);
                                 COPYPART(SpineTL->part, NextPart);
                                 tv->newindex = 0;
-                                
+
                                 tv->newst_stage1 = searchtrie_make(CurrCand, SpineTL->listend, n, tv);
-                                
+
                                 SpineTL->listcounter = 1;
                                 SpTLliststart = SpineTL->liststart;
-                                
+
                                 SpTLliststart->pathsingcode = SpineTL->singcode = SpTLliststart->singcode;
                                 SpTLliststart->firstsingcode = 0;
-                                
+
                                 PRINT_LINE
                                 if (tv->options->verbosity >= 2) PRINT_CANDIDATE(SpTLliststart, tv->tolevel)
-                                    
+
                                     tv->tolevel_tl = tv->tolevel;
-                                
+
                                 memset(BreakSteps, 0, n*sizeof(int));
                                 tv->brkstpcount = 0;
-                                
+
                                 if (tv->steps > 1) {
                                     if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
-                                    
+
                                     /* EXPERIMENTAL PATH */
                                     while (NextPart->cells < tv->finalnumcells) {
                                         if (!TargetCellFirstPath(g_arg, SpTLliststart, NextPart, n, tv)) {
@@ -7633,22 +7633,22 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                         }
                                         ExperimentalStep(g_arg, NextPart, SpTLliststart, tv, ti, m, n);
                                         PRINT_EXPPATHSTEP(SpTLliststart, TRUE)
-                                        
+
                                         Spine[tv->tolevel_tl].singcode = SpTLliststart->pathsingcode;
                                     }
                                     if (NextPart->cells == tv->finalnumcells) {
                                         UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                     }
-                                    
+
                                     if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
-                                    
+
                                     if (tv->tolevel_tl > tv->smalldeglevel) {
                                         tv->smalldeglevel = tv->tolevel_tl;
                                     }
                                     if ((tv->finalnumcells < n) && (tv->tolevel_tl < tv->smalldeglevel)) {
                                         tv->smalldeglevel = tv->tolevel_tl;
                                     }
-                                    
+
                                     tv->firstpathlength = tv->tolevel_tl;
                                     PRINT_RETURN
                                     if (!tv->strategy && !tv->options->getcanon && (NextPart->cells == tv->finalnumcells) && (tv->tolevel_tl == tv->tolevel + 1)) {
@@ -7681,7 +7681,7 @@ void CompStage0(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
             }
         }
     }
-    
+
 	/* REMOVE CURRENT CANDIDATE */
 	if (SpineFL->liststart && (k >= SpineTL->tgtend)) {
 		SpineFL->liststart = CurrCand->next;
@@ -7702,40 +7702,40 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 {
 	int i, k, cu, cu1, tmp, gom_level, search_vtx;
     searchtrie *TreeNode;
-    
+
     CurrCand->stnode = tv->newst_stage1;
-    
+
     tv->tolevel++;
 	SpineTL = Spine+tv->tolevel;
 	tv->tcell = SpineTL->tgtcell;
     SpineTL->levelcounter = 0;
     SpineTL->keptcounter = 0;
     SpineTL->updates = 1;
-    
-	
+
+
 	if (tv->options->verbosity >= 2) {
 		LINE(tv->linelgth-3, "=");
 		NEXTLINE
 	}
-	
+
 	memset(RefCells, 0, n*sizeof(int));
 	memset(MultRefCells, 0, n*sizeof(int));
 	ti->thegrouphaschanged = TRUE;
-	
+
 	/*  CANDIDATE */
 	memcpy(NextCand->lab, CurrCand->lab, n*sizeof(int));
 	memcpy(NextCand->invlab, CurrCand->invlab, n*sizeof(int));
 	NextCand->do_it = TRUE;
 	SpineTL->trcstart = CurrPart->cells;
-	
+
 	tv->indivstart = tv->tcell;
 	tv->indivend = SpineTL->tgtend;
 	if (g_arg->d[CurrCand->lab[tv->indivstart]] == 1) {
 		tv->indivstart = SpineTL->tgtend-1;
 	}
-    
+
     FixBase(fix, tv, NextCand, 0, tv->fromlevel);
-    
+
 	if (!ti->identitygroup) {
         if (tv->options->verbosity >= 2) tv->schreier2 -= CPUTIME;
         tv->currorbit = getorbits(fix, tv->nfix, gpB, &gensB, n);
@@ -7759,7 +7759,7 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
         }
         CurrCand->sortedlab = TRUE;
     }
-    
+
 	for (k = tv->indivstart; k < tv->indivend; k++) {
         NextCand->vertex = CurrCand->lab[k];
         NextCand->name = ++tv->name;
@@ -7789,32 +7789,32 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
         PRINT_REFINE_VERB(3)
 		memcpy(NextPart->cls, CurrPart->cls, n*sizeof(int));
 		memcpy(NextPart->inv, CurrPart->inv, n*sizeof(int));
-		
+
 		Individualize(NextPart, NextCand, CurrCand->lab[k], tv->tcell, CurrPart->cells, SpineTL->tgtpos);
-		
+
 		tv->stats->numnodes++;
         SpineTL->levelcounter++;
         tv->tolevel_tl = tv->tolevel;
 		trieref = trieroot;
         SpineTL->levelcounter++;
-        
+
 		traces_refine_maketrie(g_arg,
 							   NextCand,
 							   m,
 							   n,
 							   NextPart, tv, ti);
-		
+
 		RefCells[CurrCand->lab[k]] = NextPart->cells;
 		if (NextPart->cells == tv->finalnumcells) {
 			tv->answ=1;
 			if (tv->options->verbosity >= 2) PRINT_CANDIDATE(NextCand, tv->tolevel)
-                
+
                 if (NextPart->cells < tv->finalnumcells) {
                     if (!Spine[tv->tolevel].part) {
                         NEWPART(Spine[tv->tolevel].part)
                     }
                 }
-            
+
 			/* ANY AUTOMORPHISM? */
 			if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
             if (NextPart->cells == tv->finalnumcells) {
@@ -7823,11 +7823,11 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
             else {
                 CheckForSingAutomorphisms(g_arg, CurrCand, NextPart, NextCand, tv, ti, m, n);
             }
-            
+
 			if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
-			
+
 			PRINT_RETURN
-			
+
 			/* ADD TO NEXT LEVEL */
 			if (tv->answ == 1) {
                 SpineTL->keptcounter++;
@@ -7837,7 +7837,7 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 			}
 		}
 	} /* end for */
-	
+
 	for (k = tv->indivstart; k < tv->indivend; k++) {
 		MultRefCells[RefCells[tv->currorbit[CurrCand->lab[k]]] % tv->finalnumcells]++;
 	}
@@ -7849,17 +7849,17 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 			}
 		}
 	}
-	
+
 #if !MAXN
     DYNALLOC1(searchtrie*, RefPath, RefPath_sz, tv->tolevel, "Traces-CS1");
 #endif
-    
+
     TreeNode = CurrCand->stnode;
     while (TreeNode) {
         RefPath[TreeNode->level] = TreeNode;
         TreeNode = TreeNode->father;
     }
-    
+
 	/* REMOVE CURRENT CANDIDATE */
 	SpineFL->liststart = CurrCand->next;
 	if (CurrCand->next == NULL) {
@@ -7869,14 +7869,14 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 	SpineFL->listcounter--;
 	CurrCand->next = GarbList;
 	GarbList = CurrCand;
-	
+
 	if (tv->options->verbosity >= 2) {
 		LINE(tv->linelgth, "=");
 		NEXTLINE
 	}
 	tv->compstage = 2;
 	tv->steps = n;
-    
+
 	if (tv->options->verbosity >= 2) tv->schreier1 -= CPUTIME;
 	gom_level = getorbitsmin(fix, tv->nfix, gpB, &gensB, &tv->currorbit,
 							 CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell], n, TRUE);
@@ -7884,10 +7884,10 @@ void CompStage1(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
 	ORBITSIZES
 	ti->thereisnextlevel = SelectNextLevel(g_arg, n, tv);
 	SpineTL->part->cells = tv->finalnumcells;
-    
+
     AutomCount[0] = 2;
     AutomCount[1] = CurrCand->vertex;
-    
+
     return;
 }
 
@@ -7901,13 +7901,13 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
     searchtrie *TreeNode, *TreeNode1, *TreeNode2;
     int *CuOrb;
     boolean schreierwrong;
-	
+
 	autom = 0;
     schreierwrong = FALSE;
-	
+
     TreeNode = CurrCand->stnode;
     tv->cand_level = 0;
-    
+
     while (TreeNode) {
         if (TreeNode->goes_to) {
             CurrCand->do_it = FALSE;
@@ -7929,16 +7929,16 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
     else {
         ti->useTempOrbits2 = FALSE;
     }
-    
+
     PRINT_FROM_VERB(3)
-    
+
     if (CurrCand->do_it) {
         if (tv->tolevel == 0) {
             tv->fromlevel = tv->tolevel;
             SpineFL = Spine+tv->fromlevel;
             vertex = Spine[tv->maxtreelevel+1].liststart->lab[Spine[1].tgtpos];
             k = n;
-            
+
             if (TargetCell(g_arg, CurrCand, CurrPart, n, tv, tv->tolevel)) {
                 ++tv->tolevel;
                 SpineTL = Spine+tv->tolevel;
@@ -7952,12 +7952,12 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                 tv->finalnumcells = CurrPart->cells;
                 return;
             }
-            
+
             memcpy(NextCand->lab, CurrCand->lab, n*sizeof(int));
             memcpy(NextCand->invlab, CurrCand->invlab, n*sizeof(int));
             SpineTL->trcstart = CurrPart->cells;
             TheTrace[SpineTL->trcstart] = SpineTL->tgtpos;
-            
+
             tv->indivstart = tv->tcell+CurrCand->indnum;
             tv->indivend = tv->indivstart+tv->steps;
             if (tv->indivend > SpineTL->tgtend) {
@@ -7965,7 +7965,7 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
             }
             memset(CurrRefCells, 0, n*sizeof(int));
             ti->thegrouphaschanged = TRUE;
-            
+
             if (!CurrCand->sortedlab) {
                 quickSort(CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell]);
                 for (i=tv->tcell; i<tv->tcell+CurrPart->cls[tv->tcell]; i++) {
@@ -7973,10 +7973,10 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                 }
                 CurrCand->sortedlab = TRUE;
             }
-            
+
             for (k = tv->indivstart; k < tv->indivend; k++) {
                 if ((tv->orbits[CurrCand->lab[k]] == CurrCand->lab[k]) && (OrbSize[tv->orbits[CurrCand->lab[k]]] >= OrbSize[tv->orbits[vertex]])) {
-                    
+
                     CurrCand->indnum++;
                     NextCand->singcode = CurrCand->singcode;
                     NextCand->vertex = CurrCand->lab[k];
@@ -7984,18 +7984,18 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     if (NextCand->name == (NAUTY_INFINITY-2)) {
                         NextCand->name = tv->name = 1;
                     }
-                    
+
                     if (ti->thegrouphaschanged) {
                         if (tv->fromlevel == tv->maxtreelevel) {
                             CURRORBITSIZES
                         }
                         ti->thegrouphaschanged = FALSE;
                     }
-                    
+
                     if (tv->currorbit[CurrCand->lab[k]] != CurrCand->lab[k]) {
                         continue;
                     }
-                    
+
                     memcpy(NextPart->cls, CurrPart->cls, n*sizeof(int));
                     memcpy(NextPart->inv, CurrPart->inv, n*sizeof(int));
                     if (NextPart->cls[tv->tcell] == 2) {
@@ -8005,21 +8005,21 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     else {
                         NextCand->singcode = MASHCOMM(NextCand->singcode, CurrCand->lab[k]+labelorg);
                     }
-                    
+
                     Individualize(NextPart, NextCand, CurrCand->lab[k], tv->tcell, CurrPart->cells, SpineTL->tgtpos);
-                    
+
                     tv->stats->numnodes++;
                     Spine[tv->tolevel+1].levelcounter++;
                     if (tv->fromlevel == tv->maxtreelevel) {
                         tv->tolevel_tl = tv->tolevel;
                         trieref = trieroot;
-                        
+
                         tv->answ = traces_refine_comptrie(g_arg,
                                                           NextCand,
                                                           m,
                                                           n,
                                                           NextPart, tv, ti);
-                        
+
                         if (tv->answ) {
                             if (NextPart->cells != n) {
                                 CurrRefCells[NextPart->cells] += CurrOrbSize[CurrCand->lab[k]];
@@ -8049,7 +8049,7 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                     if (NextPart->cells == tv->finalnumcells) {
                                         UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                     }
-                                    
+
                                     if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
                                     if (!tv->answ) {
                                         PRINT_RETURN
@@ -8064,13 +8064,13 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                             autom = CheckForAutomorphisms(g_arg, CurrCand, NextCand,
                                                           tv, ti, temp, n, NextPart);
                             if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
-                            
+
                             if (ti->thegrouphaschanged) {
                                 ORBITSIZES
                             }
                         }
                         PRINT_RETURN
-                        
+
                         /* ADD TO NEXT LEVEL */
                         if ((NextPart->cells < tv->finalnumcells) || (tv->tolevel != tv->maxtreelevel) || (tv->tolevel_tl != tv->tolevel+1)) {
                             ADDTONEXTLEVEL;
@@ -8091,12 +8091,12 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
             temp = CurrCand->lab[Spine[1].tgtpos];
             vertex = Spine[tv->maxtreelevel+1].liststart->lab[Spine[1].tgtpos];
             k = n;
-            
+
             if (tv->cand_level || ((tv->orbits[temp] == temp) && (OrbSize[tv->orbits[CurrCand->lab[Spine[1].tgtpos]]] >= OrbSize[tv->orbits[vertex]])))
             {
                 tv->fromlevel = tv->tolevel;
                 SpineFL = Spine+tv->fromlevel;
-                
+
                 if (TargetCell(g_arg, CurrCand, CurrPart, n, tv, tv->tolevel)) {
                     tv->tcellevel = ++tv->tolevel;
                     SpineTL = Spine+tv->tolevel;
@@ -8111,9 +8111,9 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     return;
                 }
                 ti->minimalinorbits = TRUE;
-                
+
                 if (!ti->identitygroup) {
-                    
+
                     if (ti->useTempOrbits1 && ti->useTempOrbits2) {
                         CuOrb = TempOrbits;
                     }
@@ -8160,10 +8160,10 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                         while (TreeNode2->vtx != j2) {
                                             TreeNode2 = TreeNode2->next_sibling;
                                         }
-                                        
+
                                         TreeNode1->index += TreeNode2->index;
                                         TreeNode2->goes_to = TreeNode1;
-                                        
+
                                         ti->minimalinorbits = FALSE;
                                     }
                                     else {
@@ -8179,13 +8179,13 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                 else {
                     CuOrb = IDENTITY_PERM;
                 }
-                
+
                 if (ti->minimalinorbits) {
                     memcpy(NextCand->lab, CurrCand->lab, n*sizeof(int));
                     memcpy(NextCand->invlab, CurrCand->invlab, n*sizeof(int));
                     SpineTL->trcstart = CurrPart->cells;
                     TheTrace[SpineTL->trcstart] = SpineTL->tgtpos;
-                    
+
                     tv->indivstart = tv->tcell+CurrCand->indnum;
                     tv->indivend = tv->indivstart+tv->steps;
                     if (tv->indivend > SpineTL->tgtend) {
@@ -8193,7 +8193,7 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                     }
                     memset(CurrRefCells, 0, n*sizeof(int));
                     if (!ti->identitygroup) ti->thegrouphaschanged = TRUE;
-                    
+
                     if (!CurrCand->sortedlab) {
                         quickSort(CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell]);
                         for (i=tv->tcell; i<tv->tcell+CurrPart->cls[tv->tcell]; i++) {
@@ -8201,7 +8201,7 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                         }
                         CurrCand->sortedlab = TRUE;
                     }
-                    
+
                     for (k = tv->indivstart; k < tv->indivend; k++) {
                         CurrCand->indnum++;
                         NextCand->singcode = CurrCand->singcode;
@@ -8210,20 +8210,20 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                         if (NextCand->name == (NAUTY_INFINITY-2)) {
                             NextCand->name = tv->name = 1;
                         }
-                        
+
                         if (ti->thegrouphaschanged) {
                             if (tv->fromlevel == tv->maxtreelevel) {
                                 CURRORBITSIZES
                             }
                             ti->thegrouphaschanged = FALSE;
                         }
-                        
+
                         if (!schreierwrong) {
                             if (CuOrb[CurrCand->lab[k]] != CurrCand->lab[k]) {
                                 continue;
                             }
                         }
-                        
+
                         memcpy(NextPart->cls, CurrPart->cls, n*sizeof(int));
                         memcpy(NextPart->inv, CurrPart->inv, n*sizeof(int));
                         if (NextPart->cls[tv->tcell] == 2) {
@@ -8233,15 +8233,15 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                         else {
                             NextCand->singcode = MASHCOMM(NextCand->singcode, CurrCand->lab[k]);
                         }
-                        
+
                         Individualize(NextPart, NextCand, CurrCand->lab[k], tv->tcell, CurrPart->cells, SpineTL->tgtpos);
-                        
+
                         tv->stats->numnodes++;
                         Spine[tv->tolevel+1].levelcounter++;
                         if (tv->fromlevel == tv->maxtreelevel) {
                             tv->tolevel_tl = tv->tolevel;
                             trieref = trieroot;
-                            
+
                             tv->answ = traces_refine_comptrie(g_arg,
                                                               NextCand,
                                                               m,
@@ -8276,7 +8276,7 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                             if (NextPart->cells == tv->finalnumcells) {
                                                 UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                             }
-                                            
+
                                         }
                                         if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
                                         if (!tv->answ) {
@@ -8304,13 +8304,13 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
                                         autom = 0;
                                     }
                                 }
-                                
+
                                 if (ti->thegrouphaschanged) {
                                     ORBITSIZES
                                 }
                             }
                             PRINT_RETURN
-                            
+
                             /* ADD TO NEXT LEVEL */
                             if ((NextPart->cells < tv->finalnumcells) || (tv->tolevel != tv->maxtreelevel) || (tv->tolevel_tl != tv->tolevel+1)) {
                                 ADDTONEXTLEVEL;
@@ -8336,9 +8336,9 @@ void CompStage2(sparsegraph *g_arg, Partition *CurrPart, Partition *NextPart, Ca
             }
             else SpineTL = &Spine[tv->tolevel+1];
         }
-        
+
     }
-    
+
 	/* REMOVE CURRENT CANDIDATE */
 	if (!CurrCand->do_it || k >= SpineTL->tgtend) {
 		SpineFL->liststart = CurrCand->next;
@@ -8356,16 +8356,16 @@ void
 grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                schreier *gp, permnode **ring,
 			   double *grpsize1, int *grpsize2, int n, TracesVars *tv, TracesInfo *ti) {
-    
+
 	int i, i1, j, j0, j2, k, k1, k2, w, w1, w2, c, c1, c2, c3, c4, n1, n2;
     int prev, step, start, counts, StInd, CyInd, cycnum, orbrep, cellord, LghAttrInd;
 	int tmp, temp, halfsize, vtx, cell1;
     int *cylab, *cycol;
 	TracesSpine SpineSDegLev;
     searchtrie *TrieNode;
-    
+
     *grpsize1 = 1.0; *grpsize2 = 0;
-    
+
     TrieNode = Spine[tv->maxtreelevel].liststart->stnode;
     if (tv->options->verbosity >= 2) {
         fprintf(outfile, "-->> ");
@@ -8393,10 +8393,10 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
             TrieNode = TrieNode->father;
         }
     }
-    
+
     if (tv->smalldeglevel < n) {
         SpineSDegLev = Spine[tv->smalldeglevel];
-        
+
         /* Deg 2 and at least one nghb with deg > 2 */
         SETMARK(StackMarkers, tv->stackmark)
         for (i=0; i<n; i += SpineSDegLev.part->cls[i]) {
@@ -8559,7 +8559,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                                     StackMarkers[tv->orbits[tmp]] = tv->stackmark;
                                 }
                                 tv->orbits[tmp] = orbrep;
-                                
+
                                 temp = PERMSTACK[k1-j];
                                 SpineSDegLev.liststart->lab[cellord] = temp;
                                 SpineSDegLev.liststart->invlab[temp] = cellord++;
@@ -8597,7 +8597,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                 }
             }
         }
-        
+
         /* Deg 2 and at least one nghb with deg = 1 */
         SETMARK(Markers, tv->mark)
         for (i=0; i<n; i += SpineSDegLev.part->cls[i]) {
@@ -8776,7 +8776,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                                     StackMarkers[tv->orbits[tmp]] = tv->stackmark;
                                 }
                                 tv->orbits[tmp] = orbrep;
-                                
+
                                 temp = PERMSTACK[k1-j];
                                 SpineSDegLev.liststart->lab[cellord] = temp;
                                 SpineSDegLev.liststart->invlab[temp] = cellord++;
@@ -8814,7 +8814,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                 }
             }
         }
-        
+
         /* Cycles */
         for (i=0; i<n; i += SpineSDegLev.part->cls[i]) {
             if (SpineSDegLev.part->cls[i] > 1) {
@@ -8854,7 +8854,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                             cycnum++;
                         }
                     }
-                    
+
                     CYCPOS[0] = 0;
                     WorkArray[0] = CYLGTH[0];
                     for (j=1; j<CyInd; j++) {
@@ -8862,10 +8862,10 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                         WorkArray[CYCPOS[j]] = CYLGTH[j];
                     }
                     sortindirect(CYCPOS, WorkArray, CyInd);
-                    
+
                     /* the next loop for orbits and canonical label */
                     SETMARK(Markers, tv->mark)
-                    
+
                     c1 = WorkArray[CYCPOS[0]];
                     LghAttrInd = 0;
                     for (c=0; c<CyInd; c++) {
@@ -8888,7 +8888,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                             }
                         }
                     }
-                    
+
                     SETMARK(Markers, tv->mark)
                     c2 = LGHATTR[CYCPOS[0]];
                     c = k = 0;
@@ -8921,7 +8921,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                             tv->orbits[CYCLES[c4]] = CYCREP[CYCOLR[c4]];
                         }
                     }
-                    
+
                     k = 0;
                     for (i1=0; i1<CyInd; i1++) {
                         k1 = CYCOLR[k];
@@ -9026,7 +9026,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                 }
             }
         }
-        
+
         /* Deg 1 */
         SETMARK(Markers, tv->mark)
         for (i=0; i<n; i += SpineSDegLev.part->cls[i]) {
@@ -9120,7 +9120,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                                     }
                                     AUTPERM[PERMSTACK[j]] = temp;
                                 }
-                                
+
                                 SPECIALGENERATORS
                                 if (tv->options->generators || tv->options->writeautoms || tv->options->userautomproc) {
                                     memcpy(AUTPERM, IDENTITY_PERM, n*sizeof(int));
@@ -9189,12 +9189,12 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                     for (j=i; j<i+SpineSDegLev.part->cls[i]; j++) {
                         tv->orbits[SpineSDegLev.liststart->lab[j]] = orbrep;
                     }
-                    
+
                     tv->stats->numorbits -= SpineSDegLev.part->cls[i] - 1;
                 }
 			}
 		}
-        
+
         /* Deg 0 or n-1 */
         for (i=0; i<n; i += SpineSDegLev.part->cls[i]) {
             if (SpineSDegLev.part->cls[i] > 1) {
@@ -9227,7 +9227,7 @@ grouporderplus(sparsegraph *sg, int *fix, int nfix, Candidate *Cand,
                     for (j=i; j<i+SpineSDegLev.part->cls[i]; j++) {
                         tv->orbits[SpineSDegLev.liststart->lab[j]] = orbrep;
                     }
-                    
+
                     tv->stats->numorbits -= SpineSDegLev.part->cls[i] - 1;
                 }
             }
@@ -9288,7 +9288,7 @@ int spinelementorbsize(int *orbits, int *lab, int size, int elem)
 
 void Propagate(sparsegraph *sg, Candidate *Cand, Partition *Part, int start, int end, int n) {
     int i, vtx, n1, n2;
-    
+
     for (i=start; i<end; i++) {
         Part->cls[i] = 1;
         Part->inv[i] = i;
@@ -9325,7 +9325,7 @@ trielist *searchtrie_new(int n, struct TracesVars *tv)
     tv->strielist->triearray[0].index = 1;
     tv->strielist->triearray[0].name = tv->strielist->triearray[0].level = 0;
     tv->strielist->triearray[0].vtx = n;
-    
+
 	tv->strienext = 1;
     return tv->strielist;
 }
@@ -9392,7 +9392,7 @@ int *findcurrorbits(schreier *gp, int k)
 {
     int i;
     schreier *sh;
-    
+
     sh = gp;
     for (i = 0; i < k; i++) {
         sh = sh->next;

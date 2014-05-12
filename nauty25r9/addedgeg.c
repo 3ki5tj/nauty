@@ -19,7 +19,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 #include "gutils.h"
 
 /*************************************************************************/
@@ -56,10 +56,10 @@ no4path(graph *g, int m, int n, int v, int *dist)
 
         gv = GRAPHROW(g,v,m);
         for (v1 = -1; (v1 = nextelement(gv,m,v1)) >= 0; )
-        {   
+        {
             gv1 = GRAPHROW(g,v1,m);
             for (v2 = -1; (v2 = nextelement(gv1,m,v2)) >= 0; )
-            {   
+            {
                 if (v2 == v) continue;
                 gv2 = GRAPHROW(g,v2,m);
                 for (v3 = -1; (v3 = nextelement(gv2,m,v3)) >= 0; )
@@ -252,7 +252,7 @@ main(int argc, char *argv[])
 		    ADDELEMENT(gv,w);
 		    ADDELEMENT(gw,v);
 		    gq = g;
-	    
+
 	            if (dolabel)
 	            {
 #if !MAXN

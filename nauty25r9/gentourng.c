@@ -86,13 +86,13 @@ PRUNE feature.
 
    By defining the C preprocessor variable PRUNE at compile time, gentourng
    can be made to call
-        int PRUNE(graph *g,int n,int maxn) 
-   for each intermediate (and final) graph, and reject it if 
+        int PRUNE(graph *g,int n,int maxn)
+   for each intermediate (and final) graph, and reject it if
    the value returned is nonzero.  The arguments are:
 
      g      = the graph in nauty format (m=1)
      n      = the number of vertices in g
-     maxn   = the number of vertices for output 
+     maxn   = the number of vertices for output
 	      (the value you gave on the command line to gentourng)
 
    gentourng constructs the graph starting with vertex 0, then adding
@@ -102,7 +102,7 @@ PRUNE feature.
    A call is made for all orders from 1 to maxn.  In testing for
    a uniform property (such as a forbidden subgraph or forbidden
    induced subgraph) it might save time to notice that a call to
-   PRUNE for n implies that the call for n-1 already passed. 
+   PRUNE for n implies that the call for n-1 already passed.
 
    For very fast tests, it might be worthwhile using PREPRUNE as
    well or instead. It has the same meaning but is applied earlier
@@ -141,7 +141,7 @@ Counts:
 
                 all                 strong          regular
    n        tournaments           tournaments     tournaments
-  
+
    1                     1                     1             1
    2                     1                     0             1
    3                     2                     1             1
@@ -156,7 +156,7 @@ Counts:
   12          154108311168          152310149735      19434757
   13        48542114686912        48234782263293       1495297
   14     28401423719122304     28304491788158056
-  15  31021002160355166848  30964247546702883729   18400989629 
+  15  31021002160355166848  30964247546702883729   18400989629
 
 **************************************************************************
 
@@ -255,7 +255,7 @@ typedef struct
 /* The program is so fast that the count of output graphs can quickly
    overflow a 32-bit integer.  Therefore, we use two long values
    for each count, with a ratio of 10^9 between them.  The macro
-   ADDBIG adds a small number to one of these big numbers.  
+   ADDBIG adds a small number to one of these big numbers.
    BIGTODOUBLE converts a big number to a double (approximately).
    SUMBIGS adds a second big number into a first big number.
    SUBBIGS subtracts one big number from a second.
@@ -370,7 +370,7 @@ nullwrite(FILE *f, graph *g, int n)
 
 static boolean
 isstrong(graph *g, int n)
-/* test if tournament g is strongly-connected 
+/* test if tournament g is strongly-connected
  * This code is strictly for tournaments only.
  */
 {
@@ -390,7 +390,7 @@ isstrong(graph *g, int n)
         }
 
 	if (seen != allbits) return FALSE;
- 
+
         seen = (allbits ^ g[0]);
         expanded = bit[0];
 
@@ -435,7 +435,7 @@ makeleveldata(void)
 
         for (n = 1; n < maxn; ++n)
         {
-            dmax = n/2; 
+            dmax = n/2;
 	    if (maxdeg < dmax) dmax = maxdeg;
             dmin = mindeg - maxn + n + 1;
 	    if (dmin < 0) dmin = 0;
@@ -600,7 +600,7 @@ refinex(graph *g, int *lab, int *ptn, int level, int *numcells,
         while (*numcells < n && lact)
         {
 	    TAKEBIT(split1,lact);
-            
+
             for (split2 = split1; ptn[split2] > 0; ++split2) {}
             if (split1 == split2)       /* trivial splitting cell */
             {
@@ -899,7 +899,7 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
 	}
 	gx[n] = gxn;
         degx[n] = degn = XPOPCOUNT(x);
-	    
+
 #ifdef PREPRUNE
         if (PREPRUNE(gx,n+1,maxn)) return FALSE;
 #endif
@@ -1010,7 +1010,7 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
 
 	cheapacc = FALSE;
 	if (code > 0) cheapacc = TRUE;
-    
+
         if (cheapacc)
         {
 #ifdef INSTRUMENT
@@ -1115,9 +1115,9 @@ genextend(graph *g, int n, int *deg, boolean rigid)
 	if (xub == dmax+1 && XPOPCOUNT(dlow)+dmax >= n) --xub;
         if (xlb > xub) return;
 
-#ifdef PRUNE 
-        if (PRUNE(g,n,maxn)) return; 
-#endif 
+#ifdef PRUNE
+        if (PRUNE(g,n,maxn)) return;
+#endif
 
         imin = data[n].xstart[xlb];
         imax = data[n].xstart[xub+1];
@@ -1242,10 +1242,10 @@ main(int argc, char *argv[])
 	secret = FALSE;
 	connec1 = FALSE;
 
-        maxdeg = MAXN; 
+        maxdeg = MAXN;
 	mindeg = 0;
 	splitlevinc = 0;
-	
+
 	gotd = gotD = gotf = gotmr = FALSE;
 
         argnum = 0;
@@ -1290,9 +1290,9 @@ PLUGIN_SWITCHES
 		    if (!gotmr)
 		    {
 			if (sscanf(arg,"%d/%d",&res,&mod) == 2)
-                        { 
-                            gotmr = TRUE; 
-                            continue; 
+                        {
+                            gotmr = TRUE;
+                            continue;
                         }
 		    }
 		    if (!gotf)
@@ -1389,7 +1389,7 @@ PLUGIN_INIT
 		fprintf(stderr,">A %s",argv[0]);
 	    else
 		CATMSG1(">A %s",argv[0]);
-	   
+
 	    CATMSG2(" -%s%s",connec1  ? "c" : "",canonise ? "l" : "");
 	 /*
 	    if (mod > 1)

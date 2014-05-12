@@ -2,7 +2,7 @@
  *        add chordal graphs
  *        add complements for ordinary graphs */
 
-/* geng.c  version 2.7; B D McKay, Jan 2013. */
+/* based on geng.c  version 2.7; B D McKay, Jan 2013. */
 
 #define USAGE \
   "geng [-cCmtfbd#D#] [-uygsnh] [-lvq] \n\
@@ -978,17 +978,6 @@ writes6x(FILE *f, graph *g, int n)
 /* write graph g (n vertices) to file f in sparse6 format */
 {
   writes6(f, g, n);
-}
-
-
-
-/***********************************************************************/
-
-static void
-nullwrite(FILE *f, graph *g, int n)
-/* don't write graph g (n vertices) to file f */
-{
-  (void) f; (void) g; (void) n;
 }
 
 
@@ -2009,8 +1998,7 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
 #ifdef INSTRUMENT
         ++a2succs;
 #endif
-        if (canonise) makecanon(gx, gcan, nx);
-        return TRUE;
+        goto FIND_CANON;
       }
       ptn[j1] = 0;
       ++numcells;
@@ -2047,8 +2035,7 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
 #ifdef INSTRUMENT
     ++a2succs;
 #endif
-    if (canonise) makecanon(gx, gcan, nx);
-    return TRUE;
+    goto FIND_CANON;
   }
 
   options.getcanon = TRUE;
@@ -2064,10 +2051,13 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
 #ifdef INSTRUMENT
     ++a2succs;
 #endif
-    if (canonise) makecanon(gx, gcan, nx);
-    return TRUE;
+    goto FIND_CANON;
   } else
     return FALSE;
+
+FIND_CANON:
+    if (canonise) makecanon(gx, gcan, nx);
+    return TRUE;
 }
 
 
@@ -2177,7 +2167,7 @@ spaextend(graph *g, int n, int *deg, int ne, boolean rigid,
             haschild = TRUE;
 #endif
             ADDBIG(ecount[ne + xc], 1);
-            (*outproc)(outfile, canonise ? gcan : gx, nx);
+            OPTCALL(outproc)(outfile, canonise ? gcan : gx, nx);
           }
         }
       }
@@ -2286,7 +2276,7 @@ genextend(graph *g, int n, int *deg, int ne, boolean rigid, int xlb, int xub)
             haschild = TRUE;
 #endif
             ADDBIG(ecount[ne + xc], 1);
-            (*outproc)(outfile, canonise ? gcan : gx, nx);
+            OPTCALL(outproc)(outfile, canonise ? gcan : gx, nx);
           }
         }
     }
@@ -2356,7 +2346,8 @@ main(int argc, char *argv[])
   nauty_check(WORDSIZE, 1, MAXN, NAUTYVERSIONID);
 
   if (MAXN > 32 || MAXN > WORDSIZE || MAXN > 8 * sizeof(xword)) {
-    fprintf(stderr, "geng: incompatible MAXN, WORDSIZE, or xword\n");
+    fprintf(stderr, "geng: incompatible MAXN %d, WORDSIZE %d, or xword %d\n",
+        MAXN, WORDSIZE, (int) sizeof(xword));
     fprintf(stderr, "--See notes in program source\n");
     exit(1);
   }
@@ -2393,29 +2384,29 @@ main(int argc, char *argv[])
         sw = *arg++;
         SWBOOLEAN('n', nautyformat)
         else SWBOOLEAN('u', nooutput)
-          else SWBOOLEAN('g', graph6)
-            else SWBOOLEAN('s', sparse6)
-              else SWBOOLEAN('t', trianglefree)
-                else SWBOOLEAN('f', squarefree)
-                  else SWBOOLEAN('b', bipartite)
-                    else SWBOOLEAN('v', verbose)
-                      else SWBOOLEAN('l', canonise)
-                        else SWBOOLEAN('y', yformat)
-                          else SWBOOLEAN('h', header)
-                            else SWBOOLEAN('m', savemem)
-                              else SWBOOLEAN('c', connec1)
-                                else SWBOOLEAN('C', connec2)
-                                  else SWBOOLEAN('q', quiet)
-                                    else SWBOOLEAN('$', secret)
-                                      else SWBOOLEAN('S', safe)
-                                        else SWINT('d', gotd, mindeg, "geng -d")
-                                          else SWINT('D', gotD, maxdeg, "geng -D")
-                                            else SWINT('x', gotx, multiplicity, "geng -x")
-                                              else SWINT('X', gotX, splitlevinc, "geng -X")
+        else SWBOOLEAN('g', graph6)
+        else SWBOOLEAN('s', sparse6)
+        else SWBOOLEAN('t', trianglefree)
+        else SWBOOLEAN('f', squarefree)
+        else SWBOOLEAN('b', bipartite)
+        else SWBOOLEAN('v', verbose)
+        else SWBOOLEAN('l', canonise)
+        else SWBOOLEAN('y', yformat)
+        else SWBOOLEAN('h', header)
+        else SWBOOLEAN('m', savemem)
+        else SWBOOLEAN('c', connec1)
+        else SWBOOLEAN('C', connec2)
+        else SWBOOLEAN('q', quiet)
+        else SWBOOLEAN('$', secret)
+        else SWBOOLEAN('S', safe)
+        else SWINT('d', gotd, mindeg, "geng -d")
+        else SWINT('D', gotD, maxdeg, "geng -D")
+        else SWINT('x', gotx, multiplicity, "geng -x")
+        else SWINT('X', gotX, splitlevinc, "geng -X")
 #ifdef PLUGIN_SWITCHES
-                                                PLUGIN_SWITCHES
+        PLUGIN_SWITCHES
 #endif
-                                                else badargs = TRUE;
+        else badargs = TRUE;
       }
     } else if (arg[0] == '-' && arg[1] == '\0')
       gotf = TRUE;
@@ -2510,7 +2501,7 @@ main(int argc, char *argv[])
 #else
   if (nautyformat) outproc = writenauty;
   else if (yformat) outproc = writeny;
-  else if (nooutput) outproc = nullwrite;
+  else if (nooutput) outproc = NULL;
   else if (sparse6) outproc = writes6x;
   else outproc = writeg6x;
 #endif
@@ -2555,25 +2546,6 @@ main(int argc, char *argv[])
 
   if (!gotX) splitlevinc = 0;
 
-/*
-    if (!quiet)
-    {
-        fprintf(stderr,">A %s -%s%s%s%s%s%s",argv[0],
-            connec2      ? "C" : connec1 ? "c" : "",
-            trianglefree ? "t" : "",
-            squarefree   ? "f" : "",
-            bipartite    ? "b" : "",
-            canonise     ? "l" : "",
-            savemem      ? "m" : "");
-        if (mod > 1) fprintf(stderr,"X%dx%d",splitlevinc,multiplicity);
-        fprintf(stderr,"d%dD%d n=%d e=%d",mindeg,maxdeg,maxn,mine);
-        if (maxe > mine) fprintf(stderr,"-%d",maxe);
-        if (mod > 1) fprintf(stderr," class=%d/%d",res,mod);
-        fprintf(stderr,"\n");
-        fflush(stderr);
-    }
- */
-
   if (!quiet) {
     msg[0] = '\0';
     if (strlen(argv[0]) > 75)
@@ -2615,7 +2587,7 @@ main(int argc, char *argv[])
   if (maxn == 1) {
     if (res == 0) {
       ADDBIG(ecount[0], 1);
-      (*outproc)(outfile, g, 1);
+      OPTCALL(outproc)(outfile, g, 1);
     }
   } else {
     if (maxn > 28 || (size_t) maxn + 4 > 8 * sizeof(xword))

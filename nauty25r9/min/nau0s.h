@@ -5,6 +5,7 @@
  *  o removes dynamic allocation
  *  o remove user functions
  *  o remove writemarker, writeperm
+ *  o only dense graph
  * This file was edited manually */
 #ifndef NAU0S_H__
 #define NAU0S_H__
@@ -263,7 +264,7 @@ typedef uint64_t setword;
   #endif /* SIZEOF_INT >= 8 */
 #endif /* WORDSIZE == 64 */
 
-#define NAUTYVERSIONID (25480)  /* 10000*version */
+#define NAUTYVERSIONID (25490)  /* 10000*version */
 #define NAUTYREQUIRED NAUTYVERSIONID  /* Minimum compatible version */
 
 #if WORDSIZE == 16
@@ -619,8 +620,6 @@ typedef struct {
 /* manipulation of real approximation to group size */
 #define MULTIPLY(s1, s2, i) if ((s1 *= i) >= 1e10) { s1 /= 1e10; s2 += 10; }
 
-struct optionstruct;  /* incomplete definition */
-
 typedef struct {
   boolean (*isautom)          /* test for automorphism */
     (graph*, int*, boolean, int, int);
@@ -641,7 +640,9 @@ typedef struct {
 typedef struct optionstruct {
   int getcanon;               /* make canong and canonlab? */
   boolean digraph;            /* multiple edges or loops? */
-  boolean defaultptn;         /* set lab,ptn,active for single cell? */
+  boolean defaultptn;         /* set lab, ptn, active for single cell? */
+  void (*userautomproc)       /* procedure called for each automorphism */
+  (int, int*, int*, int, int, int);
   void (*invarproc)           /* procedure to compute vertex-invariant */
   (graph *, int*, int*, int, int, int, int*, int, boolean, int, int);
   int tc_level;               /* max level for smart target cell choosing */
@@ -655,13 +656,13 @@ typedef struct optionstruct {
 
 #define DEFAULTOPTIONS_GRAPH(options) optionblk options = \
 { 0, FALSE, TRUE, \
-  NULL, 100, 0, 1, 0, &dispatch_graph }
+  NULL, NULL, 100, 0, 1, 0, &dispatch_graph }
 
 
 
 #define DEFAULTOPTIONS_DIGRAPH(options) optionblk options = \
 { 0, TRUE, TRUE, \
-  adjacencies, 100, 0, 999, 0, &dispatch_graph }
+  NULL, adjacencies, 100, 0, 999, 0, &dispatch_graph }
 
 
 
@@ -1381,15 +1382,18 @@ static int firstpathnode(int*, int*, int, int, graph *g, int n);
 static int othernode(int*, int*, int, int, graph *g, int n);
 static int processnode(int*, int*, int, int, graph *g, int n);
 
+#define OPTCALL(proc) if (proc != NULL) (*proc)
+
 /* copies of some of the options: */
 static boolean getcanon, digraph;
 static int tc_level, mininvarlevel, maxinvarlevel, invararg;
 static void (*invarproc)
 (graph *, int*, int*, int, int, int, int*, int, boolean, int, int);
+static void (*userautomproc)(int, int*, int*, int, int, int);
 static dispatchvec_t dispatch;
 #pragma omp threadprivate(getcanon, digraph, tc_level)
 #pragma omp threadprivate(mininvarlevel, maxinvarlevel, invararg)
-#pragma omp threadprivate(invarproc, dispatch)
+#pragma omp threadprivate(invarproc, userautomproc, dispatch)
 
 /* local versions of some of the arguments: */
 #if MAXM != 1
@@ -1424,6 +1428,8 @@ static int gca_first, /* level of greatest common ancestor of
            samerows, /* number of rows of canong which are correct for
                         the bsf leaf  BDM:correct description? */
            canonlevel, /* level of bsf leaf */
+           stabvertex, /* point fixed in ancestor of first leaf at level
+                          gca_canon */
            cosetindex; /* the point being fixed at level gca_first */
 #pragma omp threadprivate(gca_first, gca_canon, noncheaplevel, allsamelevel)
 #pragma omp threadprivate(eqlev_first, eqlev_canon, comp_canon)
@@ -1606,6 +1612,7 @@ void nauty(graph * RESTRICT g_arg,
   digraph = options->digraph;
   if (digraph) tc_level = 0;
   else tc_level = options->tc_level;
+  userautomproc = options->userautomproc;
 
   invarproc = options->invarproc;
   if (options->mininvarlevel < 0 && options->getcanon)
@@ -1850,6 +1857,7 @@ static int firstpathnode(int *lab, int *ptn, int level, int numcells, graph *g, 
         rtnlevel = firstpathnode(lab, ptn, level + 1, numcells + 1, g, n);
         childcount = 1;
         gca_first = level;
+        stabvertex = tv1;
       } else {
         rtnlevel = othernode(lab, ptn, level + 1, numcells + 1, g, n);
         ++childcount;
@@ -2011,7 +2019,7 @@ static int othernode(int *lab, int *ptn, int level, int numcells, graph *g, int 
 *  anywhere up to the closest invocation of firstpathnode.                   *
 *                                                                            *
 *  FUNCTIONS CALLED:    isautom(),updatecan(),testcanlab(),fmperm(),         *
-*                       orbjoin(),                                           *
+*                       (*userautomproc)(),orbjoin(),                                           *
 *                       shortprune(),fmptn()                                 *
 *                                                                            *
 *****************************************************************************/
@@ -2072,6 +2080,8 @@ static int processnode(int *lab, int *ptn, int level, int numcells, graph *g, in
     fmptr += 2 * NAUTY_M_;
     stats->numorbits = orbjoin(orbits, workperm1, n);
     ++stats->numgenerators;
+    OPTCALL(userautomproc) (stats->numgenerators, workperm1, orbits,
+                            stats->numorbits, stabvertex, n);
     return gca_first;
 
   case 2:                   /* lab is equivalent to canonlab */
@@ -2085,6 +2095,8 @@ static int processnode(int *lab, int *ptn, int level, int numcells, graph *g, in
       return gca_canon;
     }
     ++stats->numgenerators;
+    OPTCALL(userautomproc) (stats->numgenerators, workperm1, orbits,
+                            stats->numorbits, stabvertex, n);
     if (orbits[cosetindex] < cosetindex)
       return gca_first;
     if (gca_canon != gca_first)
@@ -2143,7 +2155,7 @@ static int processnode(int *lab, int *ptn, int level, int numcells, graph *g, in
 static set workset[MAXM];   /* used for scratch work */
 static int workperm2[MAXN];
 static int bucket[MAXN + 2];
-static set dnwork[40 * MAXM];
+static set dnwork[2 * 60 * MAXM];
 #pragma omp threadprivate(workset, workperm2, bucket, dnwork)
 
 

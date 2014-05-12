@@ -165,7 +165,7 @@ main(int argc, char *argv[])
 	    }
 	}
 
-	if (sswitch && gswitch) 
+	if (sswitch && gswitch)
             gt_abort(">E labelg: -s and -g are incompatible\n");
 
 	if (tswitch && (fswitch || Sswitch))
@@ -204,7 +204,7 @@ main(int argc, char *argv[])
 	if (!qswitch)
 	{
 	    fprintf(stderr,">A labelg");
-	    if (sswitch || gswitch || fswitch || iswitch 
+	    if (sswitch || gswitch || fswitch || iswitch
 			|| tswitch || Sswitch)
 		fprintf(stderr," -");
 	    if (sswitch) fprintf(stderr,"s");
@@ -241,7 +241,7 @@ main(int argc, char *argv[])
 	    outcode = 0;
 	else if (sswitch || (!gswitch && (codetype&SPARSE6)))
 	    outcode = SPARSE6;
-	else 
+	else
 	    outcode = GRAPH6;
 
 	if (!fswitch) fmt = NULL;
@@ -285,7 +285,7 @@ main(int argc, char *argv[])
 	    traces_opts.writeautoms = FALSE;
 	    traces_opts.verbosity = 0;
 	    traces_opts.outfile = stdout;
-	    
+
 	    while (TRUE)
 	    {
 		if (read_sg_loops(infile,&sg,&loops) == NULL) break;

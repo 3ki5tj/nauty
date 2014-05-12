@@ -1,21 +1,21 @@
 // cc -O4 -o water2 -DWORDSIZE=32 -DMAXN=WORDSIZE nauty.c naugraph.c nautil.c gtools.c schreier.c naurng.c watercluster2.c
 
 /*
-Reads graphs in g6 code or multicode (optional) from stdin and directs them 
+Reads graphs in g6 code or multicode (optional) from stdin and directs them
 
-options: 
+options:
 
 ix  means: the indegree of every vertex may be at most x.
 
 iy  means: the outdegree of every vertex may be at most y.
 
-  S  means: allow that for every pair of vertices x,y at most one of the edges x-->y 
+  S  means: allow that for every pair of vertices x,y at most one of the edges x-->y
      and y-->x may be present. By default both of them may be present in the same graph.
 
 
   T  means: Output directed graphs in T-code. This is a simple ASCII output format. Every line
-     contains one graph. First the number of vertices, then the number of 
-     directed edges and then the list of directed edges with the start first 
+     contains one graph. First the number of vertices, then the number of
+     directed edges and then the list of directed edges with the start first
      and the end then. E.g.: 3 2 0 1 2 1 means 3 vertices, 2 directed edges:
      0-->1 and 2-->1
 
@@ -26,22 +26,22 @@ iy  means: the outdegree of every vertex may be at most y.
      The code is complete with the 0 ending the list of outgoing neighbours of nv.
 
   C  means: Do really construct all the directed graphs in memory, but don't output them. This is not
-     a big difference in case of restricted in- and outdegrees, because all that is done extra is that 
+     a big difference in case of restricted in- and outdegrees, because all that is done extra is that
      edges are directed instead of just keeping track of in- and out-degrees. This option is intended only
-     for testing purposes to test also routines that are normally not used when counting. Things that would 
-     speed up the counting also in some cases of restricted in- and out-degrees -- like multiplying the 
-     possibilities of assigning directions to edges that can be assigned directions independent 
-     of each other (depending on the degrees of the endvertices and overlaps) -- are not included. 
+     for testing purposes to test also routines that are normally not used when counting. Things that would
+     speed up the counting also in some cases of restricted in- and out-degrees -- like multiplying the
+     possibilities of assigning directions to edges that can be assigned directions independent
+     of each other (depending on the degrees of the endvertices and overlaps) -- are not included.
      In case of not restrictive bounds on the in- and out-degree it not really constructing the graphs
      can be considerably faster. In cases of restricted in- and out-degrees the only difference is that
      the graph isn't modified...
-     The fact that in case of no output the graph is not modified is mainly to save time for the one 
+     The fact that in case of no output the graph is not modified is mainly to save time for the one
      case of waterclusters, where large numbers were determined. If large numbers (without output)
      for other cases shall be determined, one should think about adding the multiplication routines.
 
    m read multicode
 
-This program uses different labelling routines -- all based on the ideas of 
+This program uses different labelling routines -- all based on the ideas of
 
 G. Brinkmann, Generating water clusters and other directed graphs,
 Journal of Mathematical Chemistry 46, 1112--1121 (2009)
@@ -67,7 +67,7 @@ Sep, 2012: PROCESS feature added by BDM.
  *
  * If SUMMARY is defined, it must expand as the name of a procedure
  * with prototype  void SUMMARY(void).  It is called at the end after
- * the normal summary. 
+ * the normal summary.
  */
 
 //#include<stdio.h>
@@ -90,7 +90,7 @@ typedef int BOOG[2];
 void nontrivlabels(), init_nauty_options();
 
 BOOG edgelist[MAX_BOGEN+1]; /* de lijst van bogen */
-BOOG edgelist_final[MAX_BOGEN+1]; /* de lijst van bogen die nadat er eerst nontriviale automorphismen waren die dan 
+BOOG edgelist_final[MAX_BOGEN+1]; /* de lijst van bogen die nadat er eerst nontriviale automorphismen waren die dan
 				  verdwenen nog gericht moeten worden.*/
 BOOG *laatstepositie; /* The last position in one of these lists. Global in order not to have to copy it every time */
 
@@ -100,9 +100,9 @@ unsigned char *operations=NULL;
 int *root_op=NULL, size_root=0, blocklength, orbitblocklength[MAXN], size_operations=0, number_operations=0;
 /* these arrays will be dynamically allocated and extended. Operations will be an array with "blocks" of length
    "blocklength=tobedirected[vertex_in_orbit]+3". They represent an operation the following way: the first entry is the central
-   vertex then the list of vertices from which only edges come in -- ended by INFTY_UCHAR, then the list of vertices 
-   to which only outgoing edges go -- ended by INFTY_UCHAR. Then the list of vertices to which incoming AND outgoing 
-   edges go -- ended by INFTY_UCHAR. 
+   vertex then the list of vertices from which only edges come in -- ended by INFTY_UCHAR, then the list of vertices
+   to which only outgoing edges go -- ended by INFTY_UCHAR. Then the list of vertices to which incoming AND outgoing
+   edges go -- ended by INFTY_UCHAR.
 
    root has as many entries as there are blocks in operations. root[i]=j means that when computing the orbits of
    operations and constructing a union-find-tree, block number j is the root of the tree containing vertex i. */
@@ -116,7 +116,7 @@ int remember_size[MAXN]; // remember_size[i] is the number of characters allocat
 /* OPTIONS */
 boolean dummybool;
 int mingerichtdeg;
-int remaining_doubles=0; /* hoeveel bogen kunnen ten hoogste nog in allebei 
+int remaining_doubles=0; /* hoeveel bogen kunnen ten hoogste nog in allebei
 			    richtingen gericht worden ? */
 int watermaxedges; /* what is the theoretical maximum for the number of edges which can
 		      directed in a way that doesn't give a conflict with the in/out-degree
@@ -124,19 +124,19 @@ int watermaxedges; /* what is the theoretical maximum for the number of edges wh
 int watermaxdeg; /* maxindeg+maxoutdeg */
 
 int is_gericht[MAX_BOGEN][MAX_BOGEN]={{0}}; /*  is_gericht[i][j]==1 als {i,j} is al gericht -- anders 0 */
-int virtual_gericht[MAX_BOGEN][MAX_BOGEN]={{0}}; /*  virtual_gericht[i][j]==1 als het al vastgelegd is dat {i,j} 
+int virtual_gericht[MAX_BOGEN][MAX_BOGEN]={{0}}; /*  virtual_gericht[i][j]==1 als het al vastgelegd is dat {i,j}
 						    i->j gericht moet worden, 2 als hij j->i gericht moet worden
 						    en 0 als het nog niet vastgelegd is. Vastgelegd betekent door
-						    de beperkingen van in- en outgraad moet deze boog zo gericht 
+						    de beperkingen van in- en outgraad moet deze boog zo gericht
 						    worden. */
 int positie[MAXN][MAXN]; /* the value of positie[i][j] is the position of edge {1,j} in edgelist in case of
 			    nontrivial automorphisms of the underlying undirected graph. */
 
-int virtual_indeg[MAXN], virtual_outdeg[MAXN]; 
-                                               /* de graden als de nog niet gerichte maar al vastgelegde 
-						  bogen meegerekend worden -- dat mag niet voor kanoniciteit 
+int virtual_indeg[MAXN], virtual_outdeg[MAXN];
+                                               /* de graden als de nog niet gerichte maar al vastgelegde
+						  bogen meegerekend worden -- dat mag niet voor kanoniciteit
 						  gebruikt worden */
-int nextstep_depth; 
+int nextstep_depth;
 
 #define SWITCHPAR_ORBSIZE 5 // when does serial orbit labelling switch to parallel -- and stay there
 #define MAXPAR_ORBSIZE 9 // maximum 16, when changing, change following MAXPAROPS too
@@ -144,7 +144,7 @@ int nextstep_depth;
 unsigned int parops[MAXPAROPS];
 // in the case of no degree restrictions this could in fact be permanently filled in -- only depending
 // on the edge orbit size. But the time for filling it in is so small that it is simply not worth it.
-int number_parops; 
+int number_parops;
 // an operation is defined as follows: if edge number i in kleinste_orbit must be directed kleinste_orbit[i][0]->kleinste_orbit[i][1],
 // bits 2i and 2i+1 form the number 0 (so are both 0). For kleinste_orbit[i][0]<-kleinste_orbit[i][1] they form 2, for
 // a double edge they form 1 ---- so 2-type is always the inverse
@@ -162,9 +162,9 @@ if (_x_<_y_) { (bildboog)[0]=_x_; (bildboog)[1]=_y_; } else  { (bildboog)[0]=_y_
   (positie[generators[permnummer][(startboog)[0]]][generators[permnummer][(startboog)[1]]])
 
 /* a macro that sets numbers a and b equivalent to a */
-#define SETEQUIV(a,b) { _y_=(b); while ((_x_=number[_y_])!=_y_) { number[_y_]=(a); _y_=_x_; } number[_y_]=(a); } 
+#define SETEQUIV(a,b) { _y_=(b); while ((_x_=number[_y_])!=_y_) { number[_y_]=(a); _y_=_x_; } number[_y_]=(a); }
 /* zorgt ervoor dat nummer[a] zo is dat nummer[nummer[a]]=nummer[a] */
-#define UPDATENUMBER(a) { _y_=(a); while ((_x_=number[_y_])!=_y_) { number[_y_]=number[_x_]; _y_=number[_y_]; } number[a]=number[_y_]; } 
+#define UPDATENUMBER(a) { _y_=(a); while ((_x_=number[_y_])!=_y_) { number[_y_]=number[_x_]; _y_=number[_y_]; } number[a]=number[_y_]; }
 
 /* the quality of a directed edge */
 #define QUALITY(a,b) (((saturated[a]+saturated[b])<<6)+colour[nextstep_depth][a])
@@ -185,7 +185,7 @@ long long int onlevel[MAX_BOGEN]={0};
 /* variabelen voor nauty: nvector sounds like a vector but is a typedef for int */
 nvector lab[MAX_BOGEN][MAXN]={{0}}, ptn[MAX_BOGEN][MAXN]={{0}}, orbits[MAX_BOGEN], colour[MAX_BOGEN][MAXN]={{0}};
 /* MAX_BOGEN is zeker te veel -- maar wat zou een goede bovengrens zijn ? */
-/* in the arrays lab[i][] and ptn[i][] the partition is stored after having labelled i orbits 
+/* in the arrays lab[i][] and ptn[i][] the partition is stored after having labelled i orbits
    completely. lab[0][] and ptn[0][] are the partitions as computed for the original graph. */
 int rememberorbits[MAXN][MAXN];
 
@@ -197,8 +197,8 @@ graph workg[MAXN], staticg[MAXN], canong[MAXN];
 graph bit_orbit[MAXN];
 int deg[MAXN]={0}, outdeg[MAXN]={0}, indeg[MAXN]={0};
 int tobedirected[MAXN]={0}; /* how many edges have still to be directed? This can
-   also be used to detect whether an edge that is in both directions is a double edge or 
-   just not yet directed in the routines for nontrivial symmetry. It is a double edge if 
+   also be used to detect whether an edge that is in both directions is a double edge or
+   just not yet directed in the routines for nontrivial symmetry. It is a double edge if
    and only if one of the endpoints is ready with ready defines as: */
 #define READY(i) (tobedirected[i]==0)
 #define NOT_READY(i) (tobedirected[i]>0)
@@ -208,7 +208,7 @@ int double_free[MAXN]={0}; /* hoeveel dubbele bogen kan top [i] nog krijgen? */
 
 long long int addnumber=0; /* How much must the counter be increased if a graph
 			      is found. Just relevant in case not all are really constructed and coded.
-			      Then this gives a speedup.*/ 
+			      Then this gives a speedup.*/
 
 long long int aantal_grafen_met_triv_group=0LL;
 long long int aantal_gerichte_grafen=0LL;
@@ -271,7 +271,7 @@ if (addnumber==2) writeBcode_invers(workg,aantal_toppen);} }
        {
 	  EMPTYSET(gconv,aantal_toppen);
           for (i=0; i<aantal_toppen;i++)
-            { 
+            {
 	       FORALLELEMENTS(g[i],j) ADDELEMENT(gconv+j,i);
 	    }
             ++dg_nout;
@@ -288,8 +288,8 @@ if (addnumber==2) writeBcode_invers(workg,aantal_toppen);} }
    { int i,j;
 
    fprintf(stdout,"%d %d",aantal_toppen,aantal_bogen+max_doubles-remaining_doubles);
-   for (i=0; i<aantal_toppen;i++) 
-     { 
+   for (i=0; i<aantal_toppen;i++)
+     {
        FORALLELEMENTS(g[i],j) fprintf(stdout," %d %d",i,j);
      }
        fprintf(stdout,"\n");
@@ -299,8 +299,8 @@ if (addnumber==2) writeBcode_invers(workg,aantal_toppen);} }
    { int i,j;
 
    fprintf(stdout,"%d %d",aantal_toppen,aantal_bogen+max_doubles-remaining_doubles);
-   for (i=0; i<aantal_toppen;i++) 
-     { 
+   for (i=0; i<aantal_toppen;i++)
+     {
        FORALLELEMENTS(g[i],j) fprintf(stdout," %d %d",j,i);
      }
 
@@ -310,8 +310,8 @@ if (addnumber==2) writeBcode_invers(workg,aantal_toppen);} }
  void writeBcode(graph *g, int aantal_toppen)
    { int i,j;
    putc(aantal_toppen,stdout);
-   for (i=0; i<aantal_toppen;i++) 
-     { 
+   for (i=0; i<aantal_toppen;i++)
+     {
        FORALLELEMENTS(g[i],j) putc(j+1,stdout);
        putc(0,stdout);
      }
@@ -323,8 +323,8 @@ if (addnumber==2) writeBcode_invers(workg,aantal_toppen);} }
      putc(aantal_toppen,stdout);
 
      for (i=0; i<aantal_toppen;i++) lengte[i]=0;
-     for (i=0; i<aantal_toppen;i++) 
-       { 
+     for (i=0; i<aantal_toppen;i++)
+       {
 	 FORALLELEMENTS(g[i],j) { lijst[j][lengte[j]]=i+1; lengte[j]++; }
        }
      for (i=0; i<aantal_toppen;i++)
@@ -337,7 +337,7 @@ void writelab(nvector ptn[], nvector lab[])
 {
   int i;
 
-  for (i=0; i<aantal_toppen; i++) 
+  for (i=0; i<aantal_toppen; i++)
     { fprintf(stderr," %d ",lab[i]); if (ptn[i]==0) fprintf(stderr,"|| "); }
   fprintf(stderr,"\n");
 
@@ -376,12 +376,12 @@ void writelist(int list[])
      static int counter=0;
    fprintf(stderr,"---------------------------------------------------------\n");
    fprintf(stderr,"Graph number %d with %d vertices\n",++counter,aantal_toppen);
-   for (i=0; i<aantal_toppen;i++) 
+   for (i=0; i<aantal_toppen;i++)
      { fprintf(stderr,"%d:",i);
-       FORALLELEMENTS(g[i],j) 
+       FORALLELEMENTS(g[i],j)
 	 { fprintf(stderr," %d", j);
-	   if (READY(i) || READY(j)) 
-	     { 
+	   if (READY(i) || READY(j))
+	     {
 	       if (ISELEMENT(g+j,i)) fprintf(stderr,"[d]"); else fprintf(stderr,"[s]");
 	     }
 	       else fprintf(stderr,"[ng]");
@@ -462,19 +462,19 @@ unsigned char ucharpuffer;
 if ((knotenzahl=getc(fil))==EOF) return EOF;
 if (knotenzahl==0) { fprintf(stderr,"Umschaltung auf short noch nicht implementiert.\n");
                      exit(0);
-                    } 
+                    }
 nuller=0; codel=1;
 if (knotenzahl=='>') /* koennte ein header sein -- oder 'ne 62, also ausreichend fuer
 			     unsigned char */
       { gepuffert=1;
 	a=getc(fil);
-	if(a==0) nuller++; 
+	if(a==0) nuller++;
 	b=getc(fil);
-	if(b==0) nuller++; 
+	if(b==0) nuller++;
 	/* jetzt wurden 3 Zeichen gelesen */
 	if ((a=='>') && (b=='m')) /*garantiert header*/
 	  { while ((ucharpuffer=getc(fil)) != '<');
-	    /* noch zweimal: */ ucharpuffer=getc(fil); 
+	    /* noch zweimal: */ ucharpuffer=getc(fil);
 	    if (ucharpuffer!='<') { fprintf(stderr,"Problems with header -- single '<'\n"); exit(1); }
 	    if ((knotenzahl=getc(fil))==EOF) return EOF;
 	    /* kein graph drin */
@@ -521,7 +521,7 @@ void usage(char name[])
 
 /**********DECODE_TO_NAUTY****************************************************/
 
-void decode_to_nauty(unsigned char *code, int codelaenge, graph *g, int degree[]) 
+void decode_to_nauty(unsigned char *code, int codelaenge, graph *g, int degree[])
 
 
   /* Dekodiert multicode nach nauty bitcode */
@@ -537,10 +537,10 @@ void decode_to_nauty(unsigned char *code, int codelaenge, graph *g, int degree[]
  aantal_toppen=code[0];
  aantal_bogen=codelaenge-aantal_toppen;
  for (v1=0; v1<aantal_toppen; v1++) { EMPTYSET1(g+v1,1); degree[v1]=0; }
- for (v1=0, end=code+codelaenge, code++; code<end; code++) 
+ for (v1=0, end=code+codelaenge, code++; code<end; code++)
    { if (*code==0) v1++;
      else { v2=(*code)-1;
-            ADDELEMENT1(g+v1,v2); ADDELEMENT1(g+v2,v1); 
+            ADDELEMENT1(g+v1,v2); ADDELEMENT1(g+v2,v1);
 	    degree[v1]++; degree[v2]++;
           }
    }
@@ -570,7 +570,7 @@ void init_for_g6(graph g[],int aantal_toppen, int degree[])
 /***************************FILL_EDGELIST**************************/
 
 void fill_edgelist()
-     /* writes the edges in g into the list in a lexicographic way. 
+     /* writes the edges in g into the list in a lexicographic way.
 	Is used if no bounds for in- and out-degree are given
 	or few edges are left. */
 
@@ -580,7 +580,7 @@ void fill_edgelist()
   for (i=j=0; i<aantal_toppen; i++) /* j is de positie in edgelist */
     { indeg_free[i]=maxindeg-indeg[i]; outdeg_free[i]=maxoutdeg-outdeg[i];
       FORALLELEMENTS_BOUND(workg[i],end,i)
-	{ 
+	{
 	  edgelist[j][0]=i; edgelist[j][1]=end; j++;
 	}
     }
@@ -607,9 +607,9 @@ void fill_edgelist_order()
 
   memcpy(dummy,workg,aantal_toppen*sizeof(graph));
 
-    for (i=0; i<aantal_toppen; i++) 
-      { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i; 
-	toppositie[i]=listlen[buffer]; (listlen[buffer])++; 
+    for (i=0; i<aantal_toppen; i++)
+      { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i;
+	toppositie[i]=listlen[buffer]; (listlen[buffer])++;
 	indeg_free[i]=maxindeg-indeg[i]; outdeg_free[i]=maxoutdeg-outdeg[i];}
 
 
@@ -623,9 +623,9 @@ void fill_edgelist_order()
 	  { end=buren[i]=FIRSTBIT(dummy[start]); DELELEMENT(dummy+start,end); }
 
 	for (i=0; i<beste; i++) /* alle buren */
-	  { 
+	  {
 	    end=buren[i];
-	    edgelist[last_positie][0]=start; edgelist[last_positie][1]=end; 
+	    edgelist[last_positie][0]=start; edgelist[last_positie][1]=end;
 	    last_positie--;
 	    DELELEMENT(dummy+end,start);
 	    /* de buur verhuizen: */
@@ -665,7 +665,7 @@ void fill_edgelist_order()
 	 WRITEUP_COUNT();
        }
     if (indeg_free[end] && outdeg_free[start]) /* bogen kan start->end gericht worden */
-       { 
+       {
 	 WRITEUP_COUNT();
        }
 
@@ -675,7 +675,7 @@ void fill_edgelist_order()
   /* else -- niet op laatste positie */
 
      if (indeg_free[start] && outdeg_free[end]) /* bogen kan end->start gericht worden */
-       { 
+       {
 	 (indeg_free[start])--; (outdeg_free[end])--;
 	 trivlabels_nowrite_nodouble(positie+1);
 	 (indeg_free[start])++; (outdeg_free[end])++;
@@ -753,7 +753,7 @@ void fill_edgelist_order()
 
   start=(*positie)[0]; end=(*positie)[1];
 
-  
+
 
   if (positie==laatstepositie)
     {
@@ -820,7 +820,7 @@ void fill_edgelist_order()
    {
      int remember;
 
-     if (!direct_output) 
+     if (!direct_output)
        { if (nodegbound)
 	 { remember=addnumber;
 	   if (remaining_doubles) { for (;positie<=laatstepositie;positie++) addnumber*=3;}
@@ -831,11 +831,11 @@ void fill_edgelist_order()
 	   }
        /* else */
          if (!remaining_doubles) trivlabels_nowrite_nodouble(positie);
-	   else trivlabels_nowrite(positie); 
-	 return; 
+	   else trivlabels_nowrite(positie);
+	 return;
        }
      /* else */
-     trivlabels(positie); 
+     trivlabels(positie);
      return;
    }
 
@@ -847,13 +847,13 @@ void direct_all_triv()
 {
   int i, start, end;
 
-  aantal_grafen_met_triv_group++; 
+  aantal_grafen_met_triv_group++;
   if (nodegbound) fill_edgelist(); else fill_edgelist_order();
   for (i=0;i<aantal_toppen;i++) double_free[i]=maxdirectdeg-deg[i];
   laatstepositie=edgelist+aantal_bogen-1;
   if (maxoutdeg==maxindeg) /* then every valid graph for one direction is also valid with
 			      the directions reversed */
-    { 
+    {
       addnumber=2;
       start=edgelist[0][0]; end=edgelist[0][1];
       /* is_gericht[][] isn't used in the directing routine */
@@ -865,10 +865,10 @@ void direct_all_triv()
       aantal_gerichte_bogen=0;
       ADDELEMENT(workg+end,start);
       (outdeg_free[start])++; (indeg_free[end])++;
-      
+
       if (remaining_doubles && double_free[start] && double_free[end])
 	{
-	  addnumber=1; 
+	  addnumber=1;
 	  (outdeg_free[start])--; (indeg_free[end])--;
 	  (outdeg_free[end])--; (indeg_free[start])--;
 	  double_free[start]--; double_free[end]--;
@@ -905,7 +905,7 @@ void sort_decreasing(int list[], int number)
 
   if (number==2)
     { if (list[0]<list[1]) WISSEL(list[0],list[1])
-      return;			     
+      return;
     }
   if (number==3)
     {
@@ -935,7 +935,7 @@ void sort_decreasing(int list[], int number)
       for (i=number-1; i ; i--)
 	for (j=0;j<i;j++)
 	  if (list[j]<list[j+1]) WISSEL(list[j],list[j+1])
-    }				   
+    }
 
   return;
 
@@ -957,13 +957,13 @@ int compute_image_operation(unsigned char image[], unsigned char original[], per
 
   if (original[0]!=image[0]) change=1;
 
-  for (run=1, num_in=0; original[run]!=INFTY_UCHAR; run++) 
+  for (run=1, num_in=0; original[run]!=INFTY_UCHAR; run++)
     { in_image[num_in]=generator[original[run]]; num_in++; }
 
-  for (run++, num_out=0; original[run]!=INFTY_UCHAR; run++) 
+  for (run++, num_out=0; original[run]!=INFTY_UCHAR; run++)
     { out_image[num_out]=generator[original[run]]; num_out++; }
 
-  for (run++, num_double=0; (run<blocklength) && (original[run]!=INFTY_UCHAR); run++) 
+  for (run++, num_double=0; (run<blocklength) && (original[run]!=INFTY_UCHAR); run++)
     { double_image[num_double]=generator[original[run]]; num_double++; }
 
   if (num_in>1) sort_decreasing(in_image,num_in);
@@ -971,13 +971,13 @@ int compute_image_operation(unsigned char image[], unsigned char original[], per
   if (num_double>1) sort_decreasing(double_image,num_double);
 
 
-  for (run=1 ; num_in; run++) 
+  for (run=1 ; num_in; run++)
     { num_in--; image[run]=in_image[num_in]; if (original[run]!=image[run]) change=1;}
   image[run]=INFTY_UCHAR; run++;
-  for ( ; num_out; run++) 
+  for ( ; num_out; run++)
     { num_out--; image[run]=out_image[num_out]; if (original[run]!=image[run]) change=1;}
   image[run]=INFTY_UCHAR; run++;
-  for ( ; num_double; run++) 
+  for ( ; num_double; run++)
     { num_double--; image[run]=double_image[num_double]; if (original[run]!=image[run]) change=1;}
   image[run]=INFTY_UCHAR;
   //for ( ;run<blocklength;run++) image[run]=INFTY_UCHAR;
@@ -994,11 +994,11 @@ void construct_operations_one(int center, int end, int do_inedge, int do_outedge
   static unsigned char *buffer;
   unsigned char *start;
 
-  if (size_operations<=((number_operations+1)*blocklength)) 
+  if (size_operations<=((number_operations+1)*blocklength))
     { buffer=operations;
       operations=malloc((size_t)(2*size_operations));
-      if (operations==NULL) 
-	{ fprintf(stderr,"Can't allocate %d bytes for operations -- exiting\n",2*size_operations); 
+      if (operations==NULL)
+	{ fprintf(stderr,"Can't allocate %d bytes for operations -- exiting\n",2*size_operations);
 	  exit(1); }
       memcpy(operations,buffer,size_operations);
       free(buffer);
@@ -1017,7 +1017,7 @@ void construct_operations_one(int center, int end, int do_inedge, int do_outedge
       number_operations++;
     }
 
-  if (do_double && double_free[center] && 
+  if (do_double && double_free[center] &&
       (indeg[end] < maxindeg) && (indeg[center] < maxindeg) &&
       (outdeg[center]<maxoutdeg) && (outdeg[end]<maxoutdeg))
     { start=operations+(number_operations*blocklength);
@@ -1033,25 +1033,25 @@ void construct_operations_one(int center, int end, int do_inedge, int do_outedge
 
 /**********************************CONSTRUCT_OPERATIONS_FINAL**************************/
 
-void construct_operations_final(int list[], int decided[],unsigned char buffer_op[], 
+void construct_operations_final(int list[], int decided[],unsigned char buffer_op[],
 				int positie, int numberin, int numberout)
 {
   int i, center;
   static unsigned char *buffer;
 
   /* here about position "positie" of the operation is decided. If "positie==blocklength"
-     we are done. 
+     we are done.
 
      This function decides on double edges.
 
   */
 
 
-  if (size_operations<=((number_operations+1)*blocklength)) 
+  if (size_operations<=((number_operations+1)*blocklength))
     { buffer=operations;
       operations=malloc((size_t)(2*size_operations));
-      if (operations==NULL) 
-	{ fprintf(stderr,"Can't allocate %d bytes for operations -- exiting\n",2*size_operations); 
+      if (operations==NULL)
+	{ fprintf(stderr,"Can't allocate %d bytes for operations -- exiting\n",2*size_operations);
 	  exit(1); }
       memcpy(operations,buffer,size_operations);
       free(buffer);
@@ -1061,11 +1061,11 @@ void construct_operations_final(int list[], int decided[],unsigned char buffer_o
   center=buffer_op[0];
   // double_free[center] must be tested inside the loop to make sure
   // that it only leads to rejection if all edges have already been assigned
-  
+
   if (double_free[center])// otherwise the rest was filled in in the previous step
 	for (i=0;list[i]>=0;i++)
 	  if (!decided[i])
-	    { 
+	    {
 	      if ( double_free[center] && double_free[list[i]] &&
 		   ((outdeg[center]+numberout < maxoutdeg) && (indeg[list[i]]<maxindeg)) &&
 		   ((indeg[center]+numberin < maxindeg) && (outdeg[list[i]]<maxoutdeg)))
@@ -1087,7 +1087,7 @@ void construct_operations_final(int list[], int decided[],unsigned char buffer_o
 
 /**********************************CONSTRUCT_OPERATIONS_OUT**************************/
 
-void construct_operations_out(int list[],int liststart, int decided[],unsigned char buffer_op[], 
+void construct_operations_out(int list[],int liststart, int decided[],unsigned char buffer_op[],
 			      int positie, int numberin, int numberout, int lowerlimit_outdeg,
 			      int mindouble)
 {
@@ -1095,7 +1095,7 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
   static int outdeg_larger;
 
   /* here about position "positie" of the operation is decided. If "positie==blocklength"
-     we are done. 
+     we are done.
 
      This function decides on outgoing edges.
 
@@ -1116,7 +1116,7 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
     { if (outdeg[center]+numberout < maxoutdeg)
 	for (i=liststart;list[i]>=0;i++)
 	  if (!decided[i])
-	    { 
+	    {
 	      if (indeg[list[i]]<maxindeg)
 		{ decided[i]=1;
 		  buffer_op[positie]=list[i];
@@ -1126,7 +1126,7 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
 		}
 	    }
       buffer_op[positie]=INFTY_UCHAR;
-      if (outdeg_larger || 
+      if (outdeg_larger ||
 	  (indeg[center]+outdeg[center]+(tobedirected[center]<<1)-numberin-numberout-deg[center]>=mindouble))
 	  // looks complicated but is just the final number of double edges
       construct_operations_final(list,decided,buffer_op,positie+1,
@@ -1134,12 +1134,12 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
       return;
     }
   //else // all the undecided entries have to be outgoing
-  
+
     for (i=liststart;list[i]>=0;i++)
       if (!decided[i])
-	{ 
+	{
 	  if ((outdeg[center]+numberout < maxoutdeg) && (indeg[list[i]]<maxindeg))
-	    { 
+	    {
 	      buffer_op[positie]=list[i];
 	      positie++; numberout++;
 	    }
@@ -1149,7 +1149,7 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
   construct_operations_final(list,decided,buffer_op,positie+1,
 			     numberin, numberout);
   return;
-    
+
 }
 
 
@@ -1158,14 +1158,14 @@ void construct_operations_out(int list[],int liststart, int decided[],unsigned c
 
 /**********************************CONSTRUCT_OPERATIONS_IN**************************/
 
-void construct_operations_in(int list[],int liststart, int decided[],unsigned char buffer_op[], 
+void construct_operations_in(int list[],int liststart, int decided[],unsigned char buffer_op[],
 			     int positie, int numberin, int numberout, int lowerlimit_outdeg,
 			     int mindouble)
 {
   int i, center;
 
   /* here about position "positie" of the operation is decided. If "positie==blocklength"
-     we are done. 
+     we are done.
 
      This function decides on incoming edges.
 
@@ -1179,7 +1179,7 @@ void construct_operations_in(int list[],int liststart, int decided[],unsigned ch
   if(indeg[center]+numberin < maxindeg)
     for (i=liststart;list[i]>=0;i++)
       if (!decided[i])
-	{ 
+	{
 	  if (outdeg[list[i]]<maxoutdeg)
 	    { decided[i]=1;
 	      buffer_op[positie]=list[i];
@@ -1226,17 +1226,17 @@ if (first_in_orbit)
     for (number_operations=0; (top=(*still_open))>=0; still_open++)
       // number_operations is global, so it must not be passed to the next functions
       //if (NOT_READY(top))
-      { 
+      {
 	if (tobedirected[top]==1)
 	  {
-	    for (j= FIRSTBIT(workg[top]); READY(j) ; NEXTEL((workg[top]),(j))); 
+	    for (j= FIRSTBIT(workg[top]); READY(j) ; NEXTEL((workg[top]),(j)));
 	    if (ISELEMENT(&sameorbit,j) && (tobedirected[j]==1)) construct_operations_one(top, j, 0, 1, double_allowed);
 	    else construct_operations_one(top, j, 1, 1, double_allowed);
 	  }
 	else
 	  if (!(staticg[top] & tbd1))
-	    { 
-	      for (end=0, j= FIRSTBIT(workg[top]); (j<WORDSIZE); NEXTEL((workg[top]),(j))) 
+	    {
+	      for (end=0, j= FIRSTBIT(workg[top]); (j<WORDSIZE); NEXTEL((workg[top]),(j)))
 		{ if (NOT_READY(j)) { list[end]=j; decided[end]=0; end++; }}
 	      // the edge has already been directed if and only if the other top has already been finished
 	      list[end]= -1;
@@ -1254,31 +1254,31 @@ if (first_in_orbit)
  if (staticg[orbit[0]]& ~touched) // all operations will contain edges to free vertices
    {
      for (j=0; (top=orbit[j])>=0; j++)
-       { if (NOT_READY(top)) 
+       { if (NOT_READY(top))
 	   { //ADDELEMENT(&sameorbit,top);
 	     if (tobedirected[top]>=2) ADDELEMENT(&pre_free,top); // will stay free unless is chosen top
 	     else ADDELEMENT(&tbd1,top);
 	   }
 	 else // that is: ready
-	   { *readyrun=top; readyrun++; } // minout would not be used 
+	   { *readyrun=top; readyrun++; } // minout would not be used
        }
    }
  else
    {
      do_double=double_allowed;
      for (j=0; (top=orbit[j])>=0; j++)
-       { 
-	 if (NOT_READY(top)) 
+       {
+	 if (NOT_READY(top))
 	   { //ADDELEMENT(&sameorbit,top);
 	     if (tobedirected[top]>=2) ADDELEMENT(&pre_free,top); // will stay free unless is chosen top
 	     else ADDELEMENT(&tbd1,top);
 	   }
 	 else // that is: ready
 	   { bufferg=(workg[top]&sameorbit);
-	     *readyrun=top; readyrun++; 
+	     *readyrun=top; readyrun++;
 	     if ((bufferg) && (outdeg[top]<minout)) { minout=outdeg[top]; do_double=double_allowed; }
 	     if (do_double && (outdeg[top]==minout))
-	       { 
+	       {
 		 FORALLELEMENTS(bufferg,i)
 		   { if (READY(i) && !ISELEMENT(workg+i,top)) // no double edge, so double edges inside the orbit would not be accepted
 		       { do_double=0; i=WORDSIZE; }
@@ -1292,19 +1292,19 @@ if (first_in_orbit)
 for (number_operations=0; (top=(*still_open))>=0; still_open++)
   // number_operations is global, so it must not be passed to the next functions
   //if (NOT_READY(top))
-  { 
+  {
     if (tobedirected[top]==1) // already ready vertices can't have less...
-      { 
-	for (j= FIRSTBIT(workg[top]); READY(j) ; NEXTEL((workg[top]),(j))); 
-	if (ISELEMENT(&sameorbit,j) && (tobedirected[j]==1)) 
+      {
+	for (j= FIRSTBIT(workg[top]); READY(j) ; NEXTEL((workg[top]),(j)));
+	if (ISELEMENT(&sameorbit,j) && (tobedirected[j]==1))
 	  { bufferg=workg[j]&sameorbit; DELELEMENT(&bufferg,top);
 	    if (outdeg[top]<minout)
-	      { if ((bufferg== (graph)0) || (outdeg[j]>outdeg[top])) // otherwise the end would be better 
+	      { if ((bufferg== (graph)0) || (outdeg[j]>outdeg[top])) // otherwise the end would be better
 		  {
 		    if (outdeg[top]==minout-1) construct_operations_one(top, j, 0, 1, do_double);
 		    else construct_operations_one(top, j, 0, 1, double_allowed);
 		  }
-		else 
+		else
 		  if ((outdeg[j]==outdeg[top]) && double_allowed)
 		  {
 		    if (outdeg[top]==minout-1) construct_operations_one(top, j, 0, 0, do_double);
@@ -1315,8 +1315,8 @@ for (number_operations=0; (top=(*still_open))>=0; still_open++)
 	else construct_operations_one(top, j, 1, 1, double_allowed);
 
       }
-    else 
-      { 
+    else
+      {
 	if (!(staticg[top] & tbd1))
 	  {
 	    error=0;
@@ -1330,12 +1330,12 @@ for (number_operations=0; (top=(*still_open))>=0; still_open++)
 		    else
 		      { if (dummy == tobedirected[top])
 			  {
-			    if (outdeg[top2]>lowerlimit_outdeg) 
+			    if (outdeg[top2]>lowerlimit_outdeg)
 			      { lowerlimit_outdeg=outdeg[top2]; mindouble=indeg[top2]+outdeg[top2]-deg[top2]; }
-			    else 
-			      if (double_allowed && (outdeg[top2]==lowerlimit_outdeg)) 
+			    else
+			      if (double_allowed && (outdeg[top2]==lowerlimit_outdeg))
 				{
-				  if (indeg[top2]+outdeg[top2]-deg[top2]>mindouble) 
+				  if (indeg[top2]+outdeg[top2]-deg[top2]>mindouble)
 				    mindouble=indeg[top2]+outdeg[top2]-deg[top2];
 				}
 			  }
@@ -1344,8 +1344,8 @@ for (number_operations=0; (top=(*still_open))>=0; still_open++)
 	      }
 	    if (!error)
 	      {
-		for (end=0, j= FIRSTBIT(workg[top]); 
-		     (j<WORDSIZE) ; NEXTEL((workg[top]),(j))) 
+		for (end=0, j= FIRSTBIT(workg[top]);
+		     (j<WORDSIZE) ; NEXTEL((workg[top]),(j)))
 		  if (NOT_READY(j)) { list[end]=j; decided[end]=0; end++; }
 
 		// the edge has already been directed if and only if the other top has already been finished
@@ -1356,7 +1356,7 @@ for (number_operations=0; (top=(*still_open))>=0; still_open++)
 	  }
       }
   }
-  return; 
+  return;
 }
 
 int compare_op(unsigned char *op1, unsigned char *op2)
@@ -1387,10 +1387,10 @@ int search_op(unsigned char *op)
   min=0; max=number_operations-1; center= (min+max)/2;
 
   while (min<max)
-    { 
+    {
       if (compare_op(op,operations+(blocklength*center))<=0)
 	{ max=center; center= (min+max)/2; }
-      else // op strictly larger 
+      else // op strictly larger
 	{ min=center+1; center= (min+max)/2; }
     }
 
@@ -1409,10 +1409,10 @@ int search_edge(int start, int end, int edgelist[][2], int length)
   min=0; max=length-1; center= (min+max)/2;
 
   while (min<max)
-    { 
+    {
       if ((start<edgelist[center][0]) || ((end<=edgelist[center][1]) && (start==edgelist[center][0]))) // start->end smaller or equal
 	{ max=center; center= (min+max)/2; }
-      else // start->end strictly larger 
+      else // start->end strictly larger
 	{ min=center+1; center= (min+max)/2; }
     }
 
@@ -1436,7 +1436,7 @@ int compute_orbits()
       free(root_op);
       root_op=malloc((size_t)size_root*sizeof(int));
     }
-  if (root_op==NULL)  
+  if (root_op==NULL)
     { fprintf(stderr,"Can't allocate %d items for root_op -- exiting.\n",size_root);
       exit(0); }
 
@@ -1444,7 +1444,7 @@ int compute_orbits()
 
   for (i=0, orbits=number_operations; i<number_operations; i++)
     for (j=0; j<number_of_generators; j++)
-      { 
+      {
 	if (compute_image_operation(image, operations+(i*blocklength), generators[j]))
 	  {
 	    index=search_op(image);
@@ -1452,7 +1452,7 @@ int compute_orbits()
 	    while ((buffer=root_op[index])!=index) index=buffer; // no path compression here
 	    run=i;
 	    while ((buffer=root_op[run])!=run) { root_op[run]=index; run=buffer; }
-	    if (run!=index) 
+	    if (run!=index)
 	      { orbits--; // the roots were different -- two trees are united
 		root_op[run]=index; }
 	  }
@@ -1492,9 +1492,9 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
 
 // If no edges go to vertices outside the set of vertices in already "finished" orbits or to vertices in
 // this orbit with still undecided edges, the canonical operation is directing one edge {x,y} x->y or x<->y.
-// Edges completely in this orbit and obtained by operations center x end y are chosen as follows: 
+// Edges completely in this orbit and obtained by operations center x end y are chosen as follows:
 // First the starting point x is chosen with minimum outdegree.
-// For edges with starting points with the same minimal outdegree, edges are preferred which are single. 
+// For edges with starting points with the same minimal outdegree, edges are preferred which are single.
 // If the tested operation is double and single operations exist, the operation is rejected.
 // Among the remaining edges those are chosen where y has minimum indegree.
 // Among the remaining those are chosen where x is in the orbit of the one with smallest canonical number
@@ -1535,39 +1535,39 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
   candidates= (graph)0;
   number_candidates=0;
   min=INFTY_UCHAR;
-  for (i=0; (top=vertexorbit[i])>=0; i++) 
+  for (i=0; (top=vertexorbit[i])>=0; i++)
     if (READY(top) && (bufferset=(staticg[top] & free)))
       {
 	buffer=POPCOUNT(bufferset);
-	if (buffer<min) { candidates= (graph)0; ADDELEMENT(&candidates,top); 
+	if (buffer<min) { candidates= (graph)0; ADDELEMENT(&candidates,top);
 	                  candidatelist[0]=top; number_candidates=1; min=buffer; }
 	else
 	  if (buffer==min)
 	    { ADDELEMENT(&candidates,top); candidatelist[number_candidates]=top; number_candidates++; }
       }
   if (number_candidates && !ISELEMENT(&candidates,center))
-    { 
+    {
       return 0;
     }
 
   if (number_candidates==1) { *newgroup=0; return 1; }
-  
+
   testoutdeg=outdeg[center];
   // First canonicity criterion: maximum outdegree
   if (number_candidates)
     {
-      for (i=0; i<number_candidates; ) 
+      for (i=0; i<number_candidates; )
 	{ k= outdeg[candidatelist[i]]-testoutdeg;
-	  if (k>0) 
+	  if (k>0)
 	    { return 0;}
-	  else 
-	    { if (k<0) { DELELEMENT(&candidates,candidatelist[i]); 
-		         number_candidates--; 
+	  else
+	    { if (k<0) { DELELEMENT(&candidates,candidatelist[i]);
+		         number_candidates--;
 			 candidatelist[i]=candidatelist[number_candidates];   }
 	      else i++; // otherwise the new element has to be tested
 	    }
 	}
-      
+
       if (number_candidates==1) { *newgroup=0; return 1; }
     // end number_candidates>0
 
@@ -1575,57 +1575,57 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
 	{ buffer=indeg[center]+outdeg[center]-deg[center]; // number of double edges starting at center
 	  for (i=0; i<number_candidates; )
 	    { j=candidatelist[i];
-	      k= indeg[j]+outdeg[j]-deg[j]-buffer; 
-	      if (k>0) 
+	      k= indeg[j]+outdeg[j]-deg[j]-buffer;
+	      if (k>0)
 		{ return 0;}
-	      else 
-		{ if (k<0) { DELELEMENT(&candidates,candidatelist[i]); 
-		    number_candidates--; 
+	      else
+		{ if (k<0) { DELELEMENT(&candidates,candidatelist[i]);
+		    number_candidates--;
 		    candidatelist[i]=candidatelist[number_candidates];   }
 		  else i++; // otherwise the new element has to be tested
 		}
 	    }
 	}
       if (number_candidates==1) { *newgroup=0; return 1; }
- 
+
       //OK-- last try. A colour that can not really be used to avoid unnecessary operation in advance
       colour=rememberorbits[orbitid];
       dummy=workg[center]&(free | sameorbit);
       buffer2=1LL;
-      FORALLELEMENTS(dummy,i) 
+      FORALLELEMENTS(dummy,i)
 	{ buffer2 *= (tobedirected[i]<<12)+(indeg[i]<<9)+(outdeg[i]<<6)+(colour[i]<<3)+deg[i]+1;
 	  buffer2 = buffer2%63241LL;
 	}
 
       for (i=0; i<number_candidates; )
-	{ 
+	{
 	  dummy=workg[candidatelist[i]]&(free | sameorbit);
 	  k2=1LL;
-	  FORALLELEMENTS(dummy,j) 
+	  FORALLELEMENTS(dummy,j)
 	    { k2 *= (tobedirected[j]<<12)+(indeg[j]<<9)+(outdeg[j]<<6)+(colour[j]<<3)+deg[j]+1;
 	      k2 = k2%63241LL;
 	    }
 	  k2 -= buffer2;
 
-	  if (k2>0LL) 
+	  if (k2>0LL)
 	    { return 0;}
-	  else 
-	    { if (k2<0LL) { DELELEMENT(&candidates,candidatelist[i]); 
-		number_candidates--; 
+	  else
+	    { if (k2<0LL) { DELELEMENT(&candidates,candidatelist[i]);
+		number_candidates--;
 		candidatelist[i]=candidatelist[number_candidates];   }
 	      else i++; // otherwise the new element has to be tested
 	    }
 	}
-      
+
       if (number_candidates==1) { *newgroup=0; return 1; }
- 
+
 
 
    } // end number candidates > 0
 
 
   // OK -- we have to work. First the canonical form must be computed:
-  // Problem: the difference between double edges and edges that have not yet been directed cannot be 
+  // Problem: the difference between double edges and edges that have not yet been directed cannot be
   // detected in the datastructure graph. To this end we put "ready" vertices in an extra partition --
   // this way double edges cannot be mapped on undirected edges. This is only necessary if there are double edges.
 
@@ -1638,19 +1638,19 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
 	  for (i=0; (k=vertexorbit[i])>=0; i++)
 	    if (READY(k) && (workg[k] & sameorbit))// has _outgoing_ edge into same orbit
 	      // the end points are automatically ready and all in the same orbit -- otherwise there would have been a candidate
-	      { 
+	      {
 		if (outdeg[k]<testoutdeg) return 0;
-		if (outdeg[k]==testoutdeg) 
-		  { numberends=0; 
+		if (outdeg[k]==testoutdeg)
+		  { numberends=0;
 		    bufferset= workg[k]&sameorbit;
-		    FORALLELEMENTS(bufferset,j) 
+		    FORALLELEMENTS(bufferset,j)
 		      { if (!ISELEMENT(workg+j,k)) return 0; // else: also double edge
 			if (indeg[j]<endin) return 0;
 			if (indeg[j]==endin) { ends[k][numberends]=j; numberends++; }
 		      }
 		    if (numberends)
-		      { ends[k][numberends]= -1; 
-			*startrun=k; startrun++; ADDELEMENT(&bit_startlist,k); 
+		      { ends[k][numberends]= -1;
+			*startrun=k; startrun++; ADDELEMENT(&bit_startlist,k);
 		      }
 		  }
 	      }
@@ -1661,12 +1661,12 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
 	  for (i=0; (k=vertexorbit[i])>=0; i++)
 	    if (READY(k) && (workg[k] & sameorbit))// has _outgoing_ edge into same orbit
 	      // the end points are automatically ready and all in the same orbit -- otherwise there would have been a candidate
-	      { 
+	      {
 		if (outdeg[k]<testoutdeg) return 0;
-		if (outdeg[k]==testoutdeg) 
+		if (outdeg[k]==testoutdeg)
 		  { numberends=0;
 		    bufferset= workg[k]&sameorbit;
-		    FORALLELEMENTS(bufferset,j) 
+		    FORALLELEMENTS(bufferset,j)
 		      { if (!ISELEMENT(workg+j,k)) // also single
 			  {
 			    if (indeg[j]<endin) return 0;
@@ -1675,7 +1675,7 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
 		      }
 		    if (numberends)
 		      { ends[k][numberends]= -1;
-			*startrun=k; startrun++; ADDELEMENT(&bit_startlist,k); 
+			*startrun=k; startrun++; ADDELEMENT(&bit_startlist,k);
 		      }
 		  }
 	      }
@@ -1683,21 +1683,21 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
       *startrun= -1;
       dummy=workg[center] & sameorbit;
       if ((startlist[1]== -1) && (ends[center][1]== -1)) { *newgroup=0; return 1; } // maar 1 boog mogelijk
-    } 
+    }
 
 
   if (double_allowed) // distinguish single and double edges for nauty()
     {
       for (i=j=k=0; i<aantal_toppen;i++)
 	{ top=lab[orbitid][i];
-	  if (READY(top)) { finished[k]=top; finishedptn[k]=1; k++; } 
+	  if (READY(top)) { finished[k]=top; finishedptn[k]=1; k++; }
 	  else { bufferlab[j]=top; bufferptn[j]=1; j++; }
 	  if (ptn[orbitid][i]==0)
 	    { if (j) bufferptn[j-1]=0;
 	      if (k) finishedptn[k-1]=0;
 	    }
 	}
-      for (i=0;i<k;i++,j++) { bufferptn[j]=finishedptn[i]; bufferlab[j]=finished[i]; } 
+      for (i=0;i<k;i++,j++) { bufferptn[j]=finishedptn[i]; bufferlab[j]=finished[i]; }
     }
   else
     {
@@ -1715,9 +1715,9 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
   // vertices uniquely correspond to orbits of operations.
 
   if (number_candidates>1)
-    {      
+    {
       for (i=0; !ISELEMENT(&candidates,bufferlab[i]); i++); // zoekt candidaat met kleinste kanonische label
-            
+
       if (orbits[center]==orbits[bufferlab[i]]) { return 1; }
       else { return 0; }
     }
@@ -1749,7 +1749,7 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
   else // a single edge was added and only neighbours via single edges may be chosen
     for (i=0;ISELEMENT(workg+bufferlab[i],canoncenter) ||
 	   !(ISELEMENT(&dummy,bufferlab[i]) && (indeg[bufferlab[i]]==endin)); i++);
-  
+
   canonend=bufferlab[i];
 
   if (orbits[endvertex]!=orbits[canonend]) { return 0; }
@@ -1761,11 +1761,11 @@ int canonical(unsigned char operation[], int vertexorbit[], int *newgroup, int o
   edgelistcounter=0;
   for (startrun=startlist; (k= *startrun)>=0;startrun++)
     if (orbits[k]==orbits[canoncenter])
-      { 
+      {
 	for (i=0; (j=ends[k][i])>=0; i++)
-	  { 
-	    if (orbits[j]==orbits[canonend]) 
-	      { edgelist[edgelistcounter][0]=k; edgelist[edgelistcounter][1]=j; 
+	  {
+	    if (orbits[j]==orbits[canonend])
+	      { edgelist[edgelistcounter][0]=k; edgelist[edgelistcounter][1]=j;
 		orb[edgelistcounter]=edgelistcounter; edgelistcounter++; }
 	  }
       }
@@ -1792,8 +1792,8 @@ int all_diff_colours(graph testset, int orbitid)
   RESETMARKS_COLOUR;
   colour=rememberorbits[orbitid];
 
-  FORALLELEMENTS(testset,i) 
-    { 
+  FORALLELEMENTS(testset,i)
+    {
       buffer = (tobedirected[i]<<12)+(indeg[i]<<9)+(outdeg[i]<<6)+(colour[i]<<3)+deg[i];
       buffer &= 32767;
       if (ISMARKED_COLOUR(buffer)) return 0;
@@ -1805,7 +1805,7 @@ int all_diff_colours(graph testset, int orbitid)
 
 
 void fill_edgelist_final(graph g[])
-     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht 
+     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht
         and positie*/
 
 {
@@ -1813,9 +1813,9 @@ void fill_edgelist_final(graph g[])
 
   for (i=0, j=aantal_gerichte_bogen; i<aantal_toppen; i++) /* j is de positie in edgelist */
     while (g[i])
-      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i); 
+      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i);
 	edgelist_final[j][0]=i; edgelist_final[j][1]=end;
-	j++; 
+	j++;
       }
   return;
 }
@@ -1836,7 +1836,7 @@ void fill_edgelist_order_final()
   int buren[MAXN]; /* de buren van de top waaraan gewerkt wordt */
   graph g[MAXN], notready;
 
-  for (i=aantal_gerichte_bogen=0; i<aantal_toppen; i++) 
+  for (i=aantal_gerichte_bogen=0; i<aantal_toppen; i++)
     { indeg_free[i]=maxindeg-indeg[i]; outdeg_free[i]=maxoutdeg-outdeg[i];
       aantal_gerichte_bogen += (deg[i]-tobedirected[i]); }
   aantal_gerichte_bogen = aantal_gerichte_bogen>>1; // every edge was counted twice
@@ -1846,9 +1846,9 @@ void fill_edgelist_order_final()
   EMPTYSET1(&notready,1);
 
   // make a list of vertices according to the whole degree. Vertices with large degree give stronger restrictions
-    for (i=0; i<aantal_toppen; i++) 
-      if (NOT_READY(i)) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i; 
-	                  toppositie[i]=listlen[buffer]; (listlen[buffer])++; 
+    for (i=0; i<aantal_toppen; i++)
+      if (NOT_READY(i)) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i;
+	                  toppositie[i]=listlen[buffer]; (listlen[buffer])++;
 			  ADDELEMENT(&notready,i); }
     else EMPTYSET1(g+i,1);
 
@@ -1867,8 +1867,8 @@ void fill_edgelist_order_final()
 	  { end=buren[i]=FIRSTBIT(g[start]); DELELEMENT(g+start,end); }
 	buren[i]= -1;
 	for (i=0; (end=buren[i])>=0; i++) /* alle buren */
-	  { 
-	    edgelist_final[last_positie][0]=start; edgelist_final[last_positie][1]=end; 
+	  {
+	    edgelist_final[last_positie][0]=start; edgelist_final[last_positie][1]=end;
 	    last_positie--;
 	    DELELEMENT(g+end,start);
 	    /* de buur verhuizen: */
@@ -1901,31 +1901,31 @@ void chooseorbit(graph *touched, int best_orbit[], int orbitid)
 
      for (i=0;i<aantal_toppen;i++) { num_in_orbit[i]=0; }
       for (i=0;i<aantal_toppen;i++)
-	{ dummy=orbits[i]; 
+	{ dummy=orbits[i];
 	  inorbit[dummy][num_in_orbit[dummy]]=i;
 	  num_in_orbit[dummy]++;
 	  if (READY(i)) ADDELEMENT(touched,i);
 	}
 
-      
+
       best=INT_MAX;
-      for (i=k=0;i<aantal_toppen;i++) 
-	{ 
-	  for (j=0;j<num_in_orbit[i]-1; j++) { ptn[orbitid][k]=1; lab[orbitid][k]=inorbit[i][j]; k++; } 
+      for (i=k=0;i<aantal_toppen;i++)
+	{
+	  for (j=0;j<num_in_orbit[i]-1; j++) { ptn[orbitid][k]=1; lab[orbitid][k]=inorbit[i][j]; k++; }
 	  if (num_in_orbit[i]) { ptn[orbitid][k]=0; lab[orbitid][k]=inorbit[i][j]; k++; }
 	  if ((orbits[i]==i) && NOT_READY(i) && (num_in_orbit[i] + (tobedirected[i]<<1))<best)
 	    { best=num_in_orbit[i] + (tobedirected[i]<<1); bestroot=i; }
-	
+
 	}
 
       memcpy(rememberorbits[orbitid],orbits,sizeof(nvector)*aantal_toppen);
-      
+
       // here the "best" orbit is chosen by a combination of number of vertices and edges to be directed per vertex
-	
+
       orbitchoices[num_in_orbit[bestroot]]++;
 
       bit_orbit[orbitid]= (graph)0;
-      for (i=j=0;i<aantal_toppen;i++) 
+      for (i=j=0;i<aantal_toppen;i++)
 	if (orbits[i]==bestroot) { best_orbit[j]=i; j++; ADDELEMENT(bit_orbit+orbitid,i); }
       (*touched) |= bit_orbit[orbitid];
       best_orbit[j]= -1;  // the sign that the end of the list has been reached
@@ -1966,7 +1966,7 @@ void prepare_next_step(int group_uptodate, int orbitid, int iterationdepth, grap
   int local_todolist[MAXN+1];
   graph not_ready;
   int colour[MAXN],numbercolour[MAXN], element[MAXN], diffcolours;
-  nvector *orbcolour; 
+  nvector *orbcolour;
 
 
 // all vertices were in orbits
@@ -1974,33 +1974,33 @@ void prepare_next_step(int group_uptodate, int orbitid, int iterationdepth, grap
       FORALLELEMENTS(not_ready,j)
 	{ if (NOT_READY(j)) { end=0; } else DELELEMENT(&not_ready,j); }
       if (end) { MAYBEPROCESS; WRITEUP(); return; } // no edges left to direct
-      //else 
+      //else
 
-       
+
       if (!group_uptodate)
 	{ end=1;
 	  orbcolour=rememberorbits[orbitid];
-	  diffcolours=0; 
+	  diffcolours=0;
 	  FORALLELEMENTS(not_ready,i)
 	    { numbercolour[diffcolours]=1; element[diffcolours]=i;
 	      colour[diffcolours]= (tobedirected[i]<<12)+(indeg[i]<<9)+(outdeg[i]<<6)+(orbcolour[i]<<3)+deg[i];
 	      for (k=0, d=1; k<diffcolours; k++) if (colour[k]==colour[diffcolours]) { end=d=0; numbercolour[k]++; }
 	      if (d) diffcolours++; // different from all earlier colours
 	    }
-	
+
 	  if (end) // group acts definitely trivial on rest
-	    { 
+	    {
 	      fill_edgelist_order_final();
 	      laatstepositie=edgelist_final+aantal_bogen-1;
 	      trivlabels_init(edgelist_final+aantal_gerichte_bogen);
 	      return;
 	    }
-	  
+
 	  d= -1;
 	  for (i=0; i<diffcolours; i++)
 	    if (numbercolour[i]==1)
 	      { if (tobedirected[element[i]]==1)
-		  { 
+		  {
 		    choose_triv_orbit(&touched, local_todolist, orbitid+1, element[i]);
 		    directorbit(local_todolist,local_todolist,0,orbitid+1,iterationdepth,touched);
 		    return;
@@ -2011,15 +2011,15 @@ void prepare_next_step(int group_uptodate, int orbitid, int iterationdepth, grap
 	  // best is just one to direct, but d is reserve
 
 	  if (d>=0)
-	    { 
+	    {
 	      choose_triv_orbit(&touched, local_todolist, orbitid+1, d);
 	      directorbit(local_todolist,local_todolist,0,orbitid+1,iterationdepth,touched);
 	      return;
 	    }
-	  
+
 	  // nieuwe orbit berekenen:
 	  //if (!group_uptodate)
-	  //	{ 
+	  //	{
 	  number_of_generators=0;
 	  // since the orbit is complete, we don't NEED to distinguish between ready vertices or not
 	  // to mark double edges. Tests showed that it also doesn't help.
@@ -2028,25 +2028,25 @@ void prepare_next_step(int group_uptodate, int orbitid, int iterationdepth, grap
 	  number_of_generators=0;
 	  nauty(workg,bufferlab,bufferptn,NILSET,orbits,&options_directed,&stats,workspace,100*MAXN,1,aantal_toppen,NULL);
 	  //orbitchoose_nauty++;
-	}    
+	}
 
       end=1; // can we end the groupcomputations and switch to trivgroup?
       if (stats.numorbits<aantal_toppen) FORALLELEMENTS(not_ready,j) if (orbits[j]!=j) end=0;
 
       if (end)
-	{ 
+	{
 	  fill_edgelist_order_final();
 	  laatstepositie=edgelist_final+aantal_bogen-1;
 	  trivlabels_init(edgelist_final+aantal_gerichte_bogen);
 	  return;
 	}
-     
+
       // --ELSE--
       /* Now the colouring for level orbitid can be prepared */
-      
+
       chooseorbit(&touched, local_todolist, orbitid+1);
 
-      directorbit(local_todolist,local_todolist,1,orbitid+1,iterationdepth,touched); 
+      directorbit(local_todolist,local_todolist,1,orbitid+1,iterationdepth,touched);
       // no vertexenvironment directed, so does not need to be increased. Otherwise MAXN would not be an upper bound
       return;
 }
@@ -2054,11 +2054,11 @@ void prepare_next_step(int group_uptodate, int orbitid, int iterationdepth, grap
 
 /******************************DIRECTORBIT***************************/
 
-void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orbitid, 
+void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orbitid,
 		 int iterationdepth, graph touched)
 
 /* number_done is number of vertices in this orbit that is already directed. The automorphism group
-   does of course not interchange completed vertices from the orbit and uncompleted ones... 
+   does of course not interchange completed vertices from the orbit and uncompleted ones...
 
    orbitid is the number of the orbit to be directed. In the beginning you start directing the first orbit (id=1),
    when that is done the second orbit (id=2), etc...
@@ -2077,12 +2077,12 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
 
 #define START(x) ((x)*localblocklength)
 
-  for (i=local_left_to_do=0;todo_list[i]>=0; i++) 
-     if (NOT_READY(todo_list[i])) 
+  for (i=local_left_to_do=0;todo_list[i]>=0; i++)
+     if (NOT_READY(todo_list[i]))
        { local_todolist[local_left_to_do]=todo_list[i]; local_left_to_do++; }
   local_todolist[local_left_to_do]= -1;
 
-  if (local_left_to_do==0) 
+  if (local_left_to_do==0)
     { if (touched==all) { MAYBEPROCESS; WRITEUP(); return; }
       else prepare_next_step(group_uptodate, orbitid, iterationdepth, touched);
       return;
@@ -2121,14 +2121,14 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
 		{
 		  for (i=j=k=0; i<aantal_toppen;i++)
 		    { top=lab[orbitid][i];
-		      if (READY(top)) { finished[k]=top; finishedptn[k]=1; k++; } 
+		      if (READY(top)) { finished[k]=top; finishedptn[k]=1; k++; }
 		      else { bufferlab[j]=top; bufferptn[j]=1; j++; }
 		      if (ptn[orbitid][i]==0)
 			{ if (j) bufferptn[j-1]=0;
 			  if (k) finishedptn[k-1]=0;
 			}
 		    }
-		  for (i=0;i<k;i++,j++) { bufferptn[j]=finishedptn[i]; bufferlab[j]=finished[i]; } 
+		  for (i=0;i<k;i++,j++) { bufferptn[j]=finishedptn[i]; bufferlab[j]=finished[i]; }
 		}
 	      else
 		{
@@ -2138,7 +2138,7 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
 	      nauty(workg,bufferlab,bufferptn,NILSET,orbits,&options_directed,&stats,workspace,100*MAXN,1,aantal_toppen,NULL);
 	      //orbitcomp_nauty++;
 	    }
-	  
+
 	  doit=0;
 	  for (i=0; (k=local_todolist[i])>=0; i++) if (orbits[k]!=k) doit=1;
 	  if (!doit)
@@ -2155,7 +2155,7 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
       remember_size[iterationdepth] = 2*number_orbits*localblocklength;
       remember_operations[iterationdepth]=malloc((size_t)remember_size[iterationdepth]);
       if (remember_operations[iterationdepth]==NULL)
-	{ fprintf(stderr,"Can't allocate %d items to store orbits -- exiting.\n",remember_size[iterationdepth]); 
+	{ fprintf(stderr,"Can't allocate %d items to store orbits -- exiting.\n",remember_size[iterationdepth]);
 	  exit(3); }
     }
 
@@ -2164,7 +2164,7 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
       for (i=j=0; i<number_operations; i++)
 	{ if (root_op[i]==i)
 	    { memcpy(remember_operations[iterationdepth]+START(j),operations+START(i),localblocklength);
-	      j++; 
+	      j++;
 	    }
 	}
     }
@@ -2177,7 +2177,7 @@ void directorbit(int todo_list[], int vertexorbit[], int group_uptodate, int orb
 
   for(i=0;i<number_orbits; i++) // in the loop edges are directed and datatypes updated -- then the next iteration
     // is called and afterwards things are reset
-    { 
+    {
       runoperation=remember_operations[iterationdepth]+START(i);
       center=runoperation[0];
       remembertobedirected=tobedirected[center];
@@ -2256,17 +2256,17 @@ void direct_all_nontriv()
 
 
 void init_waterplugin(int toppen)
-{ 
-  
+{
+
  watermaxdeg=maxindeg+maxoutdeg;
  //if (watermaxdeg<maxdeg) maxdeg=watermaxdeg; That was for the routine that was a plugin for geng
- /* grafen met een grotere graad kunnen niet gericht worden zodat ze nog aan de 
+ /* grafen met een grotere graad kunnen niet gericht worden zodat ze nog aan de
     voorwaarden voldoen */
- 
+
  if (maxindeg<=maxoutdeg) { mingerichtdeg=maxindeg; watermaxedges=toppen*maxindeg; }
  else { mingerichtdeg=maxoutdeg; watermaxedges=toppen*maxoutdeg; }
  //if (watermaxedges<maxe) maxe=watermaxedges; That was for the routine that was a plugin for geng
- /* grafen met meer bogen kunnen niet gericht worden, zodat ze nog aan de 
+ /* grafen met meer bogen kunnen niet gericht worden, zodat ze nog aan de
     voorwaarden voldoen */
 
 }
@@ -2292,9 +2292,9 @@ void writeop(unsigned int op, BOOG orbit[], int length)
    { int i,j;
    fprintf(stderr,"---------------------------------------------------------\n");
    fprintf(stderr,"Graph with %d vertices, %d edges, %d already directed\n",aantal_toppen,aantal_bogen, aantal_gerichte_bogen);
-   for (i=0; i<aantal_toppen;i++) 
+   for (i=0; i<aantal_toppen;i++)
      { fprintf(stderr,"%d:",i);
-       FORALLELEMENTS(g[i],j) 
+       FORALLELEMENTS(g[i],j)
 	 { fprintf(stderr," %d", j);
 	 if (aantal_gerichte_bogen)
 	   {
@@ -2313,7 +2313,7 @@ void writeop(unsigned int op, BOOG orbit[], int length)
 
 
 void fill_edgelist_edgeorb()
-     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht 
+     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht
         and positie*/
 
 {
@@ -2325,8 +2325,8 @@ void fill_edgelist_edgeorb()
 
   for (i=j=0; i<aantal_toppen; i++) /* j is de positie in edgelist */
     while (g[i])
-      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i); 
-        edgelist[j][0]=i; edgelist[j][1]=end; 
+      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i);
+        edgelist[j][0]=i; edgelist[j][1]=end;
 	positie[i][end]=positie[end][i]=j;
 	j++;
       }
@@ -2351,7 +2351,7 @@ void fill_edgelist_edgeorb_order()
 
   memcpy(g,staticg,aantal_toppen*sizeof(graph));
 
-    for (i=0; i<aantal_toppen; i++) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i; 
+    for (i=0; i<aantal_toppen; i++) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i;
                                       toppositie[i]=listlen[buffer]; (listlen[buffer])++; }
 
 
@@ -2365,9 +2365,9 @@ void fill_edgelist_edgeorb_order()
 	  { end=buren[i]=FIRSTBIT(g[start]); DELELEMENT(g+start,end); }
 
 	for (i=0; i<beste; i++) /* alle buren */
-	  { 
+	  {
 	    end=buren[i];
-	    edgelist[last_positie][0]=start; edgelist[last_positie][1]=end; 
+	    edgelist[last_positie][0]=start; edgelist[last_positie][1]=end;
 	    last_positie--;
 	    DELELEMENT(g+end,start);
 	    /* de buur verhuizen: */
@@ -2394,7 +2394,7 @@ void fill_edgelist_edgeorb_order()
 
 
 void fill_edgelist_edgeorb_final()
-     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht 
+     /* writes the edges in gg into the list in a lexicographic way and initializes is_gericht
         and positie*/
 
 {
@@ -2406,7 +2406,7 @@ void fill_edgelist_edgeorb_final()
 
   for (i=0, j=aantal_gerichte_bogen; i<aantal_toppen; i++) /* j is de positie in edgelist */
     while (g[i])
-      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i); 
+      { end=FIRSTBIT(g[i]); DELELEMENT(g+i,end);  DELELEMENT(g+end,i);
       if (!is_gericht[i][end])
 	{ edgelist_final[j][0]=i; edgelist_final[j][1]=end;
 	j++; }
@@ -2433,7 +2433,7 @@ void fill_edgelist_edgeorb_order_final()
 
   memcpy(g,staticg,aantal_toppen*sizeof(graph));
 
-    for (i=0; i<aantal_toppen; i++) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i; 
+    for (i=0; i<aantal_toppen; i++) { buffer=bufferdeg[i]=deg[i]; list[buffer][listlen[buffer]]=i;
                                       toppositie[i]=listlen[buffer]; (listlen[buffer])++; }
 
     last_positie=aantal_bogen-1;
@@ -2447,8 +2447,8 @@ void fill_edgelist_edgeorb_order_final()
 
 	for (i=0; i<beste; i++) /* alle buren */
 	  if (!is_gericht[start][end=buren[i]])
-	  { 
-	    edgelist_final[last_positie][0]=start; edgelist_final[last_positie][1]=end; 
+	  {
+	    edgelist_final[last_positie][0]=start; edgelist_final[last_positie][1]=end;
 	    last_positie--;
 	    DELELEMENT(g+end,start);
 	    /* de buur verhuizen: */
@@ -2477,7 +2477,7 @@ void fill_edgelist_edgeorb_order_final()
 
 void  mark_components(int graaf[][MAXN],int adj[],int aantal_toppen,int number[])
      /* Does a bfs on the vertices of graaf and makes that for every vertex i the
-	value number[i] is the number of the smallest vertex in the component. 
+	value number[i] is the number of the smallest vertex in the component.
      */
 {
   int i,j,min, lijst[MAX_BOGEN], buffer, b;
@@ -2485,7 +2485,7 @@ void  mark_components(int graaf[][MAXN],int adj[],int aantal_toppen,int number[]
 
   RESETMARKS
 
-  for (i=0;i<aantal_toppen;i++) 
+  for (i=0;i<aantal_toppen;i++)
     if (UNMARKED(i))
       { number[i]=i;
       if (adj[i])
@@ -2494,7 +2494,7 @@ void  mark_components(int graaf[][MAXN],int adj[],int aantal_toppen,int number[]
 	  run=lijst; end=lijst+1;
 	  while (run<end)
 	    { buffer= *run;
-	    for (j=0;j<adj[buffer];j++) 
+	    for (j=0;j<adj[buffer];j++)
 	      if (UNMARKED(graaf[buffer][j]))
 		{ b=graaf[buffer][j];
 		MARK(b);
@@ -2511,20 +2511,20 @@ void  mark_components(int graaf[][MAXN],int adj[],int aantal_toppen,int number[]
 #define ADDEDGE(g,ad,a,b) {(g)[a][(ad)[a]]=b; (ad)[a]++; g[b][(ad)[b]]=a; (ad)[b]++; }
 
 void mark_orbitnumbers_edgelist(int number[], int *specialexists)
-     /* Computes the orbits of not yet directed edges by assigning the same number to edges in the 
+     /* Computes the orbits of not yet directed edges by assigning the same number to edges in the
 	same orbit. If an edge is on position i in the edgelist, number[i] is its orbitnumer.
-	The orbitnumber is always the number of the smallest edge in the orbit -- this is used 
+	The orbitnumber is always the number of the smallest edge in the orbit -- this is used
 	in other routines !!
 	If an edge is found that is stabilized by all elements of the group, but the endpoints
-	are not, it's index is written 
+	are not, it's index is written
 	to specialexists. If no such edge exists, *specialexists = -1;
-	In the first case the numbers in number[] are undefined. 
+	In the first case the numbers in number[] are undefined.
 	It is assumed that generators and edgelist are up to date and especially that no undirected
 	edges are mapped on directed ones by the given permutations.
      */
 
 { int i, j, good_special,pos2;
-  BOOG boog; 
+  BOOG boog;
   int graaf[MAX_BOGEN][MAXN], adj[MAX_BOGEN];
 
   for (i=0; i<aantal_bogen; i++) { adj[i]=0; }
@@ -2532,10 +2532,10 @@ void mark_orbitnumbers_edgelist(int number[], int *specialexists)
   for (i=0; i<aantal_bogen; i++)
     {COPYBOOG(boog,edgelist[i]);
     if (!is_gericht[boog[0]][boog[1]])
-      { 
+      {
       good_special=1;
       for (j=0; j<number_of_generators; j++)
-	{ 
+	{
 	  pos2=POSBILD(boog,j);
 	  if (i!=pos2) /* het beeld is verschillend */
 	  { good_special=0;
@@ -2559,7 +2559,7 @@ void mark_orbitnumbers_edgelist_first(int number[], int *specialexists, int *com
        -- comments see get_orbit_first()
      */
 { int i, j, good_special,edge_fixed, pos2;
-  BOOG boog; 
+  BOOG boog;
   int graaf[MAX_BOGEN][MAXN], adj[MAX_BOGEN];
 
   *completelyfixededge = -1;
@@ -2569,13 +2569,13 @@ void mark_orbitnumbers_edgelist_first(int number[], int *specialexists, int *com
   for (i=0; i<aantal_bogen; i++)
     {COPYBOOG(boog,edgelist[i]);
     if (!is_gericht[boog[0]][boog[1]])
-      { 
+      {
       good_special=edge_fixed=1;
       for (j=0; j<number_of_generators; j++)
-	{ 
+	{
 	pos2=POSBILD(boog,j);
 	if (i!=pos2) /* het beeld is verschillend */
-	  { good_special=edge_fixed=0; 
+	  { good_special=edge_fixed=0;
 	    ADDEDGE(graaf,adj,i,pos2);
 	  }
 	else { if (orbits[boog[0]]!=orbits[boog[1]]) good_special=0; }
@@ -2598,17 +2598,17 @@ void mark_orbitnumbers(int number[], BOOG list_of_dir_edges[], int listlength)
         All edges in list_of_dir_edges[] are interpreted as going from ...[][0] to ...[][1]*/
 
 { int i, j, pos2;
-  BOOG boog; 
+  BOOG boog;
   int positie[2*MAX_BOGEN][2*MAX_BOGEN];
   int graaf[MAX_BOGEN][MAXN], adj[MAX_BOGEN];
 
-  for (i=0; i<listlength; i++) 
+  for (i=0; i<listlength; i++)
     { positie[list_of_dir_edges[i][0]][list_of_dir_edges[i][1]]=i; adj[i]=0; }
 
   for (i=0; i<listlength; i++)
     { COPYBOOG(boog,list_of_dir_edges[i]);
       for (j=0; j<number_of_generators; j++)
-	{ 
+	{
 	pos2=POSBILD(boog,j);
 	if (pos2!=i)  /* het beeld is verschillend */
 	  { ADDEDGE(graaf,adj,i,pos2);
@@ -2621,11 +2621,11 @@ void mark_orbitnumbers(int number[], BOOG list_of_dir_edges[], int listlength)
 
 void mark_orbitnumbers_only_directed(int number[], BOOG list_of_edges[], int listlength)
      /* Computes the orbits of those edges in list_of_edges that are already directed --
-	but interprets them as undirected. The subset of already directed edges in the list 
+	but interprets them as undirected. The subset of already directed edges in the list
 	must be closed under the automorphisms given in the global variable generators...*/
 
 { int i, j,a,b,pos2;
-  BOOG boog; 
+  BOOG boog;
   int positie[2*MAX_BOGEN][2*MAX_BOGEN];
   int graaf[MAX_BOGEN][MAXN], adj[MAX_BOGEN];
 
@@ -2639,10 +2639,10 @@ void mark_orbitnumbers_only_directed(int number[], BOOG list_of_edges[], int lis
 
   for (i=0; i<listlength; i++)
     if (number[i])
-      { 
+      {
       COPYBOOG(boog,list_of_edges[i]);
       for (j=0; j<number_of_generators; j++)
-	{ 
+	{
 	pos2=POSBILD(boog,j);
 	if (pos2!=i)  /* het beeld is verschillend */
 	  { ADDEDGE(graaf,adj,i,pos2);
@@ -2656,11 +2656,11 @@ void mark_orbitnumbers_only_directed(int number[], BOOG list_of_edges[], int lis
 
 void mark_orbitnumbers_only_candidates(int number[], BOOG list_of_edges[], int listlength, int candidate[])
      /* Computes the orbits of those edges in list_of_edges that are already directed --
-	but interprets them as undirected. The subset of already directed edges in the list 
+	but interprets them as undirected. The subset of already directed edges in the list
 	must be closed under the automorphisms given in the global variable generators...*/
 
 { int i, j,a,b,pos2;
-  BOOG boog; 
+  BOOG boog;
   int positie[2*MAX_BOGEN][2*MAX_BOGEN];
   int graaf[MAX_BOGEN][MAXN], adj[MAX_BOGEN];
 
@@ -2668,19 +2668,19 @@ void mark_orbitnumbers_only_candidates(int number[], BOOG list_of_edges[], int l
     { adj[i]=0;
       if (candidate[i])
 	{ a=list_of_edges[i][0]; b=list_of_edges[i][1];
-	  positie[a][b]=positie[b][a]=i; 
+	  positie[a][b]=positie[b][a]=i;
 	}
     }
 
   for (i=0; i<listlength; i++)
     if (candidate[i])
-      { 
+      {
       COPYBOOG(boog,list_of_edges[i]);
       for (j=0; j<number_of_generators; j++)
-	{ 
+	{
 	pos2=POSBILD(boog,j);
 	if (pos2!=i)  /* het beeld is verschillend */
-	  { ADDEDGE(graaf,adj,i,pos2); 
+	  { ADDEDGE(graaf,adj,i,pos2);
 	  }
 	}
     }
@@ -2694,7 +2694,7 @@ void mark_orbitnumbers_only_candidates(int number[], BOOG list_of_edges[], int l
 
 void get_orbit(BOOG kleinste_orbit[], int *orbitsize, int *biggest_orbit)
      /* writes an orbit of still undirected edges of minimal size into kleinste_orbit. It is assumed
-	that generators and edgelist are up to date. 
+	that generators and edgelist are up to date.
 	Orbits of size one with the endpoints in different orbits are not considered -- fixing
 	this edge won't help at all, because it is already fixed by every automorphism.
 
@@ -2707,7 +2707,7 @@ void get_orbit(BOOG kleinste_orbit[], int *orbitsize, int *biggest_orbit)
 
   mark_orbitnumbers_edgelist(number, &orbit_met_een);
 
-  if (orbit_met_een>=0) { COPYBOOG(kleinste_orbit[0],edgelist[orbit_met_een]); 
+  if (orbit_met_een>=0) { COPYBOOG(kleinste_orbit[0],edgelist[orbit_met_een]);
                           *orbitsize=1; return; }
 
   /* else */
@@ -2717,12 +2717,12 @@ void get_orbit(BOOG kleinste_orbit[], int *orbitsize, int *biggest_orbit)
     { aantallen[i]=0;
     // if (!is_gericht[edgelist[i][0]][edgelist[i][1]]) al gerichte bogen hebben hun eigen number en
     // dus orbitsize aantallen 1 achteraf en worden dus toch al niet gekozen
-    (aantallen[number[i]])++; 
+    (aantallen[number[i]])++;
     }
 
 
   for (i=max=0, min=INT_MAX, minorb=-1 ; i<aantal_bogen; i++)
-    { 
+    {
       if ((aantallen[i]>1) && (aantallen[i]<min)) /* als er een goede met orbitsize 1 is, kom je hier niet
 						     omdat die al als special is gekozen */
 	{ min=aantallen[i]; minorb=i; }
@@ -2735,14 +2735,14 @@ void get_orbit(BOOG kleinste_orbit[], int *orbitsize, int *biggest_orbit)
 
   if (minorb== -1) { *orbitsize=0; return; }
 
-  /* nu worden de bogen uit de gekozen orbit in de 
+  /* nu worden de bogen uit de gekozen orbit in de
      lijst kleinste_orbit geschreven */
 
 
-   for (i=j=0; i<aantal_bogen; i++) 
-     { if (number[i]==minorb) 
+   for (i=j=0; i<aantal_bogen; i++)
+     { if (number[i]==minorb)
        { COPYBOOG(kleinste_orbit[j],edgelist[i]); j++; }
-     } 
+     }
    *orbitsize=j;
 }
 
@@ -2764,10 +2764,10 @@ void get_orbit_first(BOOG kleinste_orbit[], int *orbitsize, int *fixedgeindex, i
 
   mark_orbitnumbers_edgelist_first(number, &orbit_met_een, fixedgeindex);
 
-  if (orbit_met_een>=0) 
-    { COPYBOOG(kleinste_orbit[0],edgelist[orbit_met_een]); 
+  if (orbit_met_een>=0)
+    { COPYBOOG(kleinste_orbit[0],edgelist[orbit_met_een]);
       *biggest_orbit=MAXPAR_ORBSIZE+1; *orbitsize=1; return; }
- 
+
   /* else */
   for (i=0; i<aantal_bogen; i++) aantallen[i]=0;
   for (i=0; i<aantal_bogen; i++) (aantallen[number[i]])++;
@@ -2775,9 +2775,9 @@ void get_orbit_first(BOOG kleinste_orbit[], int *orbitsize, int *fixedgeindex, i
 
 
   for (i=max=0, min=INT_MAX, minorb= -1 ; i<aantal_bogen; i++)
-    { 
-      if ((aantallen[i]) && (aantallen[i]<min) && 
-	  ((aantallen[i]>1) || (orbits[edgelist[i][0]]==orbits[edgelist[i][1]]))) 
+    {
+      if ((aantallen[i]) && (aantallen[i]<min) &&
+	  ((aantallen[i]>1) || (orbits[edgelist[i][0]]==orbits[edgelist[i][1]])))
 	{ min=aantallen[i]; minorb=i; }
       if ((aantallen[i])>max) max=aantallen[i];
     }
@@ -2791,14 +2791,14 @@ void get_orbit_first(BOOG kleinste_orbit[], int *orbitsize, int *fixedgeindex, i
   if (minorb == -1) { *orbitsize=0; return; }
   /* the group only permutes isolated vertices */
 
-  /* nu worden de bogen uit de gekozen orbit in de 
+  /* nu worden de bogen uit de gekozen orbit in de
      lijst kleinste_orbit geschreven */
 
 
-   for (i=j=0; i<aantal_bogen; i++) 
-     { if (number[i]==minorb) 
+   for (i=j=0; i<aantal_bogen; i++)
+     { if (number[i]==minorb)
        { COPYBOOG(kleinste_orbit[j],edgelist[i]); j++; }
-     } 
+     }
    *orbitsize=j;
 }
 
@@ -2815,22 +2815,22 @@ void trynextstep()
 
   if (!nodegbound)
     {
-      for (i=0, complete=1; i<aantal_bogen; i++) 
-	{ if (!is_gericht[edgelist[i][0]][edgelist[i][1]] && 
+      for (i=0, complete=1; i<aantal_bogen; i++)
+	{ if (!is_gericht[edgelist[i][0]][edgelist[i][1]] &&
 	      !virtual_gericht[edgelist[i][0]][edgelist[i][1]]) { complete=0; break; }
 	}
- 
-      if (complete)  
-	{ if (direct_output==0) { WRITEUP(); } 
+
+      if (complete)
+	{ if (direct_output==0) { WRITEUP(); }
 	  else
-	    { 
+	    {
 	      memcpy(buffergraph,workg,aantal_toppen*sizeof(graph));
-              for (i=0; i<aantal_bogen; i++) 
+              for (i=0; i<aantal_bogen; i++)
 		{ start=edgelist[i][0]; end=edgelist[i][1];
 		  if (!is_gericht[start][end])
-		  { if (virtual_gericht[start][end]==1) 
+		  { if (virtual_gericht[start][end]==1)
 		      DELELEMENT(workg+end,start);
-		    else  DELELEMENT(workg+start,end); 
+		    else  DELELEMENT(workg+start,end);
 		  }
 		}
 	      MAYBEPROCESS;
@@ -2852,7 +2852,7 @@ void trynextstep()
   nextstep_depth++;
 
   if (stats.numorbits==aantal_toppen) /* triviale groep */
-    { 
+    {
       fill_edgelist_edgeorb_order_final();
       laatstepositie=edgelist_final+aantal_bogen-1;
       trivlabels_init(edgelist_final+aantal_gerichte_bogen);
@@ -2864,23 +2864,23 @@ void trynextstep()
 
 
   if (orbitsize==0) /* group acts trivially on remaining edges */
-    { 
+    {
       fill_edgelist_edgeorb_order_final();
       laatstepositie=edgelist_final+aantal_bogen-1;
       trivlabels_init(edgelist_final+aantal_gerichte_bogen);
       nextstep_depth--;
       return;
     }
-  /* else */ 
+  /* else */
 
   memcpy(colour[nextstep_depth],orbits,aantal_toppen*sizeof(nvector));
   for (i=0;i<aantal_toppen;i++) numberinorbit[i]=0;
-  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i]; 
+  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i];
                                   inorbit[dummy][numberinorbit[dummy]]=i;
 				  (numberinorbit[dummy])++;
                                 }
-  for (i=k=0;i<aantal_toppen;i++) 
-    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[nextstep_depth][k]=1; lab[nextstep_depth][k]=inorbit[i][j]; k++; } 
+  for (i=k=0;i<aantal_toppen;i++)
+    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[nextstep_depth][k]=1; lab[nextstep_depth][k]=inorbit[i][j]; k++; }
       if (numberinorbit[i]) { ptn[nextstep_depth][k]=0; lab[nextstep_depth][k]=inorbit[i][j]; k++; }
     }
 
@@ -2889,22 +2889,22 @@ void trynextstep()
   /* maybe at least the whole orbit is forced... */
   if (!nodegbound)
     {
-      for (i=0, complete=1; i<orbitsize; i++) 
+      for (i=0, complete=1; i<orbitsize; i++)
 	{ if (!virtual_gericht[kleinste_orbit[i][0]][kleinste_orbit[i][1]]) { complete=0; break; }
 	}
-      
-      if (complete) 
+
+      if (complete)
 	{ aantal_gerichte_bogen+=orbitsize;
-	  for (i=0; i<orbitsize; i++) 
+	  for (i=0; i<orbitsize; i++)
 		{ start=kleinste_orbit[i][0]; end=kleinste_orbit[i][1];
 		  saturated[start]++; saturated[end]++;
 		  is_gericht[start][end]=is_gericht[end][start]=1;
-		  if (virtual_gericht[start][end]==1) 
+		  if (virtual_gericht[start][end]==1)
 		      { DELELEMENT(workg+end,start);
 			outdeg_free[start]--; indeg_free[end]--;
 		      }
-		    else  
-		      { DELELEMENT(workg+start,end); 
+		    else
+		      { DELELEMENT(workg+start,end);
 			outdeg_free[end]--; indeg_free[start]--;
 		      }
 		  }
@@ -2915,16 +2915,16 @@ void trynextstep()
 	  trynextstep();
 
 	  aantal_gerichte_bogen-=orbitsize;
-	  for (i=0; i<orbitsize; i++) 
+	  for (i=0; i<orbitsize; i++)
 		{ start=kleinste_orbit[i][0]; end=kleinste_orbit[i][1];
 		  saturated[start]--; saturated[end]--;
 		  is_gericht[start][end]=is_gericht[end][start]=0;
-		  if (virtual_gericht[start][end]==1) 
+		  if (virtual_gericht[start][end]==1)
 		    { ADDELEMENT(workg+end,start);
 		    outdeg_free[start]++; indeg_free[end]++;
 		    }
-		  else  
-		    { ADDELEMENT(workg+start,end); 
+		  else
+		    { ADDELEMENT(workg+start,end);
 		    outdeg_free[end]++; indeg_free[start]++;
 		    }
 		}
@@ -2938,7 +2938,7 @@ void trynextstep()
   return;
 }
 
-void trynextstep_par() 
+void trynextstep_par()
 /* This routine is called when a whole orbit has been labelled and new orbits have to be computed.
    If orbitsgiven != NULL it contains the actual information about the new orbits. */
 {  int i, orbitsize, dummy, k,j,biggest_orbit;
@@ -2959,7 +2959,7 @@ void trynextstep_par()
   nextstep_depth++;
 
   if (stats.numorbits==aantal_toppen) /* triviale groep */
-    { 
+    {
       fill_edgelist_edgeorb_order_final();
       laatstepositie=edgelist_final+aantal_bogen-1;
       trivlabels_init(edgelist_final+aantal_gerichte_bogen);
@@ -2971,23 +2971,23 @@ void trynextstep_par()
 
 
   if (orbitsize==0) /* group acts trivially on remaining edges */
-    { 
+    {
       fill_edgelist_edgeorb_order_final();
       laatstepositie=edgelist_final+aantal_bogen-1;
       trivlabels_init(edgelist_final+aantal_gerichte_bogen);
       nextstep_depth--;
       return;
     }
-  /* else */ 
+  /* else */
 
   memcpy(colour[nextstep_depth],orbits,aantal_toppen*sizeof(nvector));
   for (i=0;i<aantal_toppen;i++) numberinorbit[i]=0;
-  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i]; 
+  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i];
                                   inorbit[dummy][numberinorbit[dummy]]=i;
 				  (numberinorbit[dummy])++;
                                 }
-  for (i=k=0;i<aantal_toppen;i++) 
-    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[nextstep_depth][k]=1; lab[nextstep_depth][k]=inorbit[i][j]; k++; } 
+  for (i=k=0;i<aantal_toppen;i++)
+    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[nextstep_depth][k]=1; lab[nextstep_depth][k]=inorbit[i][j]; k++; }
       if (numberinorbit[i]) { ptn[nextstep_depth][k]=0; lab[nextstep_depth][k]=inorbit[i][j]; k++; }
     }
 
@@ -2999,10 +2999,10 @@ void trynextstep_par()
 
 
 void compute_extensions(BOOG kleinste_orbit[], int orbitsize, BOOG extensionlist[], int *number_of_extensions)
-     /* Computes the number of extensions by computing the orbits on the possibilities to direct the 
+     /* Computes the number of extensions by computing the orbits on the possibilities to direct the
 	not yet directed edges in kleinste_orbit. To be precise: First a list of directed versions of the
 	not yet directed edges is made (2 directed for each undirected) and then the orbits are computed
-	and one directed edge for every version is filled in. 
+	and one directed edge for every version is filled in.
 	Already at this stage indeg and outdeg are considered, so that directed edges that would violate
 	these conditions aren't considered.
 */
@@ -3023,36 +3023,36 @@ int i,start,end, problem, sum, maxsum;
 
  for (i=0; i<orbitsize; i++)
    { start=kleinste_orbit[i][0]; end=kleinste_orbit[i][1];
-   if (!is_gericht[start][end]) { candidatelist[number_of_candidates][0]=start; 
+   if (!is_gericht[start][end]) { candidatelist[number_of_candidates][0]=start;
                                   candidatelist[number_of_candidates][1]=end;
 				  number_of_candidates++; }
    else /* one that is already directed */
-     { 
+     {
      if (ISELEMENT(workg+start,end)) sum=QUALITY_P1(start,end); else sum=QUALITY_P1(end,start);
      /* this sum can be increased by one when the new edge is added */
        if (sum<maxsum) maxsum=sum;
      }
    }
- 
+
  for (i=buffersize=0; i<number_of_candidates; i++)
      { start=candidatelist[i][0]; end=candidatelist[i][1];
        /* the tests are done in the loop to detect problems with unassignable edges also if they
 	  do not fulfill the canonicity criteria */
        problem=1; /* maybe the edge cannot be directed at all !! */
-       if (outdeg_free[start] && indeg_free[end]) 
+       if (outdeg_free[start] && indeg_free[end])
        { sum=QUALITY_P2(start,end);
-	 if (sum<=maxsum) {bufferlist[buffersize][0]=start; bufferlist[buffersize][1]=end; buffersize++;} 
+	 if (sum<=maxsum) {bufferlist[buffersize][0]=start; bufferlist[buffersize][1]=end; buffersize++;}
          problem=0;}
-     if (outdeg_free[end] && indeg_free[start]) 
+     if (outdeg_free[end] && indeg_free[start])
        { sum=QUALITY_P2(end,start);
-	 if (sum<=maxsum) {bufferlist[buffersize][0]=end; bufferlist[buffersize][1]=start; buffersize++;} 
+	 if (sum<=maxsum) {bufferlist[buffersize][0]=end; bufferlist[buffersize][1]=start; buffersize++;}
          problem=0;}
      if (problem) { *number_of_extensions=0; return; }
      }
 
  if (buffersize>1)
-  { 
-    if (!group_up_to_date) 
+  {
+    if (!group_up_to_date)
       { number_of_generators=0;
         memcpy(bufferlab,lab[nextstep_depth],aantal_toppen*sizeof(nvector));
 	memcpy(bufferptn,ptn[nextstep_depth],aantal_toppen*sizeof(nvector));
@@ -3061,7 +3061,7 @@ int i,start,end, problem, sum, maxsum;
 	group_up_to_date=1;
       }
      mark_orbitnumbers(number,bufferlist,buffersize);
-     for (i=n_ext=0; i<buffersize; i++) 
+     for (i=n_ext=0; i<buffersize; i++)
      if (number[i]==i) { COPYBOOG(extensionlist[n_ext],bufferlist[i]);
                          n_ext++; }
      *number_of_extensions=n_ext;
@@ -3090,9 +3090,9 @@ int qual=0;
 }
 
 int is_canonical_edge(BOOG list[],int last_positie)
-/* Checks whether the directed edge x->y is canonical -- that is: 
-   choose one with minimal QUALITY 
-   and amongst them one with biggest (deg[end]+maxoutdeg-outdeg_free[end])<<6+indeg_free[start] 
+/* Checks whether the directed edge x->y is canonical -- that is:
+   choose one with minimal QUALITY
+   and amongst them one with biggest (deg[end]+maxoutdeg-outdeg_free[end])<<6+indeg_free[start]
    the smallest among all lexicographic pairs canon_number(a),canon_number(b)
    with a->b or b-> a a directed edge in list[]. Then check whether
    a->b is in the same orbit as the edge of this smallest pair.
@@ -3120,17 +3120,17 @@ int is_canonical_edge(BOOG list[],int last_positie)
       sum=QUALITY(a,b);
       if (sum<referencesum) return 0;
       if (sum==referencesum)
-	{ 
-	  
-	  lq=((deg[b]+maxoutdeg-outdeg_free[b])<<6)-indeg_free[a]; 
+	{
+
+	  lq=((deg[b]+maxoutdeg-outdeg_free[b])<<6)-indeg_free[a];
 	  if (lq>endquality) return 0;
-	  if (lq==endquality) 
+	  if (lq==endquality)
 	    { /* OK -- nog een poging */
-	      if (expensivequality== -1) 
+	      if (expensivequality== -1)
 		expensivequality=getexpensivequality(workg[x],workg[y]);
 	      eq=getexpensivequality(workg[a],workg[b]);
 	      if (eq<expensivequality) return 0;
-	      else 
+	      else
 		if (eq==expensivequality)
 		  { candidate[i]=1; gotacandidate=1; }
 		else candidate[i]=0;
@@ -3139,7 +3139,7 @@ int is_canonical_edge(BOOG list[],int last_positie)
 	}
       else candidate[i]=0;
     }
-   
+
   if (!gotacandidate) return 1; /* Only the edge itself */
 
   number_of_generators=0;
@@ -3148,7 +3148,7 @@ int is_canonical_edge(BOOG list[],int last_positie)
   nauty(workg,bufferlab,bufferptn,NILSET,orbits,&options_directed_canon,&stats,\
 	workspace, 100*MAXN,1,aantal_toppen,canong);
   group_up_to_date=1;
-  
+
   for (i=0;i<aantal_toppen;i++) canonnumber[bufferlab[i]]=i;
 
   for (i=0; i<=last_positie; i++)
@@ -3159,7 +3159,7 @@ int is_canonical_edge(BOOG list[],int last_positie)
     }
 
   if (which==last_positie) return 1;
-   
+
   mark_orbitnumbers_only_candidates(number, list, last_positie+1, candidate);
 
   if (number[which]==number[last_positie]) return 1; else return 0;
@@ -3169,7 +3169,7 @@ int is_canonical_edge(BOOG list[],int last_positie)
 
 void force_edges(int top, int all_out, BOOG forcelist[], int *listlen, int *problem)
      /* directs forced edges, *problem is set to 1 if the partial
-	direction cannot be completed according to the rules 
+	direction cannot be completed according to the rules
 
 	all_out==1 betekent dat de bogen naar buiten gericht moeten worden ==0
 	naar binnen.
@@ -3188,7 +3188,7 @@ void force_edges(int top, int all_out, BOOG forcelist[], int *listlen, int *prob
   if (virtual_indeg[top]+virtual_outdeg[top]==deg[top]) return;
 
   if (all_out) /* all the rest must be directed outwards */
-    { 
+    {
       FORALLELEMENTS(workg[top],j)
 	{
 	  if (!is_gericht[top][j] && !virtual_gericht[top][j]) /* a new edge to be virtually directed */
@@ -3204,7 +3204,7 @@ void force_edges(int top, int all_out, BOOG forcelist[], int *listlen, int *prob
     }
   else
     /* all the rest must be directed inwards */
-    { 
+    {
       FORALLELEMENTS(workg[top],j)
 	{
 	  if (!is_gericht[top][j] && !virtual_gericht[top][j]) /* a new edge to be virtually directed */
@@ -3216,17 +3216,17 @@ void force_edges(int top, int all_out, BOOG forcelist[], int *listlen, int *prob
 	    /* top kan maar 1 keer door virtual_outdeg[top]==maxoutdeg toegevoegd worden */
 	    }
 	}
-      
+
     }
 
-  
+
   for (i=0; i<end; i++)
     { top=list[i];
     all_out=richting[i];
     if (virtual_indeg[top]+virtual_outdeg[top]<deg[top])
       {
 	if (all_out) /* all the rest must be directed outwards */
-	  { 
+	  {
 	    FORALLELEMENTS(workg[top],j)
 	      {
 		if (!is_gericht[top][j] && !virtual_gericht[top][j]) /* a new edge to be virtually directed */
@@ -3244,7 +3244,7 @@ void force_edges(int top, int all_out, BOOG forcelist[], int *listlen, int *prob
        /* all the rest must be directed inwards */
 	{
 	  FORALLELEMENTS(workg[top],j)
-	    { 
+	    {
 	      if (!is_gericht[top][j] && !virtual_gericht[top][j]) /* a new edge to be virtually directed */
 		{ if (virtual_outdeg[j]==maxoutdeg) { *problem=1; return; }
 		virtual_indeg[top]++; virtual_outdeg[j]++;
@@ -3267,7 +3267,7 @@ int allemaal_doubles_mogelijk(BOOG edgelist[],int orbitsize, int marker[], int *
 
       The fields fixing that they are directed are also filled in.
 
-      maybe I should rewrite the program in a way to always have the list of undirected 
+      maybe I should rewrite the program in a way to always have the list of undirected
       edges available -- unfortunately that takes so little time that it is hardly worth it... */
 {
   int i, start, end;
@@ -3291,11 +3291,11 @@ int allemaal_doubles_mogelijk(BOOG edgelist[],int orbitsize, int marker[], int *
       aantal_gerichte_bogen++;
       is_gericht[start][end]=is_gericht[end][start]=1;
       /* a double edge can never be forced */
-      virtual_indeg[start]++; virtual_indeg[end]++; 
-      virtual_outdeg[start]++; virtual_outdeg[end]++; 
+      virtual_indeg[start]++; virtual_indeg[end]++;
+      virtual_outdeg[start]++; virtual_outdeg[end]++;
       saturated[start]+=2; saturated[end]+=2;
       /* note that this is only compatible with the symmetry group, because all
-	 edges in the orbit are handled at the same time -- otherwise it would 
+	 edges in the orbit are handled at the same time -- otherwise it would
 	 destroy symmetry -- not yet handled edges and edges that are decided to stay
 	 double will be different for the quality criterion if they were identic before. */
       (indeg_free[end])--; (outdeg_free[start])--;
@@ -3318,11 +3318,11 @@ void reset_doubles(BOOG edgelist[], int marklist[], int marklistend)
     if (marklist[i])
       { start=edgelist[i][0]; end=edgelist[i][1];
         is_gericht[start][end]=is_gericht[end][start]=0;
-	virtual_indeg[start]--; virtual_indeg[end]--; 
-	virtual_outdeg[start]--; virtual_outdeg[end]--; 
+	virtual_indeg[start]--; virtual_indeg[end]--;
+	virtual_outdeg[start]--; virtual_outdeg[end]--;
 	saturated[start]-=2; saturated[end]-=2;
       /* note that this is only compatible with the symmetry group, because all
-	 edges in the orbit are handled at the same time -- otherwise it would 
+	 edges in the orbit are handled at the same time -- otherwise it would
 	 destroy symmetry -- not yet handled edges and edges that are decided to stay
 	 double will be different for the quality criterion if they were identic before. */
 	remaining_doubles++;
@@ -3348,7 +3348,7 @@ void do_extensions_par(BOOG orbit[],int positie,int numberin[],int numberout[], 
 
   if ((indeg_free[start]-numberin[start]>0) && (outdeg_free[end]-numberout[end]>0))
     // incoming possible
-    { SETOP(op,positie,2); 
+    { SETOP(op,positie,2);
       numberin[start]++; numberout[end]++;
       do_extensions_par(orbit,positie-1,numberin,numberout,numberdouble,op);
       numberin[start]--; numberout[end]--;
@@ -3358,7 +3358,7 @@ void do_extensions_par(BOOG orbit[],int positie,int numberin[],int numberout[], 
       (outdeg_free[start]-numberout[start]>0) && (outdeg_free[end]-numberout[end]>0) &&
       (double_free[start]-numberdouble[start]>0) && (double_free[end]-numberdouble[end]>0))
     // double possible
-    { SETOP(op,positie,1); 
+    { SETOP(op,positie,1);
       numberin[start]++; numberin[end]++; numberout[start]++; numberout[end]++;
       numberdouble[start]++; numberdouble[end]++;
       do_extensions_par(orbit,positie-1,numberin,numberout,numberdouble,op);
@@ -3369,7 +3369,7 @@ void do_extensions_par(BOOG orbit[],int positie,int numberin[],int numberout[], 
 
   if ((indeg_free[end]-numberin[end]>0) && (outdeg_free[start]-numberout[start]>0))
     // outgoing possible
-    { SETOP(op,positie,0); 
+    { SETOP(op,positie,0);
       numberin[end]++; numberout[start]++;
       do_extensions_par(orbit,positie-1,numberin,numberout,numberdouble,op);
       numberin[end]--; numberout[start]--;
@@ -3427,7 +3427,7 @@ int compute_par_orbits(BOOG edgeorbit[],int orbitsize,int num_extensions, unsign
 {
   int root[MAXPAROPS], i, j, pos1, pos2, orbits, buf;
   unsigned int buffer;
-  int inv[MAXN][MAXN]; 
+  int inv[MAXN][MAXN];
   // inv[i][j] is the position of edge {i,j} in edgeorbit. If inv[i][j]<0 this means that in fact {j,i} is in
   // edgeorbit -- and that on position -(inv[i][j])-1 -- the one is necessary as -0 = 0
 
@@ -3437,7 +3437,7 @@ int compute_par_orbits(BOOG edgeorbit[],int orbitsize,int num_extensions, unsign
 
   for (i=0; i<num_extensions; i++)
     for (j=0; j<number_of_generators; j++)
-      { 
+      {
 	buffer=par_image(parops[i],generators[j],edgeorbit,orbitsize,inv);
 	FIND_PAROP(buffer,pos1);
 	while (root[pos1]!=pos1) pos1=root[pos1];
@@ -3459,8 +3459,8 @@ void parallel_orbit_labelling(BOOG edge_orbit[], int orbitsize)
   int num_extensions, i,j,type, start, end;
   unsigned int nonequivextensions[MAXPAROPS], buf;
 
-  
-  if (!group_up_to_date) 
+
+  if (!group_up_to_date)
     { number_of_generators=0;
       memcpy(bufferlab,lab[nextstep_depth],aantal_toppen*sizeof(nvector));
       memcpy(bufferptn,ptn[nextstep_depth],aantal_toppen*sizeof(nvector));
@@ -3473,13 +3473,13 @@ void parallel_orbit_labelling(BOOG edge_orbit[], int orbitsize)
 
   num_extensions=compute_par_orbits(edge_orbit,orbitsize,num_extensions,nonequivextensions);
 
-  
+
 
 
   aantal_gerichte_bogen += orbitsize;
-  for (j=0;j<orbitsize;j++) 
+  for (j=0;j<orbitsize;j++)
     { start=edge_orbit[j][0]; end=edge_orbit[j][1];
-      saturated[start]++; saturated[end]++; 
+      saturated[start]++; saturated[end]++;
       is_gericht[start][end]=is_gericht[end][start]=1;
     }
 
@@ -3488,7 +3488,7 @@ void parallel_orbit_labelling(BOOG edge_orbit[], int orbitsize)
       for (j=0;j<orbitsize;j++)
 	{ type=GETTYPE(buf,j);
 	  start=edge_orbit[j][0]; end=edge_orbit[j][1];
-	  
+
 	  if (type==0) // outgoing
 	    { outdeg_free[start]--; indeg_free[end]--;
 	      DELELEMENT(workg+end,start);
@@ -3505,14 +3505,14 @@ void parallel_orbit_labelling(BOOG edge_orbit[], int orbitsize)
 	}
 
       group_up_to_date=0;
-      trynextstep_par(); 
+      trynextstep_par();
       // don't switch back to general routine as some fields are not filled in
       // properly -- e.g. virtual degrees and saturated
-      
+
       for (j=0;j<orbitsize;j++)
 	{ type=GETTYPE(buf,j);
 	  start=edge_orbit[j][0]; end=edge_orbit[j][1];
-	  
+
 	  if (type==0) // outgoing
 	    { outdeg_free[start]++; indeg_free[end]++;
 	      ADDELEMENT(workg+end,start);
@@ -3529,14 +3529,14 @@ void parallel_orbit_labelling(BOOG edge_orbit[], int orbitsize)
 	}
       group_up_to_date=0;
     }
-  
+
   aantal_gerichte_bogen -= orbitsize;
-  for (j=0;j<orbitsize;j++) 
+  for (j=0;j<orbitsize;j++)
     { start=edge_orbit[j][0]; end=edge_orbit[j][1];
-      saturated[start]--; saturated[end]--; 
+      saturated[start]--; saturated[end]--;
       is_gericht[start][end]=is_gericht[end][start]=0;
     }
-  
+
   return;
 
 }
@@ -3558,7 +3558,7 @@ void nontrivlabels(BOOG kleinste_orbit[], int done_in_orbit, int orbitsize, BOOG
  compute_extensions(kleinste_orbit, orbitsize, extensionlist,&number_of_extensions);
 
  for (i=0; i<number_of_extensions; i++)
-   { 
+   {
        start=extensionlist[i][0]; end=extensionlist[i][1];
        if (((virtual_outdeg[start]<maxoutdeg) && (virtual_indeg[end]<maxindeg)) || (virtual_gericht[start][end]==1))
         { problem=forcelistlen=0;
@@ -3569,18 +3569,18 @@ void nontrivlabels(BOOG kleinste_orbit[], int done_in_orbit, int orbitsize, BOOG
 	  group_up_to_date=0;
 	  aantal_gerichte_bogen++;
 	  al_gericht[done_in_orbit][0]=start; al_gericht[done_in_orbit][1]=end;
-	  if (!virtual_gericht[start][end]) 
-	    { 
+	  if (!virtual_gericht[start][end])
+	    {
 	      virtual_outdeg[start]++; virtual_indeg[end]++;
-	      if (virtual_outdeg[start]==maxoutdeg) 
+	      if (virtual_outdeg[start]==maxoutdeg)
 		force_edges(start, 0, forcelist, &forcelistlen, &problem);
-	      if (!problem && (virtual_indeg[end]==maxindeg) ) 
+	      if (!problem && (virtual_indeg[end]==maxindeg) )
 		force_edges(end, 1, forcelist, &forcelistlen, &problem); }
 
 	  if (!problem && ((done_in_orbit==0) || is_canonical_edge(al_gericht,done_in_orbit)))
-	 /* if is_canonical_edge() is called, done_in_orbit>0, so nauty was just called and the 
+	 /* if is_canonical_edge() is called, done_in_orbit>0, so nauty was just called and the
 	    group is up to date */
-	    { 
+	    {
 	      if (done_in_orbit+1 < orbitsize)
 		nontrivlabels(kleinste_orbit, done_in_orbit+1, orbitsize,al_gericht,maxorbit);
 	    else
@@ -3592,7 +3592,7 @@ void nontrivlabels(BOOG kleinste_orbit[], int done_in_orbit, int orbitsize, BOOG
 	  ADDELEMENT(workg+end,start);
 	  group_up_to_date=0;
 	  aantal_gerichte_bogen--;
-	  if (!virtual_gericht[start][end]) 
+	  if (!virtual_gericht[start][end])
 	    { virtual_outdeg[start]--; virtual_indeg[end]--;
 	    for (j=0; j<forcelistlen;j++)
 	      {
@@ -3604,7 +3604,7 @@ void nontrivlabels(BOOG kleinste_orbit[], int done_in_orbit, int orbitsize, BOOG
 	}
    } /* einde for-loop */
 
- /* conventie: dubbel edges hebben de hoogste prioriteit om verwijdert te worden. Dat betekent 
+ /* conventie: dubbel edges hebben de hoogste prioriteit om verwijdert te worden. Dat betekent
     dat ze als laatste in een orbit die opgevuld moet worden toegevoegd worden */
 
  if ((remaining_doubles >= orbitsize-done_in_orbit) && (orbitsize>done_in_orbit))
@@ -3635,14 +3635,14 @@ int connected(graph g[], int aantal_toppen)
 
   if (reached==ALLMASK(aantal_toppen))
     { return 1; }
-  else 
+  else
     { return 0; }
 }
 
 int test_possible(graph globalg[],int globaldeg[], int n, int m, int min_direct_deg)
      /* Test of sommige deelgrafen aan |E|<= min_direct_deg*aantal_toppen voldoet.
 
-	Geeft 1 terug als er misschien een manier bestaat om de bogen een richting 
+	Geeft 1 terug als er misschien een manier bestaat om de bogen een richting
 	toe te kennen en 0 als zo'n manier zeker niet bestaat.
 
      */
@@ -3654,7 +3654,7 @@ int test_possible(graph globalg[],int globaldeg[], int n, int m, int min_direct_
   int *runp, *endp;
   int list[2*MAXN]; /* de lijst van toppen. In het begin staan ze er allemaal in. Als er een top al bekeken is
 		       en dan word de graad min_direct_deg word hij er opnieuw toegevoegd -- maar dat kan
-		       maar 1 keer gebeuren. 
+		       maar 1 keer gebeuren.
 		       Het probleem is te voorkomen dat een top 2 keer in het gedeelte van de lijst staat
 		       waaraan nog gewerkt wordt. Dan kan het gebeuren dat de top 2 keer verwijderd word.
 
@@ -3673,18 +3673,18 @@ int test_possible(graph globalg[],int globaldeg[], int n, int m, int min_direct_
   for (runp=list, endp=list+n; runp<endp; runp++)
     { top=*runp;
       if (deg[top]<=min_direct_deg)
-      { 
+      {
 	grens-=min_direct_deg;
 	m-=deg[top];
 	deg[top]=0;
 	removed=1;
 	if (m>grens) { return 0; }
         FORALLELEMENTS(g[top],j)
-	  { 
+	  {
 	    DELELEMENT(g+j,top);
 	    deg[j]--;
 	    /* top<i betekent: de eerste keer dat hij in de lijst stond was al vroeger. En en tweede keer
-	       kan de top er nog niet staan omdat de volgende voorwaarde deg[j]==min_direct_deg garandeerd 
+	       kan de top er nog niet staan omdat de volgende voorwaarde deg[j]==min_direct_deg garandeerd
 	       dat de graad net voldoende gedaald is */
 	    if ((top<(runp-list)) && (deg[j]==min_direct_deg)) { *endp=j; endp++; }
 	  }
@@ -3698,14 +3698,14 @@ int test_possible(graph globalg[],int globaldeg[], int n, int m, int min_direct_
 
   RESETMARKS
 
-  for (i=0;i<n;i++) 
+  for (i=0;i<n;i++)
     if (UNMARKED(i) && deg[i])
       { m0=deg[i];
 	list[0]=i;
 	MARK(i);
 	for (runp=list, endp=list+1; runp<endp; runp++)
 	  { top=*runp;
-	  FORALLELEMENTS(g[top],j) 
+	  FORALLELEMENTS(g[top],j)
 	    { if (UNMARKED(j))
 	      { MARK(j);
 	        m0+=deg[j];
@@ -3724,7 +3724,7 @@ int test_possible(graph globalg[],int globaldeg[], int n, int m, int min_direct_
 
 
 void waterclusters (graph g[], int n)
-{ 
+{
   int i, j, k, orbitsize, start, end, fixed_edge, dummy, maxgraphdeg, biggest_orbit;
   BOOG kleinste_orbit[MAX_BOGEN+1];  /* het is mogelijk dat er maar 1 orbit is */
   BOOG al_gericht[MAX_BOGEN+1];
@@ -3753,34 +3753,34 @@ void waterclusters (graph g[], int n)
 
    /* als maxindeg==maxoutdeg is gegarandeerd dat voor elke graaf die gegenereerd word ook een manier
      bestaat om richtingen toe te kennen zonder de voorwaarden te schenden */
-  if (maxgraphdeg>2*mingerichtdeg) 
+  if (maxgraphdeg>2*mingerichtdeg)
     { if (test_possible(g,deg,n,aantal_bogen,mingerichtdeg)==0) return; }
 
   //if ((maxgraphdeg<=maxindeg) && (maxgraphdeg<=maxoutdeg)) nodegbound=1; else nodegbound=0;
 
   if (aantal_bogen==0) { addnumber=1; MAYBEPROCESS; WRITEUP(); return; }
 
-  if (double_allowed) 
+  if (double_allowed)
     max_doubles=remaining_doubles=watermaxedges-aantal_bogen; else max_doubles=remaining_doubles=0;
   if (remaining_doubles)
     { /* deg[i] is altijd <= maxindeg+maxoutdeg */
       for (i=0;i<aantal_toppen;i++) double_free[i]=watermaxdeg-deg[i];
     }
-  else 
+  else
     for (i=0;i<aantal_toppen;i++) double_free[i]=0;
 
   nextstep_depth=0;
 
   if (stats.numorbits!=n)
     { fill_edgelist_edgeorb();
-      get_orbit_first(kleinste_orbit,&orbitsize,&fixed_edge,&biggest_orbit); 
+      get_orbit_first(kleinste_orbit,&orbitsize,&fixed_edge,&biggest_orbit);
     }
 
-  /* Now is (orbitsize==0) if the group acts trivially on edges 
+  /* Now is (orbitsize==0) if the group acts trivially on edges
      -- only interesting in case of disconnected graphs */
 
   if ((stats.numorbits==n) || (orbitsize==0)) /* trviale groep */
-    { aantal_grafen_met_triv_group++; 
+    { aantal_grafen_met_triv_group++;
       fill_edgelist_edgeorb_order();
       laatstepositie=edgelist+aantal_bogen-1;
       if (maxoutdeg==maxindeg) /* then every valid graph for one direction is also valid with
@@ -3800,7 +3800,7 @@ void waterclusters (graph g[], int n)
 
 	  if (remaining_doubles && double_free[start] && double_free[end])
 	    {
-	      addnumber=1; 
+	      addnumber=1;
 	      (outdeg_free[start])--; (indeg_free[end])--;
 	      (outdeg_free[end])--; (indeg_free[start])--;
 	      double_free[start]--; double_free[end]--;
@@ -3829,17 +3829,17 @@ void waterclusters (graph g[], int n)
   /* first: write good beginning colours for nauty */
   memcpy(colour[0],orbits,aantal_toppen*sizeof(nvector));
   for (i=0;i<aantal_toppen;i++) numberinorbit[i]=0;
-  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i]; 
+  for (i=0;i<aantal_toppen;i++) { dummy=orbits[i];
                                   inorbit[dummy][numberinorbit[dummy]]=i;
 				  (numberinorbit[dummy])++;
                                 }
-  for (i=k=0;i<aantal_toppen;i++) 
-    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[0][k]=1; lab[0][k]=inorbit[i][j]; k++; } 
+  for (i=k=0;i<aantal_toppen;i++)
+    { for (j=0;j<numberinorbit[i]-1; j++) { ptn[0][k]=1; lab[0][k]=inorbit[i][j]; k++; }
       if (numberinorbit[i]) { ptn[0][k]=0; lab[0][k]=inorbit[i][j]; k++; }
     }
 
   /* else */
-  if ((fixed_edge<0)|| (maxindeg!=maxoutdeg)) 
+  if ((fixed_edge<0)|| (maxindeg!=maxoutdeg))
     { addnumber=1; nontrivlabels(kleinste_orbit,0,orbitsize,al_gericht, biggest_orbit); return; }
   /* else */
   /* one edge can already be directed -- but because it is fixed anyway, the group is still correct. */
@@ -3858,10 +3858,10 @@ void waterclusters (graph g[], int n)
   is_gericht[start][end]=is_gericht[end][start]=0;
   virtual_outdeg[start]--; virtual_indeg[end]--;
   (outdeg_free[start])++; (indeg_free[end])++;
-  saturated[start]=saturated[end]=0; 
+  saturated[start]=saturated[end]=0;
 
   if (remaining_doubles && double_free[start] && double_free[end])
-    { 
+    {
       addnumber=1;
       (outdeg_free[start])--; (indeg_free[end])--;
       (outdeg_free[end])--; (indeg_free[start])--;
@@ -3881,7 +3881,7 @@ void waterclusters (graph g[], int n)
       virtual_indeg[start]--; virtual_indeg[end]--;
       (outdeg_free[start])++; (indeg_free[end])++;
       (outdeg_free[end])++; (indeg_free[start])++;
-      saturated[start]=saturated[end]=0; 
+      saturated[start]=saturated[end]=0;
     }
 
 
@@ -3913,13 +3913,13 @@ void direct_edges(void) /* graph workg[] and int aantal_toppen, aantal_bogen are
   else { maxedges=aantal_toppen*maxoutdeg; minrestriction=maxoutdeg; }
 
   if (maxedges<aantal_bogen) return;
- /* grafen met meer bogen kunnen niet gericht worden, zodat ze nog aan de 
+ /* grafen met meer bogen kunnen niet gericht worden, zodat ze nog aan de
     voorwaarden voldoen */
 
   maxdeg=maxindeg+maxoutdeg;
   if (!nodegbound)
     {
-      for (i=free_vertices=0;i<aantal_toppen;i++) 
+      for (i=free_vertices=0;i<aantal_toppen;i++)
 	{ if (deg[i]>maxdeg) return;
 	  if (deg[i]<maxdeg) free_vertices++;
 	}
@@ -3931,16 +3931,16 @@ void direct_edges(void) /* graph workg[] and int aantal_toppen, aantal_bogen are
   // when to use what is just some heuristic -- a more elaborate one could be helpful
     if ((!regular) &&
 	(nodegbound || (maxindeg<=2 && maxoutdeg<=2) || (free_vertices>((2*aantal_toppen)/3))))
-    { //waterclusteruse++; 
+    { //waterclusteruse++;
       waterclusters (staticg, aantal_toppen); return; }
 
   //water_v_use++;
 
   memcpy(workg,staticg,sizeof(graph)*aantal_toppen);
 
-  for (i=0; i<aantal_toppen; i++) 
+  for (i=0; i<aantal_toppen; i++)
     { indeg[i]=outdeg[i]=0;
-      if (double_allowed) 
+      if (double_allowed)
 	{ double_free[i]=maxdirectdeg-deg[i];
 	  if (minrestriction<double_free[i]) double_free[i]=minrestriction;
 	}
@@ -3949,19 +3949,19 @@ void direct_edges(void) /* graph workg[] and int aantal_toppen, aantal_bogen are
 
   aantal_gerichte_bogen=0;
 
-  if (double_allowed) 
+  if (double_allowed)
     max_doubles=remaining_doubles=maxedges-aantal_bogen; else max_doubles=remaining_doubles=0;
 
 
   number_of_generators=0;
   nauty(workg,bufferlab,bufferptn,NILSET,orbits,&options,&stats,workspace,100*MAXN,1,aantal_toppen,NULL);
 
-  if (stats.numorbits==aantal_toppen) 
-    { 
+  if (stats.numorbits==aantal_toppen)
+    {
       direct_all_triv();
     }
-  else 
-    { 
+  else
+    {
       for (i=0; i<aantal_toppen; i++) { tobedirected[i]=deg[i]; }
 
       direct_all_nontriv(); }
@@ -3975,23 +3975,23 @@ void init_allocated_fields()
 {
   int i;
 
-  size_root=1000; root_op=malloc((size_t)size_root*sizeof(int)); 
-  if (root_op==NULL) 
+  size_root=1000; root_op=malloc((size_t)size_root*sizeof(int));
+  if (root_op==NULL)
     { fprintf(stderr,"Can't allocate %d items for root_op in the beginning -- exiting.\n",size_root);
       exit(0); }
 
 
   operations=malloc((size_t)4096);
-  if (operations==NULL) 
-    { fprintf(stderr,"Can't allocate initial memory for operations -- exiting\n"); 
+  if (operations==NULL)
+    { fprintf(stderr,"Can't allocate initial memory for operations -- exiting\n");
       exit(1); }
   size_operations=4096;
 
   for (i=0; i<MAXN; i++)
     {
       remember_operations[i]=malloc((size_t)4096);
-      if (remember_operations[i]==NULL) 
-	{ fprintf(stderr,"Can't allocate initial memory for operations -- exiting\n"); 
+      if (remember_operations[i]==NULL)
+	{ fprintf(stderr,"Can't allocate initial memory for operations -- exiting\n");
 	  exit(1); }
       remember_size[i]=4096;
     }
@@ -4004,8 +4004,8 @@ void init_allocated_fields()
 
 int main(int argc, char *argv[])
 
-// reads from stdin 
-{ 
+// reads from stdin
+{
 
   int i, m, zaehlen=0;
   unsigned char *code=NULL;
@@ -4013,21 +4013,21 @@ int main(int argc, char *argv[])
   int multicode=0, g6code=1;
   long long int last=0LL;
 
-  if (sizeof(long long int)<8) 
-    { 
+  if (sizeof(long long int)<8)
+    {
       fprintf(stderr,"This may cause problems with the hashing function for large degree -- exit().\n");
-      exit(1); 
+      exit(1);
     }
 
   for (i=1; i<argc; i++)
     {
       if (argv[i][0]=='i') maxindeg=atoi(argv[i]+1);
       else  if (argv[i][0]=='o') maxoutdeg=atoi(argv[i]+1);
-      else  if (argv[i][0]=='T') direct_output=1; 
-	else  if (argv[i][0]=='C') direct_output=2;
-	  else  if (argv[i][0]=='B') direct_output=3;
-	    else  if (argv[i][0]=='S') double_allowed=0;
-	      else  if (argv[i][0]=='m') { g6code=0; multicode=1; }
+      else  if (argv[i][0]=='T') direct_output=1;
+      else  if (argv[i][0]=='C') direct_output=2;
+      else  if (argv[i][0]=='B') direct_output=3;
+      else  if (argv[i][0]=='S') double_allowed=0;
+      else  if (argv[i][0]=='m') { g6code=0; multicode=1; }
       else usage(argv[0]);
     }
 
@@ -4045,8 +4045,8 @@ int main(int argc, char *argv[])
 
   while((g6code && (readg(stdin,staticg,1,&m,&aantal_toppen) != NULL)) ||
 	(multicode && (lese_multicode(&code, &codelaenge, stdin) != EOF)))
-    { 
-      zaehlen++; 
+    {
+      zaehlen++;
 #ifdef PROCESS
       dg_nin = zaehlen;
 #endif

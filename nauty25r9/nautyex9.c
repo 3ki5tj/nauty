@@ -2,7 +2,7 @@
    to Traces.  We compute the automorphism group of the circulant
    graph of order n with i is adjacent to j iff j-i is a square
    mod n.  We need that -1 is a square so that the graph is
-   undirected, which means that the prime factors of n must be 
+   undirected, which means that the prime factors of n must be
    congruent to 1 mod 4.  (This is the Paley graph in the event
    that p is a prime.)
 */
@@ -29,7 +29,7 @@ main(int argc, char *argv[])
  /* Select option for passing generators to Traces */
 
     options.generators = &gens;
- 
+
  /* Read a number of vertices and process it */
 
     while (1)
@@ -74,7 +74,7 @@ main(int argc, char *argv[])
                 sg.v[i] = i*deg;     /* Position of vertex i in v array */
                 sg.d[i] = deg;       /* Degree of vertex i */
             }
-             
+
             for (i = 0; i < n; ++i)   /* Edges */
             {
                 k = sg.v[i];
@@ -99,7 +99,7 @@ main(int argc, char *argv[])
             addpermutation(&gens,p,n);
 
          /* Call Traces */
-            
+
             Traces(&sg,lab,ptn,orbits,&options,&stats,NULL);
 
             printf("Automorphism group size = ");

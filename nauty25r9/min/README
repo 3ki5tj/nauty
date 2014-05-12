@@ -1,16 +1,45 @@
 Aim: make a minimal and self-contained version of nauty
 
+List of files
+==============
+
+nau0.h    standalone file
+
+nau0s.h   simplified standalone file
+
+naugeng.c uses in addition (only depends on nau0.h)
+          geng.c, gtools.h, gtools.c
+
+
+nau0.h and nau0s.h
+===================
+
 The symbolic links constitute a minimal subset of files.
 
 The standalone file nau0.h or nau0s.h can be included by external programs to use the function nauty()
 
-nau0.h    standalone file
-nau0s.h   simplified standalone file
 
-naugeng.c uses in addition
-  geng.c
-  gtools.h
-  gtools.c
+naugeng.c
+=========
 
 icc naugeng.c && ./a.out -C 4
+
+
+naugeng.c
+main()
+  genextend()
+    isbiconnected()
+    accept1()/accept2()
+      nauty()
+      makecanon()
+
+The function genextend() tries to build a graph
+  by adding vertices to a smaller graph.
+
+The functions accept1()/accept2() tests if the graph
+  or its automorphism has appeared before
+* accept1() works for nx < maxn
+* accept2() works for nx == maxn
+
+In the former case, the search continues.
 

@@ -18,7 +18,7 @@
 
    4. Declare ACTION(p) for what splay_scan() should do for node p.
 
-   5. Declare INSERT_ARGS to be the additional arguments needed 
+   5. Declare INSERT_ARGS to be the additional arguments needed
    for splay_insert(), including a leading comma.
 
    6. Declare COMPARE(p) to compare INSERT_ARGS or LOOKUP_ARGS to the
@@ -199,7 +199,7 @@ SPLAY(SPLAYNODE *p)
 	{
 	    p->parent = NULL;
 	}
-	
+
 	switch (code)
 	{
 	 case S_L:
@@ -368,7 +368,7 @@ SPLAY_DELETE(SPLAYNODE **to_root, SPLAYNODE *p)
         p->right->parent = NULL;
         free(p);
         return;
-    }  
+    }
 
     /* both children exist */
 
@@ -398,7 +398,7 @@ void
 SPLAY_DUMP(SPLAYNODE *p DUMP_ARGS)
 {
     int i;
-    
+
     if (p == NULL) return;
 
     if (p->right && p->right->parent != p)

@@ -64,7 +64,7 @@ How to add a new property:
     If several things are computed at the same time, link them
     together such as for z and Z.  It doesn't matter which is
     first, provided the prereq field points to the first one.
-   
+
  2. Add code to compute() to compute the value(s) of the parameter.
     Probably this means calling an external procedure then setting
     some VAL() and COMPUTED() values.
@@ -342,14 +342,14 @@ add_one(void)
 
 static void
 printthesevals(FILE *f)
-{       
+{
         int i,ki;
-        
+
         for (i = 0; i < numkeys; ++i)
-        {   
+        {
             ki = key[i];
             if (i > 0) fprintf(f,"; ");
-            
+
             if (VALTYPE(ki) == BOOLTYPE)
 	    {
                 if (!VAL(ki)) fprintf(f,"not %s",ID(ki));
@@ -396,7 +396,7 @@ printkeyvals(FILE *f, long *val)
 
 static void
 groupstats(graph *g, int m, int n, group_node *sz,
-           int *numorbits, int *fixedpts)  
+           int *numorbits, int *fixedpts)
 /* Find the automorphism group of the undirected graph g.
    Return the group size and number of orbits and fixed points. */
 {
@@ -448,7 +448,7 @@ groupstats(graph *g, int m, int n, group_node *sz,
         {
 	    *numorbits = numcells;
 	    *fixedpts = (numcells == n ? n : n-2);
-	    sz->groupsize1 = n + 1.0 - numcells; 
+	    sz->groupsize1 = n + 1.0 - numcells;
 	    sz->groupsize2 = 0;
         }
         else
@@ -521,7 +521,7 @@ compute(graph *g, int m, int n, int code)
 		VAL(I_z) = rad;
 		VAL(I_Z) = diam;
 		COMPUTED(I_z) = COMPUTED(I_Z) = TRUE;
-		break;		
+		break;
 
 	    case I_a:
 		groupstats(g,m,n,&sz,&norbs,&fixedpts);
@@ -621,7 +621,7 @@ group_in_range(group_node *sz, long lo, long hi)
 	{
 	    sz1 = sz->groupsize1;
 	    sz2 = sz->groupsize2;
-	   
+
 	    while (sz2 >= 0 && sz1 <= hi)
 	    {
 		--sz2;
@@ -926,7 +926,7 @@ main(int argc, char *argv[])
 	    }
 	}
 
-	if (!qswitch && dofilter) 
+	if (!qswitch && dofilter)
 	    fprintf(stderr,
 		">Z  %ld graphs read from %s; %ld written to %s; %.3f sec\n",
 	        nin,infilename,nout,outfilename,t);

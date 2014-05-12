@@ -87,7 +87,7 @@ main(int argc, char *argv[])
         }
     }
 
-    if (sswitch && gswitch) 
+    if (sswitch && gswitch)
         gt_abort(">E amtog: -s and -g are incompatible\n");
 
     if (badargs || argnum > 2)
@@ -141,7 +141,7 @@ main(int argc, char *argv[])
         DYNALLOC2(graph,g,g_sz,n,m,"amtog");
     }
 #endif
-    
+
 
      /* perform scanning required */
 
@@ -162,7 +162,7 @@ main(int argc, char *argv[])
 #else
             DYNALLOC2(graph,g,g_sz,n,m,"amtog");
 #endif
-        } 
+        }
         else if (s[0] == 'm' || s[0] == 'M' || s[0] == 't' ||
                  s[0] == 'T' || s[0] == '0' || s[0] == '1')
         {
@@ -174,7 +174,7 @@ main(int argc, char *argv[])
             }
             if (s[0] == '0' || s[0] == '1') ungetc(s[0],infile);
             m = (n + WORDSIZE - 1) / WORDSIZE;
-    
+
 	    EMPTYSET(g,m*(size_t)n);
 
             loop = unsymm = FALSE;
@@ -232,7 +232,7 @@ main(int argc, char *argv[])
             if (unsymm) fprintf(stderr,
                    ">E amtog: warning, graph "
                           COUNTER_FMT " is unsymmetric\n",nin);
-    
+
             if (outcode == SPARSE6) writes6(outfile,g,m,n);
             else                    writeg6(outfile,g,m,n);
         }

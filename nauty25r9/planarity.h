@@ -48,7 +48,7 @@ CPUDEFS
 
 #endif  /* not  PLANAR_IN_MAGMA */
 
-#include "nauty.h" 
+#include "nauty.h"
 
 
 
@@ -89,7 +89,7 @@ CPUDEFS
 #define MARK_X_Y_PATH(n) ((n)+5)
 #define MARK_MINORS(n) ((n)+6)
 #define MIN_EMBED_MARK    0   /* ONLY for the t_embed_sparse_rep str */
-                        
+
 
 typedef enum
 {
@@ -151,7 +151,7 @@ typedef struct ver_edge {
     /* edge data */
     int          neighbour;
     int          in_adjl;
-    int          twin_in_adjl; 
+    int          twin_in_adjl;
     int          mult;
     int          type;
     int          sign;
@@ -185,7 +185,7 @@ typedef struct ver_sparse_rep {
   a record in the adjacency list
 */
 typedef struct adjl_sparse_rep {
-    int          end_vertex; 
+    int          end_vertex;
     int          next;   /* next in list as an index in the adj. list */
 } t_adjl_sparse_rep;
 

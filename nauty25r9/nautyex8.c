@@ -3,7 +3,7 @@
    This version uses dense form with dynamic allocation.
 */
 
-#include "nauty.h" 
+#include "nauty.h"
 
 int
 main(int argc, char *argv[])
@@ -26,7 +26,7 @@ main(int argc, char *argv[])
  /* Select option for canonical labelling */
 
     options.getcanon = TRUE;
- 
+
     while (1)
     {
         printf("\nenter n : ");

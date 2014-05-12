@@ -26,7 +26,7 @@ main(int argc, char *argv[])
  /* Select option for canonical labelling */
 
     options.getcanon = TRUE;
- 
+
     while (1)
     {
         printf("\nenter n : ");
@@ -72,7 +72,7 @@ main(int argc, char *argv[])
          /* Label g1, result in cg1 and labelling in lab1; similarly g2.
             It is not necessary to pre-allocate space in cg1 and cg2, but
             they have to be initialised as we did above.  */
-            
+
             densenauty(g1,lab1,ptn,orbits,&options,&stats,m,n,cg1);
             densenauty(g2,lab2,ptn,orbits,&options,&stats,m,n,cg2);
 

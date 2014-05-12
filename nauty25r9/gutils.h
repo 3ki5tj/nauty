@@ -16,7 +16,7 @@ extern boolean isbipartite(graph*,int,int);
 extern boolean twocolouring(graph*,int*,int,int);
 extern boolean isconnected1(graph*,int);
 extern boolean isconnected(graph*,int,int);
-extern boolean issubconnected(graph*,set*,int,int); 
+extern boolean issubconnected(graph*,set*,int,int);
 extern long maxcliques(graph*,int,int);
 extern void delete1(graph*,graph*,int,int);
 extern int conncontent(graph*,int,int);

@@ -165,7 +165,7 @@ DYNALLSTAT(set,wss,wss_sz);
 *             Note that invar[] is declared as an int array.  Since the      *
 *             absolute value of the invariant is irrelevant, only the        *
 *             comparative values, any short, int or long value can be        *
-*             assigned to the entries of invar[] without fear.  However,     *  
+*             assigned to the entries of invar[] without fear.  However,     *
 *             you should assign a value less than 077777 to ensure machine-  *
 *             independence of the canonical labelling.                       *
 *                                                                            *
@@ -759,7 +759,7 @@ uniqinter(set *s1, set *s2, int m)
 *                                                                            *
 *****************************************************************************/
 
-void 
+void
 cellfano2(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
           int *invar, int invararg, boolean digraph, int m, int n)
 {
@@ -803,7 +803,7 @@ cellfano2(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
 		    vv[nw] = v1;
 		    ww[nw] = x01;
 		    ++nw;
-		}	
+		}
 
                 for (iv1 = 0; iv1 < nw-2; ++iv1)
                 {
@@ -895,7 +895,7 @@ setnbhd(graph *g, int m, int n, set *w, set *wn)
 	    gi = GRAPHROW(g,i,M);
             for (j = M; --j >= 0;) wn[j] |= gi[j];
 	}
-}    
+}
 
 /*****************************************************************************
 *                                                                            *
@@ -908,7 +908,7 @@ setnbhd(graph *g, int m, int n, set *w, set *wn)
 *                                                                            *
 *****************************************************************************/
 
-void 
+void
 cellfano(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
          int *invar, int invararg, boolean digraph, int m, int n)
 {
@@ -981,7 +981,7 @@ cellfano(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
                             setnbhd(g,m,n,workset,w13);
                             for (i = M; --i >= 0;) workset[i] = gv2[i] & gv3[i];
                             setnbhd(g,m,n,workset,w23);
-			
+
 			    for (i = M; --i >= 0;) workset[i] = w01[i] & w23[i];
 			    setnbhd(g,m,n,workset,pt0);
                             for (i = M; --i >= 0;) workset[i] = w03[i] & w12[i];
@@ -1032,7 +1032,7 @@ distances(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
         DYNALLOC1(set,workset,workset_sz,m,"distances");
         DYNALLOC1(int,workshort,workshort_sz,n+2,"distances");
 	DYNALLOC1(set,ws1,ws1_sz,m,"distances");
-	DYNALLOC1(set,ws2,ws2_sz,m,"distances"); 
+	DYNALLOC1(set,ws2,ws2_sz,m,"distances");
 #endif
 
         for (i = n; --i >= 0;) invar[i] = 0;
@@ -1310,7 +1310,7 @@ cellcliq(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
                         for (i = ss; --i >= 0;) ++invar[v[i]];
                         --ss;
                     }
-                    else if ((v[ss] 
+                    else if ((v[ss]
 				= nextelement((set*)wss+M*(ss-1),M,v[ss])) < 0)
                         --ss;
                     else
@@ -1406,7 +1406,7 @@ cellind(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
                         for (i = ss; --i >= 0;) ++invar[v[i]];
                         --ss;
                     }
-                    else if ((v[ss] 
+                    else if ((v[ss]
 			   = nextelement((set*)wss+M*(ss-1),M,v[ss])) < 0)
                         --ss;
                     else
@@ -1513,7 +1513,7 @@ nautinv_check(int wordsize, int m, int n, int version)
 *  nautinv_freedyn() - free the dynamic memory in this module                *
 *                                                                            *
 *****************************************************************************/
- 
+
 void
 nautinv_freedyn(void)
 {
@@ -1701,7 +1701,7 @@ semirefine(graph *g, int *lab, int *ptn, int level, int *numcells,
 	return CLEANUP(longcode);
 }
 
-void 
+void
 refinvar(graph *g, int *lab, int *ptn, int level, int numcells, int tvpos,
           int *invar, int invararg, boolean digraph, int m, int n)
 {

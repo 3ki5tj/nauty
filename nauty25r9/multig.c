@@ -37,7 +37,7 @@
 nauty_counter mg_nin,mg_nout;
 FILE *outfile;
 
-#define MAXNV 128 
+#define MAXNV 128
 #define MAXNE 1024
 static int v0[MAXNE+MAXNV],v1[MAXNE+MAXNV];
 static int edgeno[MAXNV][MAXNV];
@@ -52,7 +52,7 @@ static unsigned long newgroupsize;
 static boolean Gswitch,Tswitch,Aswitch,Bswitch;
 static int Brows;
 
-#define GROUPTEST_NOT 
+#define GROUPTEST_NOT
 #ifdef GROUPTEST
 static long long totallab;
 #endif
@@ -240,7 +240,7 @@ trythisone(grouprec *group,
             {
                 fprintf(outfile,"%d %d",n,ne2);
                 if (Gswitch) fprintf(outfile," %lu",newgroupsize);
-    
+
                 for (i = 0; i < ne2; ++i)
                     fprintf(outfile," %d %d %d",v0[i],v1[i],ix[i]);
                 fprintf(outfile,"\n");
@@ -452,7 +452,7 @@ multi(graph *g, int nfixed, long minedges, long maxedges, long maxmult,
 
     j0 = -1;  /* last vertex with degree 0 */
     j1 = n;   /* first vertex with degree > 0 */
- 
+
     ne = 0;
     maxd = 0;
     for (i = 0, gi = g; i < n; ++i, gi += m)

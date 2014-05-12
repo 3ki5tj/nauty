@@ -24,7 +24,7 @@ main(int argc, char *argv[])
  /* Select option for canonical labelling */
 
     options.getcanon = TRUE;
- 
+
  /* Read a number of vertices and process */
 
     while (1)
@@ -58,7 +58,7 @@ main(int argc, char *argv[])
                 sg1.v[i] = 3*i;     /* Position of vertex i in v array */
                 sg1.d[i] = 3;       /* Degree of vertex i */
             }
-             
+
             for (i = 0; i < n; i += 2)   /* Spokes */
             {
                 sg1.e[sg1.v[i]] = i+1;
@@ -74,7 +74,7 @@ main(int argc, char *argv[])
                 sg1.e[sg1.v[i]+2] = i-2;
             sg1.e[sg1.v[1]+2] = n-2;
             sg1.e[sg1.v[0]+2] = n-1;
-                
+
          /* Now make the second graph */
 
             SG_ALLOC(sg2,n,3*n,"malloc");
@@ -99,7 +99,7 @@ main(int argc, char *argv[])
          /* Label sg1, result in cg1 and labelling in lab1; similarly sg2.
             It is not necessary to pre-allocate space in cg1 and cg2, but
             they have to be initialised as we did above.  */
-            
+
             Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
             Traces(&sg2,lab2,ptn,orbits,&options,&stats,&cg2);
 

@@ -86,7 +86,7 @@ fcanonise(graph *g, int m, int n, graph *h, char *fmt, boolean digraph)
         endfmt = FALSE;
         for (i = 0; i < n; ++i)
         {
-            if (!endfmt && fmt[i] != '\0') 
+            if (!endfmt && fmt[i] != '\0')
                 x[i] = ((long)fmt[i] << 22) | i;
             else
             {
@@ -208,7 +208,7 @@ fcanonise_inv(graph *g, int m, int n, graph *h, char *fmt,
         endfmt = FALSE;
         for (i = 0; i < n; ++i)
         {
-            if (!endfmt && fmt[i] != '\0') 
+            if (!endfmt && fmt[i] != '\0')
                 x[i] = ((long)fmt[i] << 22) | i;
             else
             {
@@ -336,7 +336,7 @@ fcanonise_inv_sg(sparsegraph *g, int m, int n, sparsegraph *h, char *fmt,
         endfmt = FALSE;
         for (i = 0; i < n; ++i)
         {
-            if (!endfmt && fmt[i] != '\0') 
+            if (!endfmt && fmt[i] != '\0')
                 x[i] = ((long)fmt[i] << 22) | i;
             else
             {
@@ -405,7 +405,7 @@ fcanonise_inv_sg(sparsegraph *g, int m, int n, sparsegraph *h, char *fmt,
 /**************************************************************************/
 
 void
-fgroup(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits)  
+fgroup(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits)
 /* Find the orbits of undirected graph g stabilised by format fmt.
    The orbits are put into orbits[] and the number of them into *numorbits
    fmt is either NULL (for no vertex classification) or is a string
@@ -457,7 +457,7 @@ fgroup(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits)
         endfmt = FALSE;
         for (i = 0; i < n; ++i)
         {
-            if (!endfmt && fmt[i] != '\0') 
+            if (!endfmt && fmt[i] != '\0')
                 x[i] = ((long)fmt[i] << 22) | i;
             else
             {
@@ -538,7 +538,7 @@ fgroup(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits)
 void
 fgroup_inv(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits,
       void (*invarproc)(graph*,int*,int*,int,int,int,int*,int,
-       boolean,int,int), int mininvarlevel, int maxinvarlevel, int invararg)  
+       boolean,int,int), int mininvarlevel, int maxinvarlevel, int invararg)
 /* Find the orbits of undirected graph g stabilised by format fmt.
    The orbits are put into orbits[] and the number of them into *numorbits
    fmt is either NULL (for no vertex classification) or is a string
@@ -592,7 +592,7 @@ fgroup_inv(graph *g, int m, int n, char *fmt, int *orbits, int *numorbits,
         endfmt = FALSE;
         for (i = 0; i < n; ++i)
         {
-            if (!endfmt && fmt[i] != '\0') 
+            if (!endfmt && fmt[i] != '\0')
                 x[i] = ((long)fmt[i] << 22) | i;
             else
             {
@@ -696,19 +696,19 @@ userlevel(int *lab, int *ptn, int level, int *orbits, statsblk *stats,
                 return;
             }
 }
- 
+
 /*******************************************************************/
 
 /* istransitive(g,m,n,h)
 
    g   is an input graph with
-   m,n of standard meaning.  
+   m,n of standard meaning.
    h   is a place to put an output graph.
 
    If g is transitive, return 1 or 2 and put a canonically labelled
-       version of g into h.  The value is 2 for symmetric graphs, 
+       version of g into h.  The value is 2 for symmetric graphs,
        and 1 for other transitive graphs.
-   If g is not transitive, return 0.  In that case h may or 
+   If g is not transitive, return 0.  In that case h may or
        may not have something in it.
 */
 int
@@ -718,7 +718,7 @@ istransitive(graph *g, int m, int n, graph *h)
     set *gw;
     short wt;
     int d,inv0,v,w;
-    statsblk stats; 
+    statsblk stats;
     static DEFAULTOPTIONS_GRAPH(options);
 #if MAXN
     int lab[MAXN],ptn[MAXN],orbits[MAXN];
@@ -794,7 +794,7 @@ istransitive(graph *g, int m, int n, graph *h)
 #ifdef REFINE
     options.userrefproc = REFINE;
 #endif
- 
+
     issymm = TRUE;
     g0 = (set*) g;
     gm = m;
@@ -808,7 +808,7 @@ istransitive(graph *g, int m, int n, graph *h)
 
 /**************************************************************************/
 
-void 
+void
 tg_canonise(graph *g, graph *h, int m, int n)
 /* Canonise vertex-transitive graph */
 {

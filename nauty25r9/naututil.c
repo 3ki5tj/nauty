@@ -546,7 +546,7 @@ ranreg_sg(sparsegraph *sg, int degree, int n)
     boolean ok;
     int *dd,*ee;
     size_t *vv,nde,j;
- 
+
 #if MAXN
     int p[MAXREG*MAXN];
 #else
@@ -575,11 +575,11 @@ ranreg_sg(sparsegraph *sg, int degree, int n)
     for (i = 0; i < n; ++i) vv[i] = i*(size_t)degree;
 
     do
-    {   
+    {
         ok = TRUE;
 
         for (j = nde; j > 0; j -= 2)
-        {   
+        {
             i = KRAN(j-1);
 	    k = p[i];
 	    if (k == p[j-1]) break;
@@ -590,7 +590,7 @@ ranreg_sg(sparsegraph *sg, int degree, int n)
         for (i = 0; i < n; ++i) dd[i] = 0;
 
         for (j = nde; j > 0; )
-        {   
+        {
             v = p[--j];
             w = p[--j];
             if (v != w)
@@ -829,7 +829,7 @@ readgraph_sg(FILE *f, sparsegraph *sg, boolean digraph, boolean prompt,
         }
         ned += d[i];
     }
-    sg->nde = ned; 
+    sg->nde = ned;
 }
 
 /*****************************************************************************
@@ -1626,24 +1626,24 @@ sethash(set *s, int n, long seed, int key)
     {
         si = s[i];
         l = SWCHUNK0(si);
-        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt) 
+        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt)
                                                             & 0x7FFFFFFFUL;
 	res = FUZZ1(res);
         if ((j += 16) >= n) break;
 #if WORDSIZE > 16
         l = SWCHUNK1(si);
-        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt) 
+        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt)
                                                            & 0x7FFFFFFFUL;
 	res = FUZZ1(res);
         if ((j += 16) >= n) break;
-#if WORDSIZE == 64    
+#if WORDSIZE == 64
         l = SWCHUNK2(si);
-        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt) 
+        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt)
                                                             & 0x7FFFFFFFUL;
 	res = FUZZ1(res);
         if ((j += 16) >= n) break;
         l = SWCHUNK3(si);
-        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt) 
+        res = (((res << lsh) ^ ((res >> rsh) & lshmask) ^ l) + salt)
                                                             & 0x7FFFFFFFUL;
 	res = FUZZ1(res);
         if ((j += 16) >= n) break;
@@ -1671,7 +1671,7 @@ listhash(int *x, int nx, long key)
 
     lkey = (unsigned long)key & 0x7FFFFFFFUL;
     accum = nx;
-    
+
     for (i = 0; i < nx; ++i)
     {
 	val = (unsigned long)x[i] & 0x7FFFFFFFUL;
@@ -2022,7 +2022,7 @@ sublabel_sg(sparsegraph *sg, int *perm, int nperm, sparsegraph *workg)
     size_t *v,*vv;
 
     n = sg->nv;
- 
+
 #if !MAXN
     DYNALLOC1(int,workperm,workperm_sz,n+2,"relabel_sg");
 #endif
@@ -2038,7 +2038,7 @@ sublabel_sg(sparsegraph *sg, int *perm, int nperm, sparsegraph *workg)
         for (k = 0; k < d[j]; ++k)
             if (workperm[e[v[j]+k]] >= 0) ++newnde;
     }
- 
+
     if (workg)
         tempsg = workg;
     else
@@ -2046,7 +2046,7 @@ sublabel_sg(sparsegraph *sg, int *perm, int nperm, sparsegraph *workg)
         SG_INIT(tmp);
         tempsg = &tmp;
     }
- 
+
     SG_ALLOC(*tempsg,nperm,newnde,"sublabel_sg");
     SG_VDE(tempsg,vv,dd,ee);
 
@@ -2201,7 +2201,7 @@ complement_sg(sparsegraph *g1, sparsegraph *g2)
 	    if (e1[j] == i) ++loops;
 
     if (loops > 1) ndec = n*(size_t)n - g1->nde;
-    else           ndec = n*(size_t)n - n - g1->nde; 
+    else           ndec = n*(size_t)n - n - g1->nde;
     SG_ALLOC(*g2,n,ndec,"converse_sg");
     g2->nv = n;
     SG_VDE(g2,v2,d2,e2);
@@ -2435,7 +2435,7 @@ rangraph2_sg(sparsegraph *sg, boolean digraph, int p1, int p2, int n)
     double rn,expec,var,sd;
     int ldeg;
     size_t *vv,inc,nde;
- 
+
     sg->nv = n;
 
     rn = n;
@@ -2446,7 +2446,7 @@ rangraph2_sg(sparsegraph *sg, boolean digraph, int p1, int p2, int n)
     if (var > 1.0)
         for (i = 0; i < 19; ++i) sd = (sd + var/sd) / 2.0;
     inc = sd + 20;
- 
+
     SG_ALLOC(*sg,n,(size_t)expec+4*inc,"rangraph2_sg");
     SG_VDE(sg,vv,dd,ee);
     if (sg->w)
@@ -2487,7 +2487,7 @@ rangraph2_sg(sparsegraph *sg, boolean digraph, int p1, int p2, int n)
 		j = ee[vv[i]+k];
 		if (j > i) ee[vv[j]+dd[j]++] = i;
 	    }
-	sg->nde = nde;	
+	sg->nde = nde;
     }
     else
     {
@@ -2509,7 +2509,7 @@ rangraph2_sg(sparsegraph *sg, boolean digraph, int p1, int p2, int n)
 	    if (i < n-1) vv[i+1] = vv[i] + ldeg;
             dd[i] = ldeg;
         }
-	sg->nde = nde;	
+	sg->nde = nde;
     }
 }
 

@@ -131,7 +131,7 @@ isconnected(graph *g, int m, int n)
 }
 
 /**************************************************************************/
- 
+
 boolean
 issubconnected(graph *g, set *sub, int m, int n)
 /* Test if the subset of g induced by sub is connected. Empty is connected. */
@@ -145,23 +145,23 @@ issubconnected(graph *g, set *sub, int m, int n)
     DYNALLSTAT(int,queue,queue_sz);
     DYNALLSTAT(int,visited,visited_sz);
     DYNALLSTAT(set,subw,subw_sz);
- 
+
     DYNALLOC1(int,queue,queue_sz,n,"issubconnected");
     DYNALLOC1(int,visited,visited_sz,n,"issubconnected");
     DYNALLOC1(set,subw,subw_sz,m,"issubconnected");
 #endif
- 
+
     subsize = 0;
     for (i = 0; i < m; ++i) subsize += (sub[i] ? POPCOUNT(sub[i]) : 0);
- 
+
     if (subsize <= 1) return TRUE;
- 
+
     for (i = 0; i < n; ++i) visited[i] = 0;
- 
+
     i = nextelement(sub,m,-1);
     queue[0] = i;
     visited[i] = 1;
- 
+
     head = 0;
     tail = 1;
     while (head < tail)
@@ -169,7 +169,7 @@ issubconnected(graph *g, set *sub, int m, int n)
         w = queue[head++];
         gw = GRAPHROW(g,w,m);
         for (i = 0; i < m; ++i) subw[i] = gw[i] & sub[i];
- 
+
         for (i = -1; (i = nextelement(subw,m,i)) >= 0;)
         {
             if (!visited[i])
@@ -179,12 +179,12 @@ issubconnected(graph *g, set *sub, int m, int n)
             }
         }
     }
- 
+
     return tail == subsize;
 }
- 
+
 /**********************************************************************/
- 
+
 boolean
 isbiconnected1(graph *g, int n)
 /* Test if g is biconnected; version for m=1. */
@@ -194,9 +194,9 @@ isbiconnected1(graph *g, int n)
     int numvis;
     setword visited;
     int num[WORDSIZE],lp[WORDSIZE],stack[WORDSIZE];
- 
+
     if (n <= 2) return FALSE;
- 
+
     visited = bit[0];
     stack[0] = 0;
     num[0] = 0;
@@ -204,7 +204,7 @@ isbiconnected1(graph *g, int n)
     numvis = 1;
     sp = 0;
     v = 0;
- 
+
     for (;;)
     {
         if ((sw = g[v] & ~visited))           /* not "==" */
@@ -233,7 +233,7 @@ isbiconnected1(graph *g, int n)
     }
 }
 /**********************************************************************/
- 
+
 boolean
 isbiconnected(graph *g, int m, int n)
 /* test if g is biconnected */
@@ -257,7 +257,7 @@ isbiconnected(graph *g, int m, int n)
     DYNALLOC1(int,lp,lp_sz,n,"isbiconnected");
     DYNALLOC1(int,stack,stack_sz,n,"isbiconnected");
 #endif
- 
+
     num[0] = 0;
     for (v = 1; v < n; ++v) num[v] = -1;
     lp[0] = 0;
@@ -266,7 +266,7 @@ isbiconnected(graph *g, int m, int n)
     v = 0;
     vc = -1;
     gv = (set*)g;
- 
+
     for (;;)
     {
         vc = nextelement(gv,m,vc);
@@ -324,7 +324,7 @@ twocolouring(graph *g, int *colour, int m, int n)
 
             head = 0;
             tail = 1;
-            while (head < tail) 
+            while (head < tail)
             {
                 w = queue[head++];
                 need = 1 - colour[w];
@@ -377,14 +377,14 @@ girth(graph *g, int m, int n)
     set *gw;
 #if MAXN
     int dist[MAXN],queue[MAXN];
-#else   
+#else
     DYNALLSTAT(int,queue,queue_sz);
     DYNALLSTAT(int,dist,dist_sz);
-    
+
     DYNALLOC1(int,queue,queue_sz,n,"girth");
     DYNALLOC1(int,dist,dist_sz,n,"girth");
-#endif  
-    
+#endif
+
     best = n+1;
 
     for (v = 0; v < n; ++v)
@@ -434,14 +434,14 @@ find_dist(graph *g, int m, int n, int v, int *dist)
     set *gw;
 #if MAXN
     int queue[MAXN];
-#else   
+#else
     DYNALLSTAT(int,queue,queue_sz);
-#endif  
-    
+#endif
+
 #if !MAXN
     DYNALLOC1(int,queue,queue_sz,n,"isconnected");
-#endif  
-    
+#endif
+
     for (i = 0; i < n; ++i) dist[i] = n;
 
     queue[0] = v;
@@ -475,14 +475,14 @@ find_dist2(graph *g, int m, int n, int v, int w, int *dist)
     set *gx;
 #if MAXN
     int queue[MAXN];
-#else   
+#else
     DYNALLSTAT(int,queue,queue_sz);
-#endif  
-    
+#endif
+
 #if !MAXN
     DYNALLOC1(int,queue,queue_sz,n,"isconnected");
-#endif  
-    
+#endif
+
     for (i = 0; i < n; ++i) dist[i] = n;
 
     queue[0] = v;

@@ -13,7 +13,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 
 /**************************************************************************/
 
@@ -166,11 +166,11 @@ main(int argc, char *argv[])
 		    compl(g,m,n,gc);
 		    gq = gc;
 		}
-		else 
+		else
 		    gq = g;
 	    }
 	    else
-	    {		
+	    {
 	    	compl(g,m,n,gc);
 		gq = gc;
 	    }
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
 	t = CPUTIME - t;
 
         if (!quiet)
-            fprintf(stderr,">Z  " COUNTER_FMT 
+            fprintf(stderr,">Z  " COUNTER_FMT
                     " graphs converted from %s to %s in %3.2f sec.\n",
                     nin,infilename,outfilename,t);
 

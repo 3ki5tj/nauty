@@ -1,5 +1,5 @@
 
-README file for nauty 2.4 
+README file for nauty 2.4
 
 Brendan McKay, bdm@cs.anu.edu.au
 
@@ -15,7 +15,7 @@ Note that nauty is copyright but free to use for most purposes.
 The details are in the file nauty.h.
 
 The code in the file planarity.c (used by the planarg program)
-is copyright to the Magma project. 
+is copyright to the Magma project.
 
 ------------------------------------------------------------
 
@@ -278,7 +278,7 @@ Aug-Sep 2007: Minor things:
               * naututil-h.in now defines CPUTIME=0.0 as a last resort
               * gtools.c now implements EDGECODE (not used anywhere yet)
               * fixed definition of SG_FREE in nausparse.h (not used)
-              * geng favours space over time for n > 28 
+              * geng favours space over time for n > 28
 
 Oct 14, 2007: Added -T switch to shortg to specify scratch directory.
 

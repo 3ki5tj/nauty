@@ -13,7 +13,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 #include "gutils.h"
 
 static FILE *outfile;
@@ -25,7 +25,7 @@ static int outcode;
 static void
 newedge(graph *g1, int m1, int n1,
         int v1, int v2, int w1, int w2,
-        graph *g2, int m2) 
+        graph *g2, int m2)
 /* Make g2 by subdividing edges v1-v2 and w1-w2 in g1
    and adding an edge between them.  Must have m2 >= m1.  */
 {

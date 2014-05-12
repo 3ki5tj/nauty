@@ -100,7 +100,7 @@
 *****************************************************************************/
 
 #include "gtools.h"    /* which includes nauty.h, which includes stdio.h */
-#include "nautinv.h"  
+#include "nautinv.h"
 #include "schreier.h"
 #include "traces.h"
 
@@ -329,7 +329,7 @@ main(int argc, char *argv[])
     }
     else
 	parameters = "";
- 
+
     mode = DENSE_MODE;
     curfile = 0;
     fileptr[curfile] = stdin;
@@ -428,32 +428,32 @@ main(int argc, char *argv[])
 	    minus = FALSE;
 	    break;
 
-	case 'a': 
+	case 'a':
 	    options_writeautoms = !minus;
             minus = FALSE;
 	    break;
 
-	case 'c': 
+	case 'c':
 	    options_getcanon = !minus;
             minus = FALSE;
 	    break;
 
-	case 'm': 
+	case 'm':
 	    options_writemarkers = !minus;
             minus = FALSE;
 	    break;
 
-	case 'p': 
+	case 'p':
 	    options_cartesian = !minus;
             minus = FALSE;
 	    break;
 
-	case 'd': 
+	case 'd':
 	    options_digraph = !minus;
             minus = FALSE;
 	    break;
 
-	case 'P': 
+	case 'P':
 	    options_keepgroup = !minus;
             minus = FALSE;
 	    break;
@@ -503,7 +503,7 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'G': 
+        case 'G':
             if (minus)
             {
                 options_schreier = 0;
@@ -523,19 +523,19 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'y': 
+        case 'y':
 	    while (*ap == '=' || *ap == ' ') ++ap;
             arg_int(&ap,&options_tc_level,"y");
             minus = FALSE;
             break;
 
-        case '$': 
+        case '$':
 	    while (*ap == '=' || *ap == ' ') ++ap;
             arg_int(&ap,&labelorg,"$");
             minus = FALSE;
             break;
 
-        case 'M': 
+        case 'M':
 	    if (minus)
 	    {
 	        multiplicity = 1;
@@ -559,13 +559,13 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'l': 
+        case 'l':
 	    while (*ap == '=' || *ap == ' ') ++ap;
             arg_int(&ap,&options_linelength,"l");
             minus = FALSE;
             break;
 
-        case 'A': 
+        case 'A':
 	    d = *ap++;
             if (d == 'n' || d == 'N' || d == 'd' || d == 'D')
 		mode = DENSE_MODE;
@@ -702,7 +702,7 @@ main(int argc, char *argv[])
                 ovalid = FALSE;
                 n = i;
                 m = SETWORDSNEEDED(n);
-                freeschreier(NULL,&generators); 
+                freeschreier(NULL,&generators);
 #if !MAXN
                 DYNALLOC1(int,lab,lab_sz,n,"dreadnaut");
                 DYNALLOC1(int,ptn,ptn_sz,n,"dreadnaut");
@@ -905,7 +905,7 @@ main(int argc, char *argv[])
 		 	{
                             for (sli = 0; sli < m*(size_t)n; ++sli)
                                 if (savedg[sli] != canong[sli]) break;
-			    same = (sli == m*(size_t)n); 
+			    same = (sli == m*(size_t)n);
 			}
 			else
 			    same = aresame_sg(&canong_sg,&savedg_sg);
@@ -1109,7 +1109,7 @@ main(int argc, char *argv[])
             if (gvalid)
 	    {
                 doref(g,lab,ptn,0,&numcells,&qinvar,perm,active,&refcode,
-                    options.userrefproc ? options.userrefproc : 
+                    options.userrefproc ? options.userrefproc :
                     (m == 1 ? refine1 : refine),
                     invarproc[options_invarproc].entrypoint,0,0,
                     options_invararg,options_digraph,m,n);
@@ -1119,7 +1119,7 @@ main(int argc, char *argv[])
 	    {
                 doref((graph*)&g_sg,lab,ptn,0,&numcells,&qinvar,perm,
                     active,&refcode,
-                    options_sg.userrefproc ? options_sg.userrefproc : 
+                    options_sg.userrefproc ? options_sg.userrefproc :
                     refine_sg,
                     invarproc[options_invarproc].entrypoint_sg,0,0,
                     options_invararg,options_digraph,m,n);
@@ -1214,7 +1214,7 @@ main(int argc, char *argv[])
 		++actmult;
 		if (multiplicity > 0 && actmult >= multiplicity) break;
 #ifdef  CPUTIME
-		if (mintime > 0.0 && (actmult < 20 || !(actmult&7)) 
+		if (mintime > 0.0 && (actmult < 20 || !(actmult&7))
 		     	&& CPUTIME >= timebefore+mintime)
 		    break;
 #endif
@@ -1259,7 +1259,7 @@ main(int argc, char *argv[])
 		    traces_opts.generators = NULL;
 
 #if !MAXN
-		DYNALLOC1(int,tempptn,tempptn_sz,n,"dreadnaut"); 
+		DYNALLOC1(int,tempptn,tempptn_sz,n,"dreadnaut");
 #endif
 		if (!pvalid) unitptn(lab,ptn,&numcells,n);
 		memcpy(tempptn,ptn,n*sizeof(int));
@@ -1276,7 +1276,7 @@ main(int argc, char *argv[])
 			cellstarts(tempptn,0,active,m,n);
 			doref((graph*)&g_sg,lab,tempptn,0,&savednc,&qinvar,perm,
 			    active,&refcode,
-                    	    options_sg.userrefproc ? options_sg.userrefproc : 
+                    	    options_sg.userrefproc ? options_sg.userrefproc :
                     	    refine_sg,
                     	    invarproc[options_invarproc].entrypoint_sg,0,0,
                     	    options_invararg,options_digraph,m,n);
@@ -1347,7 +1347,7 @@ main(int argc, char *argv[])
 		if (options_getcanon) cvalid_sg = TRUE;
 		ovalid = TRUE;
 	    }
-            else 
+            else
             {
                 ovalid = FALSE;
                 cvalid = cvalid_sg = FALSE;
@@ -1415,7 +1415,7 @@ main(int argc, char *argv[])
 			if (multiplicity > 0 && actmult >= multiplicity)
 			    break;
 #ifdef  CPUTIME
-			if (mintime > 0.0 && (actmult < 20 || !(actmult&7)) 
+			if (mintime > 0.0 && (actmult < 20 || !(actmult&7))
 	  		        && CPUTIME >= timebefore+mintime)
 			    break;
 #endif
@@ -1482,7 +1482,7 @@ main(int argc, char *argv[])
 			if (multiplicity > 0 && actmult >= multiplicity)
 			    break;
 #ifdef  CPUTIME
-			if (mintime > 0.0 && (actmult < 20 || !(actmult&7)) 
+			if (mintime > 0.0 && (actmult < 20 || !(actmult&7))
 	  		        && CPUTIME >= timebefore+mintime)
 			    break;
 #endif
@@ -1718,7 +1718,7 @@ main(int argc, char *argv[])
 			tempptn[j] = i;
 		    }
 
-                k = 0; 
+                k = 0;
 		numcells = 0;
 		for (i = 0; i < n; ++i)
 		{
@@ -1760,7 +1760,7 @@ main(int argc, char *argv[])
 
 		k = 0;
 		for (i = 0; i < j; ++i)
-		{ 
+		{
 		    ptn[templab[i]] = k;
 		    k += tempptn[i];
 		}
@@ -1769,7 +1769,7 @@ main(int argc, char *argv[])
 		for (i = 0; i < n; ++i) ptn[i] = 1;
 		k = 0;
 		for (i = 0; i < j; ++i)
-		{ 
+		{
 		    k += tempptn[i];
 		    if (i == j-1 || tempptn[i] != tempptn[i+1])
 			ptn[k-1] = 0;
@@ -1799,11 +1799,11 @@ main(int argc, char *argv[])
             {
                 zseed = hashgraph(canong,m,n,2922320L);
                 fprintf(outfile,"[N%07lx",zseed);
-                
+
                 zseed = hashgraph(canong,m,n,19883109L);
                 fprintf(outfile," %07lx",zseed);
-                
-                zseed = hashgraph(canong,m,n,489317L); 
+
+                zseed = hashgraph(canong,m,n,489317L);
                 fprintf(outfile," %07lx]\n",zseed);
             }
             else if (cvalid_sg)
@@ -1811,11 +1811,11 @@ main(int argc, char *argv[])
                 zseed = hashgraph_sg(&canong_sg,2922320L);
                 fprintf(outfile,"[%c%07lx",
 		        mode==SPARSE_MODE?'S':'T',zseed);
-                
+
                 zseed = hashgraph_sg(&canong_sg,19883109L);
                 fprintf(outfile," %07lx",zseed);
-                
-                zseed = hashgraph_sg(&canong_sg,489317L); 
+
+                zseed = hashgraph_sg(&canong_sg,489317L);
                 fprintf(outfile," %07lx]\n",zseed);
             }
             else
@@ -2059,8 +2059,8 @@ main(int argc, char *argv[])
             if (options_invarproc != 1)
                 fprintf(outfile," invarproc=%s",
 		  (mode == DENSE_MODE ?
-		    invarproc[options_invarproc].name : 
-		    invarproc[options_invarproc].name_sg)); 
+		    invarproc[options_invarproc].name :
+		    invarproc[options_invarproc].name_sg));
             if (pvalid)
                 fprintf(outfile,"; %d cell%s",SS(numcells,"","s"));
             else

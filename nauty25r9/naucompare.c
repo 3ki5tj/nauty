@@ -43,10 +43,10 @@ scanline(char *in, char *fmt, char *out)
  * 0 if it doesn't match.  In the case of matching, construct an output
  * string with volatile fields replaced by "*" and some standardisation
  * of the non-volatile fields.  Format specifiers are:
- 
+
    %d  - matches an integer (maybe with sign)
    %f  - matches a real number of the form ddd.ddd (maybe with sign)
-   %sx - matches a string, where 'x' is any character. 
+   %sx - matches a string, where 'x' is any character.
          If 'x' is not a space, match zero or more characters from the
              current position up but not including the first 'x'.
          If 'x' is a space, match one or more characters from the current

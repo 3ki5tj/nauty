@@ -68,7 +68,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 #include "nautinv.h"
 #include "gutils.h"
 #include "traces.h"
@@ -200,8 +200,8 @@ beginsort(FILE **sortin, FILE **sortout, char *tempdir,
 
 static void
 tosort(FILE *f, char *cdstr, char *dstr, nauty_counter index)
-/* write one graph to sort process 
-   cdstr = canonical string 
+/* write one graph to sort process
+   cdstr = canonical string
    dstr = optional original string
    index = optional index number */
 {
@@ -485,7 +485,7 @@ main(int argc, char *argv[])
         }
     }
     else if (tswitch)
-    {   
+    {
         SG_INIT(sg);
         SG_INIT(sh);
         traces_opts.getcanon = TRUE;
@@ -494,7 +494,7 @@ main(int argc, char *argv[])
         traces_opts.outfile = stdout;
 
         while (TRUE)
-        {   
+        {
             if (read_sg_loops(infile,&sg,&loops) == NULL) break;
             if (loops > 0) gt_abort(">E shortg: Traces does not allow loops\n");
             ++numread;
@@ -736,9 +736,9 @@ main(int argc, char *argv[])
 #endif
     {
         fprintf(stderr,">E shortg: sort process killed (signal %d)\n",
-                      WTERMSIG(status)); 
+                      WTERMSIG(status));
         gt_abort(NULL);
-    }   
+    }
     else if (WEXITSTATUS(status) != 0)
     {
         fprintf(stderr,

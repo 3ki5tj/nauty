@@ -12,7 +12,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 
 /**************************************************************************/
 
@@ -168,10 +168,10 @@ main(int argc, char *argv[])
 	    DYNALLOC2(graph,gc,gc_sz,n,m,"NRswitchg");
 #endif
 	    for (v = 0; v < n; ++v)
-	    {		
+	    {
 	    	NRswitch(g,m,n,v,gc);
 		gq = gc;
-	    
+
 	        if (dolabel)
 	        {
 #if !MAXN

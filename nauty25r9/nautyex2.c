@@ -4,7 +4,7 @@
    This version uses dynamic allocation.
 */
 
-#include "nauty.h"   
+#include "nauty.h"
 /* MAXN=0 is defined by nauty.h, which implies dynamic allocation */
 
 int
@@ -13,7 +13,7 @@ main(int argc, char *argv[])
   /* DYNALLSTAT declares a pointer variable (to hold an array when it
      is allocated) and a size variable to remember how big the array is.
      Nothing is allocated yet.  */
- 
+
     DYNALLSTAT(graph,g,g_sz);
     DYNALLSTAT(int,lab,lab_sz);
     DYNALLSTAT(int,ptn,ptn_sz);

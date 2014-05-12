@@ -15,7 +15,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 
 /**************************************************************************/
 
@@ -76,7 +76,7 @@ main(int argc, char *argv[])
 
 	argnum = 0;
 	badargs = FALSE;
-       
+
 	for (j = 1; !badargs && j < argc; ++j)
 	{
 	    arg = argv[j];
@@ -87,9 +87,9 @@ main(int argc, char *argv[])
 		{
 		    sw = *arg++;
 		         SWBOOLEAN('q',quiet)
-                    else SWINT('f',fswitch,fixed,"ranlabg -f") 
-                    else SWINT('m',mswitch,mult,"ranlabg -m") 
-                    else SWLONG('S',Sswitch,seed,"ranlabg -S") 
+                    else SWINT('f',fswitch,fixed,"ranlabg -f")
+                    else SWINT('m',mswitch,mult,"ranlabg -m")
+                    else SWLONG('S',Sswitch,seed,"ranlabg -S")
 		    else badargs = TRUE;
 		}
 	    }

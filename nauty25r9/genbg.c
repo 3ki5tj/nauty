@@ -274,7 +274,7 @@ static unsigned long splitcases = 0;
 /************************************************************************/
 
 void
-writeny(FILE *f, graph *g, int n1, int n2) 
+writeny(FILE *f, graph *g, int n1, int n2)
 /* write graph g (n1+n2 vertices) to file f in y format */
 {
     static char ybit[] = {32,16,8,4,2,1};
@@ -312,7 +312,7 @@ writeny(FILE *f, graph *g, int n1, int n2)
 }
 
 /************************************************************************/
- 
+
 void
 writeg6x(FILE *f, graph *g, int n1, int n2)
 /* write graph g (n1+n2 vertices) to file f in graph6 format */
@@ -417,7 +417,7 @@ fragments(int *x, int nx, int *frag, int *nfrag)
     for (i = 0; i < nx; ++i) allx |= x[i];
 
     *nfrag = 0;
-    
+
     while (allx)
     {
         v = XNEXTBIT(allx);
@@ -443,13 +443,13 @@ fragments(int *x, int nx, int *frag, int *nfrag)
                 else
                     ++j;
         }
-    
+
         if (nw > 1)
             for (i = 0; i < nw; ++i)
                 frag[(*nfrag)++] = w[i];
     }
 }
- 
+
 /*********************************************************************/
 
 static boolean
@@ -465,11 +465,11 @@ isconnected(graph *g, int n)
     seen = expanded | g[n-1];
 
     while (seen != allbits && (toexpand = (seen & ~expanded))) /* not == */
-    {   
+    {
         i = FIRSTBITNZ(toexpand);
         expanded |= bit[i];
         seen |= g[i];
-    }   
+    }
 
     return  seen == allbits;
 }
@@ -1495,9 +1495,9 @@ PLUGIN_SWITCHES
                 if (!gotmr)
                 {
                     if (sscanf(arg,"%d/%d",&res,&mod) == 2)
-                    { 
-                        gotmr = TRUE; 
-                        continue; 
+                    {
+                        gotmr = TRUE;
+                        continue;
                     }
                 }
                 if (!gote)

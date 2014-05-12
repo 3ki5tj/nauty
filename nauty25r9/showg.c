@@ -1,6 +1,6 @@
 /* showg.c  version 1.7; B D McKay, September 2013.
    Formerly called readg.c.
- 
+
    This is a stand-alone edition of listg.c that does not
    need nauty or any other files.  Use listg in preference
    if you have installed it.  */
@@ -52,7 +52,7 @@
 
 /* gtools.h : General header for gtools programs. */
 
-#ifndef MAXN 
+#ifndef MAXN
 #define MAXN  0
 #endif
 #define G6LEN(n)  (((n)*((n)-1)/2+5)/6+(n<=SMALLN?1:4))
@@ -290,10 +290,10 @@ nextelement(set *set1, int m, int pos)
 }
 
 /*********************************************************************
-opengraphfile(filename,codetype,assumefixed,position) 
+opengraphfile(filename,codetype,assumefixed,position)
           opens and positions a file for reading graphs.
 
-  filename = the name of the file to open 
+  filename = the name of the file to open
 		(NULL means stdin, assumed already open)
   codetype   = returns a code for the format.
 		This is a combination of SPARSE6, GRAPH6,
@@ -311,9 +311,9 @@ opengraphfile(filename,codetype,assumefixed,position)
   If the file starts with ">", there must be a header, either
   GRAPH6_HEAD or SPARSE6_HEAD.  Otherwise opengraphfile() fails.
 
-  The value returned is a file pointer or NULL.  
+  The value returned is a file pointer or NULL.
   If assumedfixed is not zero and position > 1, the global variable
-  ogf_linelen is set to the length (including \n) of the length of the 
+  ogf_linelen is set to the length (including \n) of the length of the
   first record.
 
 **********************************************************************/
@@ -357,7 +357,7 @@ opengraphfile(char *filename, int *codetype, int assumefixed, long position)
 	        bad_header = TRUE;
 	    if (!bad_header &&
 		    ((c = getc(f)) == EOF || (c != 'g' && c != 's')))
-		bad_header = TRUE;	
+		bad_header = TRUE;
 	    if (!bad_header && c == 'g')
 	    {
 		if ((c = getc(f)) == EOF || c != 'r' ||
@@ -433,7 +433,7 @@ opengraphfile(char *filename, int *codetype, int assumefixed, long position)
 		        ">E opengraphfile: required record no present\n");
 		return NULL;
 	    }
-	    
+
 	    pos2 = ftell(f);
 	    if (pos2 < 0)
             {
@@ -492,7 +492,7 @@ graphsize(char *s)
 	else             p = s;
 	n = *p++ - BIAS6;
 
-	if (n > SMALLN) 
+	if (n > SMALLN)
 	{
 	    n = *p++ - BIAS6;
 	    n = (n << 6) | (*p++ - BIAS6);
@@ -531,7 +531,7 @@ stringtograph(char *s, graph *g, int m)
 	    for (j = 1; j < n; ++j)
 	    {
 	        gj = GRAPHROW(g,j,m);
-    
+
 	        for (i = 0; i < j; ++i)
 	        {
 	            if (--k == 0)
@@ -539,7 +539,7 @@ stringtograph(char *s, graph *g, int m)
 		        k = 6;
 		        x = *(p++) - BIAS6;
 	            }
-	    
+
 	            if (x & TOPBIT6)
 	            {
 		        gi = GRAPHROW(g,i,m);
@@ -625,7 +625,7 @@ readg(FILE *f, graph *g, int reqm, int *pm, int *pn)
             p = s;
 	}
 
-	while (*p >= BIAS6 && *p <= MAXBYTE) 
+	while (*p >= BIAS6 && *p <= MAXBYTE)
 	    ++p;
 	if (*p == '\0')
 	    gt_abort(">E showg: missing newline\n");
@@ -681,7 +681,7 @@ longvalue(char **ps, long *l)
 	    ++s;
 	}
 
-	if (*s < '0' || *s > '9') 
+	if (*s < '0' || *s > '9')
 	{
 	    *ps = s;
 	    return (pos || neg) ? ARG_ILLEGAL : ARG_MISSING;
@@ -703,7 +703,7 @@ longvalue(char **ps, long *l)
 	*l = neg ? -sofar : sofar;
 	return ARG_OK;
 }
-	
+
 /*************************************************************************/
 
 static void
@@ -842,7 +842,7 @@ putsetx(FILE *f, set *set1, int *curlenp, int linelength, int m,
 		first = FALSE;
 	    }
 	    else
-            {    
+            {
                 fprintf(f," %s",s);
                 *curlenp += slen + 1;
             }
@@ -897,7 +897,7 @@ putedges(FILE *f, graph *g, int linelength, int m, int n)
         for (i = 0, pg = g; i < n; ++i, pg += m)
 	{
 	    for (j = i-1; (j = nextelement(pg,m,j)) >= 0;)
-	    { 
+	    {
 		if (curlen > 0 && curlen > linelength - 10 && linelength > 0)
 		{
 		    fprintf(f,"\n");
@@ -1057,7 +1057,7 @@ main(int argc, char *argv[])
 
 	if (labelorg < 0) gt_abort(">E showg: negative origin forbidden.\n");
 
-	if ((aswitch!=0) + (Aswitch!=0) + (eswitch!=0) 
+	if ((aswitch!=0) + (Aswitch!=0) + (eswitch!=0)
 	    		 + (dswitch!=0) + (cswitch!=0) > 1)
 	    gt_abort(">E showg: -aAecd are incompatible\n");
 

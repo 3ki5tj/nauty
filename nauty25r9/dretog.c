@@ -89,7 +89,7 @@ main(int argc, char *argv[])
 	    }
 	}
 
-	if (sswitch && gswitch) 
+	if (sswitch && gswitch)
             gt_abort(">E dretog: -s and -g are incompatible\n");
 
 	if (labelorg < 0) gt_abort(">E dretog: negative origin forbidden\n");
@@ -156,7 +156,7 @@ main(int argc, char *argv[])
 		}
 		if (n <= 0)
 		    gt_abort(">E dretog: n can't be <= 0\n");
-	    } 
+	    }
 	    else if (s[0] == '"')
 	    {
 		while ((c = getc(infile)) != '"' && c != EOF) {}

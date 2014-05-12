@@ -20,7 +20,7 @@
 
 /*************************************************************************/
 
-#include "gtools.h" 
+#include "gtools.h"
 #include "planarity.h"
 
 /*************************************************************************/
@@ -117,14 +117,14 @@ isplanar(t_ver_sparse_rep *V, int n, t_adjl_sparse_rep *A, int e,
          boolean planarcheck, boolean nonplanarcheck)
 /*
   The input graph is given as an adjacency list:
-      V: array of vertices 
+      V: array of vertices
       n: size of graph
       A: adjacency list
       e: number of edges
-      
+
   If the graph is planar the embedding is stored  in VR and ER;
   the embedding contains e edges (nbr_e_obs not used)
-      
+
   If the graph is non planar the obstruction is returned in
   VR and AR together with the number of edges in nbr_e_obs.
 
@@ -139,11 +139,11 @@ isplanar(t_ver_sparse_rep *V, int n, t_adjl_sparse_rep *A, int e,
     int              edge_pos, v, w;
     boolean          ans;
     t_ver_edge       *embed_graph;
- 
+
     ans = sparseg_adjl_is_planar(V, n, A, c,
                                  &dfs_tree, &back_edges, &mult_edges,
                                  &embed_graph, &edge_pos, &v, &w);
-    
+
     if (!ans && nonplanarcheck)
     {
         embedg_obstruction(V, A, dfs_tree, back_edges,
@@ -155,12 +155,12 @@ isplanar(t_ver_sparse_rep *V, int n, t_adjl_sparse_rep *A, int e,
         embedg_embedding(V, A, embed_graph, n, e, *c, edge_pos, mult_edges,
                          VR, ER);
     }
-    
+
     sparseg_dlcl_delete(dfs_tree, n);
     sparseg_dlcl_delete(back_edges, n);
     sparseg_dlcl_delete(mult_edges, n);
     embedg_VES_delete(embed_graph, n);
- 
+
     return ans;
 }
 

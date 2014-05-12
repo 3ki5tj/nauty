@@ -78,9 +78,9 @@ main(int argc, char *argv[])
 	    }
 	}
 
-	if (sswitch && gswitch) 
+	if (sswitch && gswitch)
             gt_abort(">E copyg: -s and -g are incompatible\n");
-	if (hswitch && xswitch) 
+	if (hswitch && xswitch)
             gt_abort(">E copyg: -h and -x are incompatible\n");
 
 	if (badargs || argnum > 2)
@@ -148,7 +148,7 @@ main(int argc, char *argv[])
 	    FREES(g);
 	}
 
-	if (!qswitch) 
+	if (!qswitch)
 	    fprintf(stderr,">Z  " COUNTER_FMT " graphs copied from %s to %s\n",
 		           nin,infilename,outfilename);
 

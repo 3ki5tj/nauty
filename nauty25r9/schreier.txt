@@ -13,7 +13,7 @@ Initialising group:
     newgroup(&gp, &gens, n);
        - This creates the two structures needed for a trivial group
          of degree n.  In the case that &gens == NULL, it creates the
-         scheier structure only.  This enables a previous set of 
+         scheier structure only.  This enables a previous set of
          generators to be used to initialise a new group;
 
 Adding a generator p[0..n-1] :
@@ -25,7 +25,7 @@ Adding a generator p[0..n-1] :
          the Schreier structure.
 
     addgenerator(&gp, &gens, p, n);
-       - This filters p through the Schreier structure once, adding 
+       - This filters p through the Schreier structure once, adding
          either p or an equivalent generator if it is not found to
          be in the group already. It is possible that the generator
          can be added even though it is not needed, even if it is
@@ -42,7 +42,7 @@ Adding a generator p[0..n-1] :
 Updating the Schreier structure:
 
   At any moment, a partial base is known (initially empty) and some
-  partial Schreier vectors and orbits relative to that partial base.  
+  partial Schreier vectors and orbits relative to that partial base.
   To make the Schreier vectors and orbits more likely to be complete,
   you can filter random group elements through it:
 
@@ -82,7 +82,7 @@ Orbits of stabiliser of partial base fix[0..nfix-1]:
           to be non-minimal, do this work without more filtering.
         - Otherwise, filter until schreierfails failures, or until
           cell[0..ncell-1] is a subset of an orbit.  This last test
-          is omitted if cell=NULL. 
+          is omitted if cell=NULL.
           The pointer &orbits remains valid until getorbits() or
           getorbitsmin() is called with an incompatible base (neither
           a prefix nor an extension).
@@ -109,7 +109,7 @@ Finishing:
    schreier_freedyn();
         - Frees all the dynamic memory allocated by the Schreier code.
           This is optional since the same dynamic memory will be reused
-          if you have a new group. 
+          if you have a new group.
 
 Getting information:
 

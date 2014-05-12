@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "gtools.h"
-#include "schreier.h" 
+#include "schreier.h"
 
 typedef struct TracesOptions {
 	boolean getcanon;
@@ -48,8 +48,8 @@ extern "C" {
 #endif
 
 extern void Traces(sparsegraph*,int*,int*,int*,TracesOptions*,
-				   TracesStats*,sparsegraph*);									
-extern void refine_tr(sparsegraph*,int*,int*,int*,int*,TracesOptions*);		
+				   TracesStats*,sparsegraph*);
+extern void refine_tr(sparsegraph*,int*,int*,int*,int*,TracesOptions*);
 extern void traces_freedyn(void);
 
 #ifdef __cplusplus

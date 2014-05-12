@@ -1,5 +1,5 @@
 /* TODO:  insert new timings
- *        add chordal graphs 
+ *        add chordal graphs
  *        add complements for ordinary graphs */
 
 /* geng.c  version 2.7; B D McKay, Jan 2013. */
@@ -52,11 +52,11 @@
                         of very approximately equal size.
                         Only the class C(res,mod) is written.
 
-                        If the -x or -X switch is used, they must have the 
-                        same value for different values of res; otherwise 
+                        If the -x or -X switch is used, they must have the
+                        same value for different values of res; otherwise
                         the partitioning may not be valid.  In this case
-                        (-x,-X with constant value), the usual relationships 
-                        between modulo classes are obeyed; for example 
+                        (-x,-X with constant value), the usual relationships
+                        between modulo classes are obeyed; for example
                         C(3,4) = C(3,8) union C(7,8).  This is not true
                         if 3/8 and 7/8 are done with -x or -X values
                         different from those used for 3/4.
@@ -93,7 +93,7 @@
                      the res/mod facility splits the graphs into subsets.
                      High values mean more even splitting at slight cost
                      to the total time.  The default is 20*mod, and the
-                     the legal minimum is 3*mod.  More information is given 
+                     the legal minimum is 3*mod.  More information is given
                      under "res/mod" above.
              -X<lev> : move the initial splitting level higher by <lev>,
                      in order to force more even splitting at the cost
@@ -151,13 +151,13 @@ PRUNE feature.
 
    By defining the C preprocessor variable PRUNE at compile time, geng
    can be made to call
-        int PRUNE(graph *g,int n,int maxn) 
-   for each intermediate (and final) graph, and reject it if 
+        int PRUNE(graph *g,int n,int maxn)
+   for each intermediate (and final) graph, and reject it if
    the value returned is nonzero.  The arguments are:
 
      g      = the graph in nauty format (m=1)
      n      = the number of vertices in g
-     maxn   = the number of vertices for output 
+     maxn   = the number of vertices for output
               (the value you gave on the command line to geng)
 
    geng constructs the graph starting with vertex 0, then adding
@@ -167,12 +167,12 @@ PRUNE feature.
    A call is made for all orders from 1 to maxn.  In testing for
    a uniform property (such as a forbidden subgraph or forbidden
    induced subgraph) it might save time to notice that a call to
-   PRUNE for n implies that the call for n-1 already passed. 
+   PRUNE for n implies that the call for n-1 already passed.
 
    For very fast tests, it might be worthwhile using PREPRUNE as
    well.  It has the same meaning but is applied earlier and more
    often.
-  
+
 SUMMARY
 
    If the C preprocessor variable SUMMARY is defined at compile time, the
@@ -208,7 +208,7 @@ Sample performance statistics.
     Here we give some graph counts and execution times on a Linux
     Pentium III running at 550 MHz.  Times are with the -u option
     (generate but don't write); add 3-5 microseconds per graph for
-    output to a file.  Add another 0.2-0.3 microseconds per graph 
+    output to a file.  Add another 0.2-0.3 microseconds per graph
     if you specify connectivity (-c), or 0.6-0.7 microseconds per
     graph if you specific biconnectivity (-C).
 
@@ -237,13 +237,13 @@ Sample performance statistics.
      C4-free Graphs  (-f)              (C3,C4)-free Graphs (-tf)
 
       1             1                      1            1
-      2             2                      2            2 
-      3             4                      3            3 
+      2             2                      2            2
+      3             4                      3            3
       4             8                      4            6
       5            18                      5           11
       6            44                      6           23
-      7           117                      7           48 
-      8           351                      8          114 
+      7           117                      7           48
+      8           351                      8          114
       9          1230                      9          293
      10          5069   0.11 sec          10          869
      11         25181   0.48 sec          11         2963   0.10 sec
@@ -352,7 +352,7 @@ cost of a small increase in cpu time.
               Aug 16, 1996 : Added -X switch and PRUNE() feature.
                              Fixed case of argument 0-0.
               Sep 22, 1996 : Improved 1-2% by tweaking refinex().
-              Jan 21, 1997 : Renamed to geng.  
+              Jan 21, 1997 : Renamed to geng.
                              Changed -s to -f, and added -sghq.
               Sep  7, 1997 : Fixed WORDSIZE=16 problems.
               Sep 22, 1997 : Use "wb" open for nautyformat.
@@ -484,7 +484,7 @@ typedef struct
 /* The program is so fast that the count of output graphs can quickly
    overflow a 32-bit integer.  Therefore, we use two long values
    for each count, with a ratio of 10^9 between them.  The macro
-   ADDBIG adds a small number to one of these big numbers.  
+   ADDBIG adds a small number to one of these big numbers.
    BIGTODOUBLE converts a big number to a double (approximately).
    SUMBIGS adds a second big number into a first big number.
    SUBBIGS subtracts one big number from a second.
@@ -551,7 +551,7 @@ static int maxeft[] =    /* max edges for -ft */
   41,44,47,50,54, 57,61,65,68,72, 76,80,85};
 static int maxebf[] =    /* max edges for -bf */
  {0,0,1,2,3, 4,6,7,9,10,   12,14,16,18,21, 22,24,26,29,31,
-  34,36,39,42,45, 48,52,53,56,58, 61,64,67}; 
+  34,36,39,42,45, 48,52,53,56,58, 61,64,67};
 
 #ifdef PLUGIN
 #include PLUGIN
@@ -677,7 +677,7 @@ isconnected(graph *g, int n)
 }
 
 /**********************************************************************/
- 
+
 static boolean
 isbiconnected(graph *g, int n)
 /* test if g is biconnected */
@@ -686,9 +686,9 @@ isbiconnected(graph *g, int n)
     setword sw;
     setword visited;
     int numvis,num[MAXN],lp[MAXN],stack[MAXN];
- 
+
     if (n <= 2) return FALSE;
- 
+
     visited = bit[0];
     stack[0] = 0;
     num[0] = 0;
@@ -696,7 +696,7 @@ isbiconnected(graph *g, int n)
     numvis = 1;
     sp = 0;
     v = 0;
- 
+
     for (;;)
     {
         if ((sw = g[v] & ~visited))           /* not "==" */
@@ -884,7 +884,7 @@ makebgraph(graph *g, xword *h, int n)
 }
 
 /**************************************************************************/
- 
+
 static void
 makeb6graph(graph *g, xword *h, int n)
 /* make x-format bipartite girth 6 graph */
@@ -918,7 +918,7 @@ makeb6graph(graph *g, xword *h, int n)
 }
 
 /**************************************************************************/
- 
+
 static void
 makesgraph(graph *g, xword *h, int n)
 /* make x-format square graph */
@@ -949,39 +949,39 @@ makesgraph(graph *g, xword *h, int n)
     }
 }
 
-/**************************************************************************/ 
- 
-static void 
+/**************************************************************************/
+
+static void
 makeg5graph(graph *g, xword *h, int n)
 /* make x-format girth-5 graph */
 {
-    setword w,x; 
+    setword w,x;
     xword hi;
     int i,j;
- 
+
     for (i = 0; i < n; ++i)
-    { 
-        w = g[i]; 
+    {
+        w = g[i];
         x = g[i];
-        while (w) 
+        while (w)
         {
             j = FIRSTBITNZ(w);
             w ^= bit[j];
             x |= g[j];
-        } 
-        x &= ~bit[i]; 
-        hi = 0; 
-        while (x) 
-        { 
-            j = FIRSTBITNZ(x); 
-            x ^= bit[j]; 
-            hi |= xbit[j]; 
-        } 
-        h[i] = hi; 
-    } 
-} 
+        }
+        x &= ~bit[i];
+        hi = 0;
+        while (x)
+        {
+            j = FIRSTBITNZ(x);
+            x ^= bit[j];
+            hi |= xbit[j];
+        }
+        h[i] = hi;
+    }
+}
 
-/**************************************************************************/  
+/**************************************************************************/
 
 static void
 makeleveldata(boolean restricted)
@@ -1243,7 +1243,7 @@ refinex(graph *g, int *lab, int *ptn, int level, int *numcells,
     while (*numcells < n && lact)
     {
         TAKEBIT(split1,lact);
-        
+
         for (split2 = split1; ptn[split2] > 0; ++split2) {}
         if (split1 == split2)       /* trivial splitting cell */
         {
@@ -1761,7 +1761,7 @@ accept2(graph *g, int n, xword x, graph *gx, int *deg, boolean nuniq)
         }
         if (j1 <= j0 + 1) cheapacc = TRUE;
     }
-    
+
     if (cheapacc)
     {
 #ifdef INSTRUMENT
@@ -1885,7 +1885,7 @@ spaextend(graph *g, int n, int *deg, int ne, boolean rigid,
             x = xx[ixx];
             xc = XPOPCOUNT(x);
             if (xc < xlb || xc > xub) continue;
-            if ((rigid || xorb[ixx] == ixx) 
+            if ((rigid || xorb[ixx] == ixx)
                 && (xc > dmax || (xc == dmax && (x & d) == 0))
                 && (dlow & ~x) == 0)
             {
@@ -1987,9 +1987,9 @@ genextend(graph *g, int n, int *deg, int ne, boolean rigid, int xlb, int xub)
     if (nx == maxn && xlb < mindeg) xlb = mindeg;
     if (xlb > xub) return;
 
-#ifdef PRUNE 
-    if (PRUNE(g,n,maxn)) return; 
-#endif 
+#ifdef PRUNE
+    if (PRUNE(g,n,maxn)) return;
+#endif
 
     imin = data[n].xstart[xlb];
     imax = data[n].xstart[xub+1];
@@ -2117,9 +2117,9 @@ main(int argc, char *argv[])
     safe = FALSE;
     connec1 = connec2 = FALSE;
 
-    maxdeg = MAXN; 
+    maxdeg = MAXN;
     mindeg = 0;
-    
+
     gotX = gotx = gotd = gotD = gote = gotmr = gotf = FALSE;
 
     argnum = 0;
@@ -2175,9 +2175,9 @@ PLUGIN_SWITCHES
                 if (!gotmr)
                 {
                     if (sscanf(arg,"%d/%d",&res,&mod) == 2)
-                    { 
-                        gotmr = TRUE; 
-                        continue; 
+                    {
+                        gotmr = TRUE;
+                        continue;
                     }
                 }
                 if (!gote)
@@ -2345,7 +2345,7 @@ PLUGIN_INIT
             fprintf(stderr,">A %s",argv[0]);
         else
             CATMSG1(">A %s",argv[0]);
-       
+
         CATMSG6(" -%s%s%s%s%s%s",
             connec2      ? "C" : connec1 ? "c" : "",
             trianglefree ? "t" : "",
@@ -2412,10 +2412,10 @@ PLUGIN_INIT
         min_splitlevel = 6;
         odometer = secret ? -1 : res;
 
-        if (maxe >= mine && 
+        if (maxe >= mine &&
                 (mod <= 1 || (mod > 1 && (splitlevel > 2 || res == 0))))
         {
-            xbnds(1,0,0);   
+            xbnds(1,0,0);
             if (sparse)
             {
                 data[1].xx[0] = 0;
