@@ -2659,7 +2659,7 @@ int targetcell(graph *g, int *lab, int *ptn, int level, int tc_level,
       fprintf(stderr, "Error: densenauty() needs standard options block\n"); \
       exit(1); \
     } \
-    nauty(g, lab, ptn, NULL, orbits, options, stats, dnwork, 40 * m, m, n, h); }
+    nauty(g, lab, ptn, NULL, orbits, options, stats, dnwork, 2 * 60 * m, m, n, h); }
 
 
 

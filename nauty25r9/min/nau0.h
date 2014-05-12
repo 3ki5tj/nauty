@@ -69,7 +69,7 @@
 #define SIZEOF_INT 4
 #endif
 #ifndef SIZEOF_LONG
-#define SIZEOF_LONG 8
+#define SIZEOF_LONG 4
 #endif
 #ifndef SIZEOF_LONG_LONG
 #define SIZEOF_LONG_LONG 8   /* 0 if nonexistent */
@@ -3630,11 +3630,11 @@ void densenauty(graph * RESTRICT g,
   }
 
 #if !MAXN
-  DYNALLOC1(set, dnwork, dnwork_sz, 40 * m, "densenauty malloc");
+  DYNALLOC1(set, dnwork, dnwork_sz, 2 * 60 * m, "densenauty malloc");
 #endif
 
   nauty(g, lab, ptn, NULL, orbits,
-        options, stats, dnwork, 40 * m, m, n, h);
+        options, stats, dnwork, 2 * 60 * m, m, n, h);
 }
 
 

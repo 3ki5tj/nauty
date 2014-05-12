@@ -5,7 +5,7 @@ iprogs = ex1
 
 progs = mynautyex1
 
-targets: $(iprogs) $(progs) 
+targets: $(iprogs) $(progs)
 
 $(iprogs) : % : %.c nau0s.h
 	$(CC) -o $@ $< $(LM)

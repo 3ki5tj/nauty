@@ -120,10 +120,6 @@
 #define SS(n,sing,plur)  (n),((n)==1?(sing):(plur))
 #define WORKSIZE 60
 
-#ifdef  CPUDEFS
-CPUDEFS                 /* data decls. for CPUTIME */
-#endif
-
 #define SORT_OF_SORT 2
 #define SORT_NAME sort2ints
 #include "sorttemplates.c"   /* define sort2ints(a,b,n) */

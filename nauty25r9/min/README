@@ -6,3 +6,11 @@ The standalone file nau0.h or nau0s.h can be included by external programs to us
 
 nau0.h    standalone file
 nau0s.h   simplified standalone file
+
+naugeng.c uses in addition
+  geng.c
+  gtools.h
+  gtools.c
+
+icc naugeng.c && ./a.out -C 4
+

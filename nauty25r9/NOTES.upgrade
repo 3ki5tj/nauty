@@ -1,0 +1,19 @@
+Changes made when upgrading from 25r7 to 25r9
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* uncrustify -c uncrustify.cfg --replace naugraph.c
+  uncrustify -c uncrustify.cfg --replace nauty.c
+  uncrustify -c uncrustify.cfg --replace nauty.h
+  uncrustify -c uncrustify.cfg --replace sorttemplates.c
+  uncrustify -c uncrustify.cfg --replace naugraph.c
+  uncrustify -c uncrustify.cfg --replace nautil.c
+  uncrustify -c uncrustify.cfg --replace schreier.c
+  uncrustify -c uncrustify.cfg --replace schreier.h
+  uncrustify -c uncrustify.cfg --replace naurng.c
+  uncrustify -c uncrustify.cfg --replace naurng.h
+
+* fromdos changes24-25.txt
+
+* changes in geng.c (isbiconnected)
+
+* change SIZEOF_LONG from 8 to 4 in nauty.h

@@ -1,4 +1,4 @@
-/* genbg.c : version 2.2; B D McKay, 23 Jan 2013. */
+/* genbg.c : version 2.3; B D McKay, 16 Feb 2013. */
 
 /* TODO: consider colour swaps */
 
@@ -68,6 +68,7 @@ PRUNE feature.
       n1  = the number of vertices in the first colour class
             (same as the n1 parameter on the command line)
       n2  = the number of vertices in the second colour class
+	    (this will always be at least 1)
       maxn2 = the value of n2 on the command line
    If n2=maxn2, the graph has the output size.
 
@@ -86,6 +87,9 @@ PRUNE feature.
    always the last one that has been added, and (except for n2=1) the
    subgraph formed by deleting n1+n2-1 has previously been passed by the
    pruning function.
+
+   Note that either PRUNE1 nor PRUNE2 are called with n2=0, even if that
+   is the output level.
 
    If -c is specified, the connectivity test has NOT been performed yet
    at the time the pruning function is called.  However the simplicity
@@ -130,6 +134,7 @@ INSTRUMENT feature.
    27 Jul 2011 : fixed error in PRUNE1 found by Stephen Hartke
     8 Jan 2012 : add antichains -A suggested by Andrew Juell
    23 Jan 2013 : fix splitlevinc initialization
+   16 Feb 2014 : add a missing call to PRUNE2
 
 **************************************************************************/
 
@@ -911,7 +916,7 @@ accept1(graph *g, int n2, int x, graph *gx, int *deg, boolean *rigid)
         ++a1succs;
 #endif
 #ifdef PRUNE2
-    if (PRUNE2(gx,deg,n1,n2+1,maxn2)) return FALSE;
+        if (PRUNE2(gx,deg,n1,n2+1,maxn2)) return FALSE;
 #endif
         return TRUE;
     }
@@ -935,7 +940,7 @@ accept1(graph *g, int n2, int x, graph *gx, int *deg, boolean *rigid)
         ++a1succs;
 #endif
 #ifdef PRUNE2
-    if (PRUNE2(gx,deg,n1,n2+1,maxn2)) return FALSE;
+        if (PRUNE2(gx,deg,n1,n2+1,maxn2)) return FALSE;
 #endif
         return TRUE;
     }
@@ -1104,6 +1109,9 @@ accept2(graph *g, int n2, int x, graph *gx, int *deg, boolean nuniq)
             {
 #ifdef INSTRUMENT
                 ++a2succs;
+#endif
+#ifdef PRUNE2
+                if (PRUNE2(gx,degx,n1,n2+1,maxn2)) return FALSE;
 #endif
                 if (canonise) makecanon(gx,gcan,n1,n2+1);
                 return TRUE;

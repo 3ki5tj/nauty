@@ -115,3 +115,8 @@ Changes from nauty 2.4 to nauty 2.5
   Version 25r7 fixed some boundary cases in Traces 
         (thanks to Geoff Bailey, Shreedhar Hardikar, John Call, Alisa Maas), 
         also a bug in planarg -p for n >= 65536.
+  Version 25r8 fixed g++ code in some header files, removed CPUDEFS
+        from dreadnaut.c and traces.c (already in gtools.h), and
+        increased workspace in densenauty() and sparsenauty().
+  Version 25r9 added a missing PRUNE2 call in genbg.c.  You didn't
+        meet this bug unless you wrote a plugin for genbg.c.
