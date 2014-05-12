@@ -2,7 +2,7 @@
 *                                                                            *
 *  Sparse-graph-specific auxiliary source file for version 2.5 of nauty.     *
 *                                                                            *
-*   Copyright (2004-2013) Brendan McKay.  All rights reserved.               *
+*   Copyright (2004-2014) Brendan McKay.  All rights reserved.               *
 *   Subject to waivers and disclaimers in nauty.h.                           *
 *                                                                            *
 *   CHANGE HISTORY                                                           *
@@ -1603,11 +1603,11 @@ sparsenauty(sparsegraph *g, int *lab, int *ptn, int *orbits,
     m = SETWORDSNEEDED(n);
 
 #if !MAXN
-    DYNALLOC1(set,snwork,snwork_sz,40*m,"densenauty malloc");
+    DYNALLOC1(set,snwork,snwork_sz,2*60*m,"densenauty malloc");
 #endif
 
     nauty((graph*)g,lab,ptn,NULL,orbits,options,stats,
-          snwork,40*m,m,n,(graph*)h);
+          snwork,2*60*m,m,n,(graph*)h);
 }
 
 /*****************************************************************************

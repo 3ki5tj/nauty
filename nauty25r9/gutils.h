@@ -1,5 +1,9 @@
 /* gutils.h - procedure declarations for gutil1.c and gutil2.c */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void degstats(graph*,int,int,
                      unsigned long*,int*,int*,int*,int*,boolean*);
 extern void diamstats(graph*,int,int,int*,int*);
@@ -29,3 +33,7 @@ extern void contract1(graph*,graph*,int,int,int);
 extern int cstarcontent(graph*,int,int);
 extern long numtriangles1(graph*,int);
 extern long numtriangles(graph*,int,int);
+
+#ifdef __cplusplus
+}
+#endif

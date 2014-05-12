@@ -650,10 +650,10 @@ densenauty(graph *g, int *lab, int *ptn, int *orbits,
     }
 
 #if !MAXN
-    DYNALLOC1(set,dnwork,dnwork_sz,40*m,"densenauty malloc");
+    DYNALLOC1(set,dnwork,dnwork_sz,2*60*m,"densenauty malloc");
 #endif
 
-    nauty(g,lab,ptn,NULL,orbits,options,stats,dnwork,40*m,m,n,h);
+    nauty(g,lab,ptn,NULL,orbits,options,stats,dnwork,2*60*m,m,n,h);
 }
 
 /*****************************************************************************
