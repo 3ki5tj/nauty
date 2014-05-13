@@ -597,7 +597,11 @@ typedef int boolean;    /* boolean MUST be the same as int */
 typedef setword set, graph;
 
 typedef struct {
-  double grpsize1;          /* size of group is */
+#ifdef QUAD
+  __float128 grpsize1;      /* size of group is */
+#else
+  long double grpsize1;     /* size of group is */
+#endif
   int grpsize2;             /*    grpsize1 * 10^grpsize2 */
   int numorbits;            /* number of orbits in group */
   int numgenerators;        /* number of generators found */
@@ -618,7 +622,12 @@ typedef struct {
 #define CANONGNIL    3      /* canong = NULL, but getcanon = TRUE */
 
 /* manipulation of real approximation to group size */
-#define MULTIPLY(s1, s2, i) if ((s1 *= i) >= 1e10) { s1 /= 1e10; s2 += 10; }
+#ifdef QUAD
+#define LARGE_GRPSIZE 1e10Q
+#else
+#define LARGE_GRPSIZE 1e10L
+#endif
+#define MULTIPLY(s1, s2, i) if ((s1 *= i) >= LARGE_GRPSIZE) { s1 /= LARGE_GRPSIZE; s2 += 10; }
 
 typedef struct {
   boolean (*isautom)          /* test for automorphism */
@@ -1579,7 +1588,7 @@ void nauty(graph * RESTRICT g_arg,
     return;
   }
   if (n_arg == 0) {   /* Special code for zero-sized graph */
-    stats_arg->grpsize1 = 1.0;
+    stats_arg->grpsize1 = 1;
     stats_arg->grpsize2 = 0;
     stats_arg->numorbits = 0;
     stats_arg->numgenerators = 0;
@@ -1670,7 +1679,7 @@ void nauty(graph * RESTRICT g_arg,
   canong = canong_arg;
 
   for (i = 0; i < n; ++i) orbits[i] = i;
-  stats->grpsize1 = 1.0;
+  stats->grpsize1 = 1;
   stats->grpsize2 = 0;
   stats->numgenerators = 0;
   stats->numnodes = 0;
