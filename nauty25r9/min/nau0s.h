@@ -597,10 +597,12 @@ typedef int boolean;    /* boolean MUST be the same as int */
 typedef setword set, graph;
 
 typedef struct {
-#ifdef QUAD
-  __float128 grpsize1;      /* size of group is */
+#if defined(QUAD) || defined(F128)
+  __float128 grpsize1;
+#elif defined(LDBL) || defined(LONG)
+  long double grpsize1;
 #else
-  long double grpsize1;     /* size of group is */
+  double grpsize1;          /* size of group is */
 #endif
   int grpsize2;             /*    grpsize1 * 10^grpsize2 */
   int numorbits;            /* number of orbits in group */

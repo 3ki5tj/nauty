@@ -1,7 +1,7 @@
 /* based on geng.c  version 2.7; B D McKay, Jan 2013. */
 
 #define USAGE \
-  "geng [-d#D#] [-nP] [-lvq] \n\
+  " [-d#D#] [-nP] [-lvq] \n\
               [-x#X#] n [mine[:maxe]] [res/mod] [file]"
 
 #define HELPTEXT \
@@ -138,7 +138,7 @@ static void
 arg_int(char **ps, int *val, char *id)
 {
   int code;
-  long longval;
+  long longval = 0;
 
   code = longvalue(ps, &longval);
   *val = longval;
@@ -427,7 +427,7 @@ makeleveldata(void)
     d->xorb = (xword*) calloc(nxsets, sizeof(xword));
 
     if (xset == NULL || xcard == NULL || xinv == NULL || d->xorb == NULL) {
-      fprintf(stderr, ">E geng: calloc failed in makeleveldata()\n");
+      fprintf(stderr, ">E bcgen: calloc failed in makeleveldata()\n");
       exit(2);
     }
 
@@ -443,7 +443,7 @@ makeleveldata(void)
     }
 
     if (j != nxsets) {
-      fprintf(stderr, ">E geng: j=%u mxsets=%u\n",
+      fprintf(stderr, ">E bcgen: j=%u mxsets=%u\n",
               j, (unsigned)nxsets);
       exit(2);
     }
@@ -502,7 +502,7 @@ geng_userautomproc(int count, int *p, int *orbits,
 
   moved = 0;
   for (i = 0; i < (xword) n; ++i)
-    if (p[i] != i) moved |= xbit[i];
+    if ((xword) p[i] != i) moved |= xbit[i];
 
   for (i = lo; i < hi; ++i) {
     if ((w = xset[i] & moved) == 0) continue;
@@ -1054,13 +1054,13 @@ main(int argc, char *argv[])
   if (argc > 1 && (strcmp(argv[1], "-help") == 0
                ||  strcmp(argv[1], "/?") == 0
                ||  strcmp(argv[1], "--help") == 0)) {
-    printf("\nUsage: " USAGE "\n\n" HELPTEXT);
+    printf("\nUsage: %s" USAGE "\n\n" HELPTEXT, argv[0]);
     return 0;
   }
   nauty_check(WORDSIZE, 1, MAXN, NAUTYVERSIONID);
 
   if (MAXN > 32 || MAXN > WORDSIZE || MAXN > 8 * sizeof(xword)) {
-    fprintf(stderr, "geng: incompatible MAXN %d, WORDSIZE %d, or xword %d\n",
+    fprintf(stderr, "bcgen: incompatible MAXN %d, WORDSIZE %d, or xword %d\n",
         MAXN, WORDSIZE, (int) sizeof(xword));
     fprintf(stderr, "--See notes in program source\n");
     exit(1);
@@ -1094,10 +1094,10 @@ main(int argc, char *argv[])
         else SWBOOLEAN('q', quiet)
         else SWBOOLEAN('$', secret)
         else SWBOOLEAN('S', safe)
-        else SWINT('d', gotd, mindeg, "geng -d")
-        else SWINT('D', gotD, maxdeg, "geng -D")
-        else SWINT('x', gotx, multiplicity, "geng -x")
-        else SWINT('X', gotX, splitlevinc, "geng -X")
+        else SWINT('d', gotd, mindeg, "bcgen -d")
+        else SWINT('D', gotD, maxdeg, "bcgen -D")
+        else SWINT('x', gotx, multiplicity, "bcgen -x")
+        else SWINT('X', gotX, splitlevinc, "bcgen -X")
 #ifdef PLUGIN_SWITCHES
         PLUGIN_SWITCHES
 #endif
@@ -1142,7 +1142,7 @@ main(int argc, char *argv[])
   if (argnum == 0)
     badargs = TRUE;
   else if (maxn < 1 || maxn > MAXN) {
-    fprintf(stderr, ">E geng: n must be in the range 1..%d\n", MAXN);
+    fprintf(stderr, ">E bcgen: n must be in the range 1..%d\n", MAXN);
     badargs = TRUE;
   }
 
@@ -1166,12 +1166,12 @@ main(int argc, char *argv[])
 
   if (!badargs && (mine > maxe || maxe < 0 || maxdeg < 0)) {
     fprintf(stderr,
-            ">E geng: impossible mine,maxe,mindeg,maxdeg values\n");
+            ">E bcgen: impossible mine,maxe,mindeg,maxdeg values\n");
     badargs = TRUE;
   }
 
   if (!badargs && (res < 0 || res >= mod)) {
-    fprintf(stderr, ">E geng: must have 0 <= res < mod\n");
+    fprintf(stderr, ">E bcgen: must have 0 <= res < mod\n");
     badargs = TRUE;
   }
 
@@ -1184,7 +1184,7 @@ main(int argc, char *argv[])
   }
 
   if ((nautyformat != 0) + (printadjmat != 0) > 1)
-    gt_abort(">E geng: -nP are incompatible\n");
+    gt_abort(">E bcgen: -nP are incompatible\n");
 
 #ifdef OUTPROC
   outproc = OUTPROC;
@@ -1206,7 +1206,7 @@ main(int argc, char *argv[])
   } else if ((outfile = fopen(outfilename,
                               nautyformat ? "wb" : "w")) == NULL) {
     fprintf(stderr,
-            ">E geng: can't open %s for writing\n", outfilename);
+            ">E bcgen: can't open %s for writing\n", outfilename);
     gt_abort(NULL);
   }
 
@@ -1218,7 +1218,7 @@ main(int argc, char *argv[])
 
   if (gotx) {
     if (multiplicity < 3 * mod || multiplicity > 999999999)
-      gt_abort(">E geng: -x value must be in [3*mod,10^9-1]\n");
+      gt_abort(">E bcgen: -x value must be in [3*mod,10^9-1]\n");
   } else
     multiplicity = PRUNEMULT * mod;
 
