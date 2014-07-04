@@ -1,7 +1,7 @@
 /* based on geng.c  version 2.7; B D McKay, Jan 2013. */
 
 #define USAGE \
-  " [-d#D#] [-nP] [-lvq] \n\
+  " [-d#D#] [-Pun] [-lvq] \n\
               [-x#X#] n [mine[:maxe]] [res/mod] [file]"
 
 #define HELPTEXT \
@@ -16,6 +16,7 @@
      -D#   : a upper bound for the maximum degree\n\
      -v    : display counts by number of edges\n\
      -l    : canonically label output graphs\n\
+     -u    : do not output any graphs, just generate and count them\n\
 \n\
      -P    : print the adjacency matrix\n\
 \n\
@@ -66,8 +67,8 @@
 #define MAXARG 2000000000L
 
 #define SWBOOLEAN(c, bool) if (sw == c) bool = TRUE;
-#define SWINT(c, bool, val, id) if (sw == c) \
-  { bool = TRUE; arg_int(&arg, &val, id); }
+#define SWINT(c, gotit, val, flag) if (sw == c) \
+  { gotit = TRUE; arg_int(&arg, &val, flag); }
 
 #include <time.h>
 #define CPUTIME ((double) clock() / CLOCKS_PER_SEC)
@@ -135,7 +136,7 @@ longvalue(char **ps, long *l)
 /*************************************************************************/
 
 static void
-arg_int(char **ps, int *val, char *id)
+arg_int(char **ps, int *val, char *flag)
 {
   int code;
   long longval = 0;
@@ -143,10 +144,10 @@ arg_int(char **ps, int *val, char *id)
   code = longvalue(ps, &longval);
   *val = longval;
   if (code == ARG_MISSING || code == ARG_ILLEGAL) {
-    fprintf(stderr, ">E %s: missing argument value\n", id);
+    fprintf(stderr, ">E %s: missing argument value\n", flag);
     gt_abort(NULL);
   } else if (code == ARG_TOOBIG || *val != longval) {
-    fprintf(stderr, ">E %s: argument value too large\n", id);
+    fprintf(stderr, ">E %s: argument value too large\n", flag);
     gt_abort(NULL);
   }
 }
@@ -166,6 +167,7 @@ static FILE *outfile;           /* file for output graphs */
 static boolean verbose;         /* presence of -v */
 boolean nautyformat;            /* presence of -n */
 boolean printadjmat;            /* presence of -P */
+boolean nooutput;               /* presence of -u */
 boolean canonise;               /* presence of -l */
 boolean quiet;                  /* presence of -q */
 statsblk nauty_stats;
@@ -1070,6 +1072,7 @@ main(int argc, char *argv[])
   verbose = FALSE;
   nautyformat = FALSE;
   printadjmat = FALSE;
+  nooutput = FALSE;
   canonise = FALSE;
   outfilename = NULL;
   secret = FALSE;
@@ -1090,14 +1093,15 @@ main(int argc, char *argv[])
         SWBOOLEAN('n', nautyformat)
         else SWBOOLEAN('P', printadjmat)
         else SWBOOLEAN('v', verbose)
+        else SWBOOLEAN('u', nooutput)
         else SWBOOLEAN('l', canonise)
         else SWBOOLEAN('q', quiet)
         else SWBOOLEAN('$', secret)
         else SWBOOLEAN('S', safe)
-        else SWINT('d', gotd, mindeg, "bcgen -d")
-        else SWINT('D', gotD, maxdeg, "bcgen -D")
-        else SWINT('x', gotx, multiplicity, "bcgen -x")
-        else SWINT('X', gotX, splitlevinc, "bcgen -X")
+        else SWINT('d', gotd, mindeg, "-d")
+        else SWINT('D', gotD, maxdeg, "-D")
+        else SWINT('x', gotx, multiplicity, "-x")
+        else SWINT('X', gotX, splitlevinc, "-X")
 #ifdef PLUGIN_SWITCHES
         PLUGIN_SWITCHES
 #endif
@@ -1183,13 +1187,14 @@ main(int argc, char *argv[])
     return -1;
   }
 
-  if ((nautyformat != 0) + (printadjmat != 0) > 1)
-    gt_abort(">E bcgen: -nP are incompatible\n");
+  if ((printadjmat != 0) + (nooutput != 0) + (nautyformat != 0) > 1)
+    gt_abort(">E bcgen: -Pun are incompatible\n");
 
 #ifdef OUTPROC
   outproc = OUTPROC;
 #else
   if (nautyformat) outproc = writenauty;
+  else if (nooutput) outproc = NULL;
   else if (printadjmat) outproc = writeadjmat;
 #endif
 
@@ -1200,7 +1205,9 @@ main(int argc, char *argv[])
   for (i = 0; i <= maxe; ++i) ZEROBIG(ecount[i]);
   for (i = 0; i < maxn; ++i) ZEROBIG(nodes[i]);
 
-  if (!gotf || outfilename == NULL) {
+  if (nooutput)
+    outfile = stdout;
+  else if (!gotf || outfilename == NULL) {
     outfilename = "stdout";
     outfile = stdout;
   } else if ((outfile = fopen(outfilename,

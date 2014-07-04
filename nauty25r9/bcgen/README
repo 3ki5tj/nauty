@@ -1,1 +1,16 @@
-../min/README
+
+Programs
+=========
+
+bcgen.c       engine for enumerating biconnected graphs
+
+gcomplx.h     header to compute the complexity of the graph
+
+gaussf.h      compute the virial coefficients of the Gaussian model
+
+
+
+
+Utilities:
+===========
+gaussfmerge   to compile: make gaussfmerge
